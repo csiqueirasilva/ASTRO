@@ -1083,10 +1083,12 @@
         var additionalDataAll = calculateArgsAndParams(planetaryArguments, planetaryParameters);
         var JDFinal = null;
 
-        if (phase === this.MoonPhases.FULL) {
+        var phaseAbs = Math.abs(phase);
+
+        if (phaseAbs === this.MoonPhases.FULL) {
             var additionalDataFull = calculateArgsAndParams(argumentVariablesFullAndNew, fullMoonParameters);
             JDFinal = JDE + additionalDataFull + additionalDataAll;
-        } else if (phase === this.MoonPhases.NEW) {
+        } else if (phaseAbs === this.MoonPhases.NEW) {
             var additionalDataNew = calculateArgsAndParams(argumentVariablesFullAndNew, newMoonParameters);
             JDFinal = JDE + additionalDataNew + additionalDataAll;
         } else {
