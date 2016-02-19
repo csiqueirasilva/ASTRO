@@ -1,0 +1,36 @@
+<div th:replace="ferramentas/fragmentos/entrada-plataforma-observacao">
+</div>
+
+<script src='lib/on-daed-js/3D/PosicaoSol.js'>
+</script>
+
+<div id="label-dados" class="img-rounded elemento-ui ui-observacao-horizontal">
+    <div><span id="label-data"></span> às <span id="label-hora"></span></div>
+    <div><div class='label-resultado'>Altura do Sol</div><span id="label-altura"></span></div>
+    <div id='row-label-resultado-latitude'><div class='label-resultado'>Latitude </div><span id="label-latitude"></span></div>
+    <div id='row-label-resultado-longitude'><div class='label-resultado'>Longitude </div><span id="label-longitude"></span></div>
+    <div id='row-label-resultado-cidade'><div class='label-resultado'>Local </div><span id="label-cidade">OBSERVATORIO NACIONAL</span></div>
+    <div><div class='label-resultado'>Nascer </div><span id="nascer-sol"></span></div>
+    <div><div class='label-resultado'>Passagem Meridiana </div><span id="passagem-meridiana-sol"></span></div>
+    <div><div class='label-resultado'>Ocaso </div><span id="ocaso-sol"></span></div>
+    <div><div class='label-resultado'>Tempo de Luz Solar </div><span id="duracao-do-dia"></span></div>
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    (function () {
+
+        var it = setInterval(function () {
+            if (posicaoAparente) {
+                var pSol = ON_DAED['3D'].PosicaoSol(posicaoAparente);
+                
+                pSol.addRequestUpdateWorker();
+                pSol.setUICallbacks();
+                posicaoAparente.addPlataformaObservacao();
+                clearInterval(it);
+            }
+        }, 100);
+
+    })();
+    /*]]>*/
+</script>

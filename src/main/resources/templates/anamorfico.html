@@ -1,0 +1,212 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="UTF-8">
+
+        <title>Astro - Imagem anamórfica</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="description" content="">
+        <meta name="author" content="Observatório Nacional">
+
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery-ui.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/bootstrap-datepicker.js"></script>
+        <script src="js/locales/bootstrap-datepicker.pt-BR.js"></script>
+        <script src="js/anglepicker.js"></script>
+        <script src="lib/on-daed-js/geral.js"></script>
+
+        <script src="js/three.min.js"></script>
+        <script src="js/OrbitControls.js"></script>
+        <script src="js/stats.min.js"></script>
+        <script src="js/tween.min.js"></script>
+        <script src="js/ThreeHelper.js"></script>
+        <script src="lib/on-daed-js/MathHelper.js"></script>
+        <script src="lib/on-daed-js/3D.js"></script>
+
+        <link href="css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="css/bootstrap-responsive.css" rel="stylesheet"/>
+
+        <link href="css/anglepicker.css" rel="stylesheet"/>
+        <link href="css/datepicker3.css" rel="stylesheet"/>
+        <link href="css/jquery-ui.structure.min.css" rel="stylesheet"/>
+        <link href="css/jquery-ui.theme.min.css" rel="stylesheet"/>
+
+        <link href="http://fonts.googleapis.com/css?family=Syncopate" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Abel" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Pontano+Sans" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Oxygen" rel="stylesheet" type="text/css">
+
+        <style>
+            #astro-index-jumbo {
+                background-image: url(imgs/jumbobg.jpg);
+            }
+
+            #unidade-zoom-btn-group, #terra-timescale-btn-group {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+            }
+
+            #resultados-input {
+                max-height: 400px;
+                overflow: auto;
+            }
+
+            .fill {
+                height: 100%;
+            }
+
+            .margin-top-2 {
+                margin-top: 2%;
+            }
+
+            .conteudo-destaque {
+                margin-top: 4%;
+                margin-bottom: 4%;
+            }
+
+            .texto-explicativo p {
+                text-align: justify;
+            }
+
+            .campo-conteudo {
+                text-align: center;
+                padding: 1%;
+            }
+
+            .campo-de-input {
+                padding-top: 4%;
+            }
+
+            .input-centralizado {
+                text-align: center;
+            }
+
+            .titulo-widget {
+                margin-top: 0%;
+                margin-bottom: 0%;
+            }
+
+            .jlink:hover {
+                cursor: pointer;
+            }
+
+            .input-hora {
+                width: 26%;
+                margin-left: 2%;
+                margin-right: 2%;
+                display: inline;
+            }
+
+            #main-div {
+                height: 100%;
+            }
+
+            .celula-angulo {
+                margin-top: 10px;
+            }
+
+            .hover-label-text {
+                text-align: center;
+                font-weight: bold;
+                text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+            }
+
+            #logo-astro {
+                width: 24px;
+            }
+
+            #sticky-footer {
+                height: 50px;
+                background: #000000;
+                width: 100%;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+            }
+
+            html, body {
+                height: 100%;
+            }
+
+            #wrap {
+                min-height: 100%;
+                height: auto;
+                margin: 0 auto -60px;
+                padding: 0 0 60px;
+            }
+
+            #footer {
+                height: 60px;
+                background-color: #000000;
+                color: #F0F0F0;
+            }
+
+            #astro-header-principal .navbar-nav > li > a {
+                color: #F0F0F0;
+            }
+
+            #astro-header-principal .navbar-nav > li > a:hover {
+                color: #428bca;
+            }
+
+            #footer-info {
+                text-align: center;
+            }
+
+            @media (max-width: 767px) {
+                #footer {
+                    margin-left: -20px;
+                    margin-right: -20px;
+                }
+            }
+
+            #terra-props-btn-group {
+                position: absolute;
+                top: 89%;
+                left: 1%;
+                width: 100%;
+            }
+
+        </style>
+
+    </head>
+    <body>
+
+        <div id="main-div"></div>
+
+        <script>
+            (function () {
+
+                if (ON_DAED["WEBGL_SUPPORT"]) {
+                    var cylHeight = 50;
+
+                    ON_DAED["3D"].create(function (scene, camera) {
+                        cam = ON_DAED["3D"].ObservacaoAnamorfica(scene, camera, cylHeight);
+                    }, function (cameraControl, renderer, scene, camera, stats, clock) {
+                        cameraControl.update(clock.getDelta());
+                        ON_DAED["3D"].update();
+                        ThreeHelper.updateText(camera, $('#main-div')[0]);
+                        TWEEN.update();
+                        renderer.render(scene, camera);
+
+                        cam.object.visible = false;
+                        cam.camera.updateCubeMap(renderer, scene);
+                        cam.object.visible = true;
+
+                    }, document.getElementById('main-div'),
+                            function (camera, renderer, scene, stats) {
+                                return new THREE.OrbitControls(camera);
+                            }, 0xAAAAAA);
+                } else {
+                    document.write("SEM SUPORTE A WEBGL");
+                }
+            })();
+        </script>
+
+    </body>
+</html>

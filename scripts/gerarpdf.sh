@@ -1,0 +1,1 @@
+find . -type f -exec echo "mkdir -p /home/csiqueira/Dropbox/ON/PCI/AstroRegistro/src/{} | unoconv -o /home/csiqueira/Dropbox/ON/PCI/AstroRegistro/src/{}/output.pdf {}" \; > test.sh

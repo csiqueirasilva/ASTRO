@@ -1,0 +1,117 @@
+<h2 class="astro-dialog-label">Linhas de Força</h2>
+
+<h2>Botões de Tela</h2>
+
+<div class='dicas-de-uso-ferramenta'>
+    <a class="btn btn-primary">Cartas Magnéticas do Brasil</a>
+</div>
+
+<p>Esse botão permite gerar as Cartas Magnéticas de Declinação, Inclinação e Intensidade do campo magnético.</p>
+
+<h3>Data</h3>
+
+<div class='dicas-de-uso-ferramenta'>
+    <input readonly="readonly" class="form-control input-centralizado jlink dataju-datepicker" size="16" type="text" id="dataju-datepicker-ajuda" value="12/02/2012" />
+</div>
+
+<p>No <b>calendário</b>, a <b>Data</b> é alterada clicando-se sobre ela. O <b>Ano</b> é alterado
+    clicando-se sobre o <b>Mês</b>. Os intervalos dos anos são alterados clicando-se
+    sobre o <b>Ano</b>. Clicando-se nas setas esquerda ou direita é possível mudar os
+    intervalos (décadas). Note que esses sucessivos cliques permitem ao
+    usuário avançar ou regredir rapidamente no tempo. O modelo utilizado
+    nesse programa permite regredir até o ano de 1900.</p>
+
+<div class='dicas-de-uso-ferramenta'>
+    <select class="form-control">
+        <option>Declinação</option>
+        <option>Inclinação</option>
+        <option>Intensidade</option>
+    </select>
+</div>
+
+<p>Opção de escolha para gerar as Cartas Magnéticas de Declinação, Inclinação e Intensidade do campo magnético.</p>
+
+<p>Após escolher uma das opções, o usuário deve "clicar" sobre o botão:</p>
+
+<div class='dicas-de-uso-ferramenta'>
+    <a class="btn btn-primary">Gerar Arquivo de Carta para o Brasil</a>
+</div>
+
+<p>O arquivo "dados-magneticos.pdf" é gerado e automaticamente realizado
+uma cópia (download). A carta magnética é gerada para todo o território
+brasileiro e para a data escolhida pelo usuário. Ver o exemplo abaixo:</p>
+
+<div class="dialog-image">
+    <img src="imgs/linhas-de-forca-ajuda-1.png" />    
+</div>
+
+<div class='dicas-de-uso-ferramenta'>
+    <a class="btn btn-primary">Dados Magnético por Data e Local</a>
+</div>
+
+<p>A função deste botão é gerar todos os parâmetros do Campo Magnético
+    para um determinado local definido pelo usuário. São eles: Declinação (D),
+    Inclinação (I), Intensidade horizontal (H), as componentes Norte (X), Leste (Y) e Vertical (Z),
+    a Intensidade Total (F) e a Variação Secular desses parâmetros. Ver exemplo a seguir:</p>
+
+<div class="dialog-image">
+    <img src="imgs/linhas-de-forca-ajuda-2.png" />    
+</div>
+
+<h2 class="astro-dialog-label">Vento Solar</h2>
+
+<p>O programa também permite ao usuário realizar uma simulação do Vento Solar e
+uma visualização desse fenômenio sobre o campo magnético da Terra.</p>
+
+<h2>Botões de Tela</h2>
+
+<p>Quando ativado, o botão <i class="dicas-de-uso-terra glyphicon glyphicon-eye-open terra-ligado jlink"></i> permite visualizar a simulação com foco central no planeta Terra.</p>
+
+<p>As escalas deslizantes permitem alterar a velocidade de Rotação e Translação da
+    Terra e a Intensidade do Vento Solar:</p>
+
+<div class="dicas-de-uso-ferramenta noselect">
+    <div>Velocidade de Rotação da Terra</div>
+    <input class="bs-slider-helper" data-slider-tooltip="hide" type="text" data-slider-min="0" data-slider-max="2000" data-slider-step="1" data-slider-value="200" />
+</div>
+
+<div class="dicas-de-uso-ferramenta noselect">
+    <div>Velocidade de Translação da Terra</div>
+    <input class="bs-slider-helper" data-slider-tooltip="hide" type="text" data-slider-min="0" data-slider-max="1000" data-slider-step="1" data-slider-value="250" />
+</div>
+
+<div class="dicas-de-uso-ferramenta noselect">
+    <div>Intensidade do Vento Solar</div>
+    <input class="bs-slider-helper" data-slider-tooltip="hide" type="text" data-slider-min="0" data-slider-max="10000" data-slider-step="1" data-slider-value="140" />
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    $(document).ready(function () {
+        $('.bs-slider-helper').bootstrapSlider();
+
+        $('#dataju-datepicker-ajuda')
+                .datepicker({
+                    orientation: "top",
+                    format: 'dd/mm/yyyy',
+                    language: 'pt-BR',
+                    autoclose: true,
+                    startDate: "01/01/1900",
+                    endDate: "31/12/2020"
+                });
+    });
+    /*]]>*/
+</script>
+
+<h3>Funções do Mouse</h3>
+
+<ul>
+    <li><b>Botão Esquerdo:</b> com este botão pode-se deslocar (rotação) a imagem do
+        sistema.</li>
+    <li><b>Botão Direito:</b> para mover o plano do horizonte, sobre o qual está o
+        observador, manter este o botão pressionado e arraste.</li>
+    <li><b>Botão de rolagem:</b> o programa permite aproximar ou afastar a imagem,
+        bastando para isso girar este botão.</li>
+</ul>
+
+<div id="agradecimento-constantino">A Divisão de Atividades Educacionais agradece imensamente ao Prof. Constantino de Mello Motta pelo apoio na atualização deste importante trabalho, realizado por ele desde ........ e que agora é disponibilizado no site do Observatório Nacional.</div>

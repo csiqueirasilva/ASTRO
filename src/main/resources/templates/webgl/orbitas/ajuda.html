@@ -1,0 +1,75 @@
+<!--<h3>Previsão de Marés</h3>
+
+<p>Este programa constrói uma visualização do efeito de maré a partir dos dados disponibilizados na página da Diretoria de Hidrografia e Navegação (DHN). Este serviço é importante para o conhecimento da variação do movimento e do nível das águas dos principais portos do Brasil, no auxílio ao atracamento de grandes embarcações de costa, de barcos pesqueiros e para aqueles especialistas na arte da pesca. </p>
+
+<p>No programa, a imagem azul que envolve a Terra, mostra a forma da camada de água da Terra com uma escala inicial aumentada em relação a parte sólida do nosso planeta. Essa forma é devida a influência gravitacional do Sol e da Lua.</p>
+
+<h3>Botões de Tela</h3>
+
+<h4><input type="checkbox" /> Atualização Automática e <input type="checkbox" /> Resultados</h4>
+
+<p>Habilitando esses botões, a previsão de maré é mostrada para a data e hora atual. Como resultados é mostrada a fase da Lua, as distâncias da Terra ao Sol e da Terra a Lua, em quilômetros.</p>
+
+<div class="btn-exemplo-ajuda">
+    <button type="button" class="btn btn-info btn-lg">
+        Alterar Data
+    </button>
+</div>
+
+<p>Ao acionar este botão, pode-se modificar manualmente a Data e Hora para uma nova construção da apresentação 3D.</p>
+
+<div class="btn-exemplo-ajuda">
+    <button type="button" class="btn btn-info btn-lg">
+        Tábuas de Maré
+    </button>
+</div>
+
+<p>Este botão permite conhecer a Hora e Altura da Maré. Disponibiliza o endereço de acesso à página da Divisão de Marés da Diretoria de Hidrografia e Navegação (DHN).</p>
+
+<h4><input type="checkbox" /> Diagrama de Forças</h4>
+
+<p>Este botão permite ligar ou desligar a opção de visualização dos vetores que representam a Força de Maré devido a ação da Lua e do Sol.</p>
+
+<div class="dicas-de-uso-ferramenta noselect">
+    <div>Escala da Forma da Maré</div>
+    <input class="bs-slider-helper" data-slider-tooltip="hide" type="text" data-slider-min="0" data-slider-max="2000" data-slider-step="1" data-slider-value="200" />
+</div>
+
+<p>Ao deslizar este botão, modifica-se a representação visual da forma da Maré.</p>
+
+<div class="btn-exemplo-ajuda">
+    <i class="glyphicon glyphicon-eye-open lua-ligado jlink"></i>
+</div>
+
+<p>Este botão visualiza o sistema Terra-Sol-Lua em destaque. Este modo permite aproximar ou afastar a imagem. Quando o botão é ativado, a imagem é vista de cima. Com o botão desativado, ela é vista de perfil.</p>
+
+<div class="btn-exemplo-ajuda">
+    <div class="btn-group" role="group">
+        <button disabled="disabled" type="button" class="btn btn-default"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+        <button class="btn btn-info" type="button">Passagem do Tempo <i class="glyphicon glyphicon-repeat"></i> <span>1</span></button>
+        <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+    </div>
+</div>
+
+<p>A função deste botão é acelerar e desacelerar o tempo, permitindo assim a visualização do fenômeno para vários dias contínuos. O movimento também pode ser interrompido a qualquer momento, bastando para isso um clique.</p>
+
+<p>Os botões mudam o tom de sua cor quando são ligados ou desligados.</p>-->
+
+<h3>Funções do Mouse</h3>
+<ul>
+    <li><b>Botão Esquerdo:</b> com este botão pode-se deslocar (rotação) a imagem do
+        sistema.</li>
+    <li><b>Botão de rolagem:</b> para aproximar ou afastar a imagem, basta girar este botão
+        ou mantê-lo pressionado e arrastando verticalmente.</li>
+</ul>
+
+<h3>Resultados</h3>
+<p>Os resultados são mostrados no canto superior esquerdo da tela.</p>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    $(document).ready(function () {
+        $('.bs-slider-helper').bootstrapSlider();
+    });
+    /*]]>*/
+</script>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8"/>
+
+        <title th:text="${conteudo} ? 'Grafico Globo - ' + ${conteudo}">Astro</title>
+
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+        <meta name="description" content="ASTRO"/>
+        <meta name="author" content="Observatório Nacional"/>
+
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery-ui.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/bootstrap-datepicker.js"></script>
+        <script src="js/locales/bootstrap-datepicker.pt-BR-ansi.js"></script>
+        <script src="js/anglepicker.js"></script>
+        <script src="lib/on-daed-js/geral.js"></script>
+        <script src="lib/on-daed-js/vsop87.min.js"></script>
+        <script src="lib/on-daed-js/astro.js"></script>
+        <script src="js/typeahead.min.js"></script>
+        <script src="js/imagesloaded.pkg.min.js"></script>
+        <script src="js/jquery.qtip.min.js"></script>
+
+        <script src="js/three.min.js"></script>
+        <script src="js/MTLLoader.js"></script>
+        <script src="js/OBJMTLLoader.js"></script>
+        <script src="js/OrbitControls.js"></script>
+        <script src="js/stats.min.js"></script>
+        <script src="js/tween.min.js"></script>
+        <script src="js/ThreeHelper.js"></script>
+        <script src="lib/on-daed-js/MathHelper.js"></script>
+        <script src="lib/on-daed-js/3D.js"></script>
+
+        <script src="lib/on-daed-js/3D/GraficoGlobo.js"></script>
+
+        <link href="css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="css/bootstrap-responsive.css" rel="stylesheet"/>
+
+        <link href="css/anglepicker.css" rel="stylesheet"/>
+        <link href="css/datepicker3.css" rel="stylesheet"/>
+        <link href="css/jquery-ui.structure.min.css" rel="stylesheet"/>
+        <link href="css/jquery-ui.theme.min.css" rel="stylesheet"/>
+
+        <link rel="stylesheet" type="text/css" href="css/jquery.qtip.min.css"/>
+
+        <link href="http://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet" type="text/css"/>
+
+
+        <style>
+
+            * {
+                font-family: 'Ubuntu', sans-serif;
+            }
+
+            .btn-exemplo-ajuda {
+                text-align: center;
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+
+            .btn-exemplo-ajuda > i {
+                font-size: 2em;
+            }
+
+            #dia-mes-ano-row, #hora-minuto-segundo-row {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            .dialog-image {
+                text-align: center; 
+                padding-top: 10px; 
+                padding-bottom: 10px;
+                width: 100%;
+            }
+
+            .dialog-image img {
+                max-width: 100%;
+            }
+
+            .modal-body {
+                text-align: justify;
+            }
+
+            #wrapper-texto-explicativo > a > button {
+                width: 100%;
+            }
+
+            #titulo-wiki > h1 {
+                margin-top: 0px;
+            }
+
+            /*            #titulo-wiki,
+                        #conteudo-wiki
+                        {
+                            text-align: center;
+                        }*/
+
+            .ui-observacao-horizontal {
+                position: absolute; 
+            }
+
+            #home-btn i, #ajuda-btn i, #info-btn i, #credits-btn i {
+                font-size: 2em;
+            }
+
+            #ajuda-btn {
+                top: 1%;
+                right: 44px;
+            }
+
+            #home-btn {
+                top: 1%;
+                right: 112px;
+            }
+
+            #info-btn {
+                top: 1%;
+                right: 10px;
+            }
+
+            #credits-btn {
+                top: 1%;
+                right: 78px;
+            }
+
+            body {
+                overflow: hidden;
+                padding: 0px;
+            }
+
+            .jlink:hover {
+                cursor: pointer;
+            }
+
+            .hover-label-text {
+                text-align: center;
+                font-size: 1.75em;
+                text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                cursor: auto;
+                z-index: -1000;
+            }
+
+            html, body {
+                height: 100%;
+            }
+
+            .celula-angulo {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            .noselect {
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+
+            canvas {
+                background: #000000;
+            }
+            
+            .input-hora {
+                width: 26%;
+                margin-left: 2%;
+                margin-right: 2%;
+                display: inline;
+            }
+
+            .margin-top-2 {
+                margin-top: 10px;
+            }
+
+
+            #bg-image-wrap {
+                position: absolute;
+                text-align: center;
+                width: 100%;
+                height: 640px;
+                z-index: -1000;
+                opacity: 0.1;
+                display: none;
+            }
+
+            @media (max-width: 767px) {
+                #bg-image-wrap img {
+                    width: 100%;
+                    margin-top: 23%;
+                }
+            }
+
+            @media (min-width: 768px) {
+                #bg-image-wrap img {
+                    height: 100%;
+                    margin-top: 6%;
+                }
+            }
+
+            #campo-de-observacao {
+                height: 100%;
+            }
+
+
+            #unidade-zoom-btn-group {
+                position: absolute;
+                bottom: 1%;
+                left: 1%;
+            }
+
+            #terra-timescale-btn-group {
+                position: absolute;
+                top: 1%;
+                left: 1%;
+            }
+
+            #terra-props-btn-group {
+                position: absolute;
+                bottom: 1%;
+                left: 1%;
+                width: 100%;
+                z-index: 1000;
+            }
+
+            body > * {
+                z-index: 1000;
+            }
+
+            #terra-obs-label-wrapper {
+                position: absolute;
+                top: 3.25em;
+                left: 1%;
+                z-index: 1000;
+            }
+
+            #resultados-campo-coords {
+                position: absolute;
+                top: 135px;
+                left: 1%;
+                color: #FFFFFF;
+                width: 372px;
+            }
+
+            #parent-exibir-resultados-coords {
+                margin-bottom: 0px;
+            }
+
+            @media(max-height: 480px) {
+                #label-resultados-coords {
+                    overflow-y: auto;
+                    height: 122px;
+                }
+            }
+
+            #btn-abrir-form-coords {
+                position: absolute;
+                bottom: 48px;
+                left: 1%;
+            }
+
+            #canvas-wrapper {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+
+    </head>
+    <body class="noselect">
+
+        <div id="canvas-wrapper">
+            <div id="campo-de-observacao" class="row-fluid">
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            var data = null;
+            /*]]>*/
+        </script>
+
+        <div th:include="'/webgl/grafico-globo/' + ${conteudo}">
+        </div>
+
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            (function () {
+
+                var terra;
+                var views = [];
+
+                ON_DAED["3D"].create(function (scene, camera) {
+                    var raioPlaneta = 63.71;
+                    terra = ON_DAED["3D"].GraficoGlobo(scene, camera, raioPlaneta);
+
+                    for (var i in data) {
+                        terra.cadData(data[i]);
+                    }
+
+                    var camUpLeft = camera;
+                    var camDown = new THREE.PerspectiveCamera(45, 1, 1, 10000000000);
+                    var camUpRight = new THREE.PerspectiveCamera(45, 1, 1, 10000000000);
+
+                    var raioDistancia = raioPlaneta + 500;
+                    var lookPosition = new THREE.Vector3();
+
+                    views.push({
+                        camera: camUpLeft,
+                        left: 0.5 - 1 / 3,
+                        bottom: 0.5,
+                        width: 1 / 3,
+                        height: 0.5
+                    });
+
+                    camUpLeft.position.set(raioDistancia * Math.cos(120 * Math.PI / 180), 0, raioDistancia * Math.sin(120 * Math.PI / 180));
+                    camUpLeft.lookAt(lookPosition);
+                    camUpLeft.rotation.z = 120 * Math.PI / 180;
+
+                    views.push({
+                        camera: camUpRight,
+                        left: 0.5,
+                        bottom: 0.5,
+                        width: 1 / 3,
+                        height: 0.5
+                    });
+
+                    camUpRight.position.set(raioDistancia * Math.cos(-120 * Math.PI / 180), 0, raioDistancia * Math.sin(-120 * Math.PI / 180));
+                    camUpRight.lookAt(lookPosition);
+                    camUpRight.rotation.z = 60 * Math.PI / 180;
+                    
+                    views.push({
+                        camera: camDown,
+                        left: 1 / 3,
+                        bottom: 0,
+                        width: 1 / 3,
+                        height: 0.5
+                    });
+
+                    camDown.position.set(0, 0, raioDistancia);
+                    camDown.lookAt(lookPosition);
+                    camDown.rotation.z = 0;
+                    
+                    terra.setVisibilityEsferaCelesteBg(false);
+
+                }, function (cameraControl, renderer, scene, camera, stats, clock) {
+
+                    for (var ii = 0; ii < views.length; ++ii) {
+
+                        var view = views[ii];
+                        var cam = view.camera;
+
+                        var left = Math.floor(window.innerWidth * view.left);
+                        var bottom = Math.floor(window.innerHeight * view.bottom);
+                        var width = Math.floor(window.innerWidth * view.width);
+                        var height = Math.floor(window.innerHeight * view.height);
+
+                        renderer.setViewport(left, bottom, width, height);
+                        renderer.setScissor(left, bottom, width, height);
+                        renderer.enableScissorTest(true);
+
+                        cam.aspect = width / height;
+                        cam.updateProjectionMatrix();
+
+                        renderer.render(scene, cam);
+                    }
+
+                    terra.rotateObjetoTerra();
+
+                    ON_DAED["3D"].update();
+                    ThreeHelper.updateText(cam, $('#campo-de-observacao')[0]);
+                    TWEEN.update();
+                }, document.getElementById('campo-de-observacao'));
+
+            })();
+
+            $(document).ready(function () {
+                var overflowY = $('body').css('overflow-y');
+
+                $('.modal').on('show.bs.modal', function () {
+                    $('body').css({'overflow-y': 'auto'});
+                    $('body').toggleClass('noselect');
+                    $('.hover-label-text').hide();
+                });
+
+                $('.modal').on('hide.bs.modal', function () {
+                    $('body').css({'overflow-y': overflowY});
+                    $('body').toggleClass('noselect');
+                    $('.hover-label-text').show();
+                    window.scrollTo(0, 0);
+                });
+
+                window.onmessage = function (event) {
+                    var data = event.data;
+                    switch (data.cmd) {
+                        case "alterarCor":
+                            for (var i in data.data) {
+                                terra.dataPais[i].setHex(data.data[i].replace('#', '0x'));
+                            }
+                            break;
+                    }
+                };
+
+            });
+            /*]]>*/
+        </script>
+
+    </body>
+</html>

@@ -1,0 +1,230 @@
+<script src="js/three.min.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/stats.min.js"></script>
+<script src="js/tween.min.js"></script>
+<script src="js/ThreeHelper.js"></script>
+<script src="js/MathHelper.js"></script>
+<script src="js/daed/3D.js"></script>
+
+<h1 class="titulo-widget">Obter Tempo Sideral</h1>
+
+<div id="campo-de-observacao" class="row-fluid">
+</div>
+
+<div class="row-fluid margin-top-2">
+    <div class="col-md-12">
+        <form>
+            <div class="form-group">
+                <div class="row-fluid">
+
+                    <div class="margin-top-2 col-md-12">
+
+                        <div class="row-fluid">
+                            <div class="col-md-6">
+                                <label for="data">Data</label>
+                                <input class="form-control input-centralizado jlink dataju-datepicker" name="data" size="16" type="text" id="data-datepicker" value="12/02/2012" />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fuso-horario">Fuso Horário</label>
+                                <select id="fuso-horario-select" class="form-control" name="fuso-horario">
+                                    <option value="-12">-12 UTC</option>
+                                    <option value="-11">-11 UTC</option>
+                                    <option value="-10">-10 UTC</option>
+                                    <option value="-9">-9 UTC</option>
+                                    <option value="-8">-8 UTC</option>
+                                    <option value="-7">-7 UTC</option>
+                                    <option value="-6">-6 UTC</option>
+                                    <option value="-5">-5 UTC</option>
+                                    <option value="-4">-4 UTC</option>
+                                    <option selected="selected" value="-3">-3 UTC</option>
+                                    <option value="-2">-2 UTC</option>
+                                    <option value="-1">-1 UTC</option>
+                                    <option value="0">UTC</option>
+                                    <option value="1">+1 UTC</option>
+                                    <option value="2">+2 UTC</option>
+                                    <option value="3">+3 UTC</option>
+                                    <option value="4">+4 UTC</option>
+                                    <option value="5">+5 UTC</option>
+                                    <option value="6">+6 UTC</option>
+                                    <option value="7">+7 UTC</option>
+                                    <option value="8">+8 UTC</option>
+                                    <option value="9">+9 UTC</option>
+                                    <option value="10">+10 UTC</option>
+                                    <option value="11">+11 UTC</option>
+                                    <option value="12">+12 UTC</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row-fluid">
+                            <div class="span12">
+                                <label class="margin-top-2" for="hora-utc">Hora Universal (UTC)</label>
+                                <div>
+                                    <input value="0" id="input-hora-hora" min="0" max="23" class="input-numerico input-hora form-control input-centralizado jlink input-small" name="hora-utc" type="number" />
+                                    <input value="0" id="input-hora-minuto" min="0" max="59" class="input-numerico input-hora form-control input-centralizado jlink input-small" name="hora-utc" type="number" />
+                                    <input value="0" id="input-hora-segundo" min="0" max="59.9999" class="input-numerico input-hora form-control input-centralizado jlink input-small" name="hora-utc" type="number" />
+                                </div>
+                            </div>
+                            
+                            <div class="span12 celula-angulo">
+                                <div id="coordenada-longitude-local">
+                                </div>
+
+                                <div class="row-fluid">
+                                    <div class="col-md-12">
+                                        <label>Longitude</label>
+                                        <div class="input-group">
+                                            <span class="input-group-btn">
+                                                <button id="input-entrada-longitude-local-sinal" class="btn btn-info" type="button">+</button>
+                                            </span>
+                                            <input value="0" id="input-entrada-longitude-local-hora" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                                            <span class="input-group-addon">º</span>
+                                            <input value="0" id="input-entrada-longitude-local-min" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                                            <span class="input-group-addon">'</span>
+                                            <input value="0" id="input-entrada-longitude-local-sec" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                                            <span class="input-group-addon">"</span>
+                                            <input name="longitudeLocal" type="hidden" class="data-source-coordenada" id="input-entrada-longitude-local-hidden" value="0" min="-180" max="180" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row-fluid margin-top-2">
+
+                            <div class="col-md-6 margin-top-2">
+                                <button type="button" class="btn btn-primary form-control" id="carregar-hora-local">Carregar Hora Local</button>
+                            </div>
+
+                            <div class="col-md-6 margin-top-2">
+                                <button type="button" class="btn btn-success form-control" id="enviar-formulario-obter-coordenadas">Visualizar</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+</div>
+
+
+<script>
+    (function () {
+
+        $('#data-datepicker').datepicker({format: 'dd/mm/yyyy', language: 'pt-BR', autoclose: true});
+
+        ON_DAED.numberInputMinMax('.input-numerico');
+
+        addTempoSideralAnglepicker($('#coordenada-longitude-local'), '#input-entrada-longitude-local');
+
+        var terra;
+
+        $('#enviar-formulario-obter-coordenadas').click(function () {
+            var sendData = {};
+
+            sendData.hora = $('#input-hora-hora').val();
+            sendData.minuto = $('#input-hora-minuto').val();
+            sendData.segundo = $('#input-hora-segundo').val();
+            sendData.longitude = $("#input-entrada-longitude-local-hidden").val();
+            sendData.fuso = $("#fuso-horario-select").val();
+
+            var calendario = $("#data-datepicker").val().split("/");
+
+            sendData.dia = calendario[0];
+            sendData.mes = calendario[1];
+            sendData.ano = calendario[2];
+
+            ON_DAED.astro(
+                    '/tempo-sideral',
+                    sendData,
+                    function (data) {
+                        if (ON_DAED["WEBGL_SUPPORT"]) {
+                            terra.tempoSideral(data.tempoSideralMedio);
+                        } else {
+                            preencherDados(data);
+                        }
+                    });
+
+        });
+
+        ON_DAED["3D"].create(function (scene, camera) {
+            var raioPlaneta = 63.71;
+            terra = ON_DAED["3D"].ObservacaoTerra(scene, camera, raioPlaneta);
+        }, function (cameraControl, renderer, scene, camera, stats, clock) {
+
+            if ($('#campo-de-observacao canvas').is(':hover')) {
+                cameraControl.enabled = true;
+                cameraControl.update(clock.getDelta());
+            } else {
+                cameraControl.enabled = false;
+            }
+
+            ON_DAED["3D"].update();
+            ThreeHelper.updateText(camera, $('#campo-de-observacao')[0]);
+            TWEEN.update();
+            renderer.render(scene, camera);
+        }, document.getElementById('campo-de-observacao'),
+                function (camera, renderer, scene, stats) {
+                    return new THREE.OrbitControls(camera);
+                });
+
+        function preencherHorarioAtual() {
+            var date = new Date();
+            $('#data-datepicker').val(date.getUTCDate() + '/' + (date.getUTCMonth() < 9 ? '0' + (date.getUTCMonth() + 1) : date.getUTCMonth() + 1) + '/' + date.getUTCFullYear());
+
+            $('#input-hora-hora').val(date.getUTCHours());
+            $('#input-hora-minuto').val(date.getMinutes());
+            $('#input-hora-segundo').val(date.getSeconds());
+
+            var selectedUTC = date.getHours() - date.getUTCHours();
+
+            $('#fuso-horario-select').val(selectedUTC);
+        }
+
+        $('#carregar-hora-local').click(preencherHorarioAtual);
+
+        preencherHorarioAtual();
+
+        var extLongitude = parseFloat('${param.longitude}');
+        var extData = '${param.data}';
+        var extFuso = '${param.fuso}';
+        var extHora = '${param.hora}';
+
+        var checkedHora = extHora.match(/\d{2,2}\:\d{2,2}\:\d{2,2}/g);
+        var checkedData = extData.match(/\d{2,2}\-\d{2,2}\-\d{4,4}/g);
+        var checkedFuso = parseInt(extFuso);
+
+        if (!isNaN(extLongitude) && !isNaN(checkedFuso) && checkedHora !== null && checkedData !== null) {
+            checkedData = checkedData[0];
+            checkedHora = checkedHora[0].split(':');
+
+            var hora = $('#input-hora-hora');
+            var minuto = $('#input-hora-minuto');
+            var segundo = $('#input-hora-segundo');
+
+            $(document).ready(function () {
+                hora.val(checkedHora[0]);
+                minuto.val(checkedHora[1]);
+                segundo.val(checkedHora[2]);
+
+                hora.trigger('blur');
+                minuto.trigger('blur');
+                segundo.trigger('blur');
+
+                tempoSideralLoadInput('#input-entrada-longitude-local', extLongitude);
+
+                $('#fuso-horario-select').val(extFuso);
+                $('#data-datepicker').datepicker('update', checkedData);
+                $('#data-datepicker').trigger('changeDate');
+
+                $('#enviar-formulario-obter-coordenadas').trigger('click');
+            });
+        }
+
+        disableBodyScroll('#campo-de-observacao');
+
+    })();
+</script>

@@ -1,0 +1,108 @@
+<script src="js/three.min.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/stats.min.js"></script>
+<script src="js/tween.min.js"></script>
+<script src="js/ThreeHelper.js"></script>
+<script src="lib/on-daed-js/MathHelper.js"></script>
+<script src="lib/on-daed-js/3D.js"></script>
+
+<h1 class="titulo-widget">Obter Segundo de Arco</h1>
+
+<div id="campo-de-observacao" class="row-fluid margin-top-2">
+</div>
+
+<div class="row-fluid">
+    <div class="col-md-12">
+        <form>
+            <div class="form-group">
+                <div class="row-fluid">
+
+                    <div class="margin-top-2 col-md-12">
+
+                        <jsp:include page="fragmentos/entrada-transformacao-unidade.jsp" />
+
+                        <div class="row-fluid margin-top-2">
+                            <div class="col-md-12 margin-top-2">
+                                <button type="button" class="btn btn-success form-control" id="enviar-formulario-transformar-unidade">Visualizar</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+</div>
+
+
+<script>
+    (function () {
+        ON_DAED.numberInputMinMax('.input-numerico');
+
+        $('#tipo-transformacao > option').not('.to-segarco').remove();
+        $('#tipo-transformacao').val($('.to-segarco').val());
+
+        var referencial;
+
+        $('#enviar-formulario-transformar-unidade').click(function () {
+
+            var sendData = {
+                tipoConversao: $('#tipo-transformacao').val(),
+                valor: $('#input-entrada-quantidade').val()
+            };
+
+            ON_DAED.astro(
+                    '/unidade',
+                    sendData,
+                    function (data) {
+                        if (ON_DAED["WEBGL_SUPPORT"]) {
+                            referencial.adicionarLinha(data * referencial.getSegArcoRef(), data + "'");
+                        } else {
+                            preencherDados({"Unidade Transformada": data});
+                        }
+                    },
+                    function () {
+                        $('#escolha-coordenadas').find('input.btn').prop('disabled', false);
+                    });
+        });
+
+        ON_DAED["3D"].create(function (scene, camera) {
+            referencial = ON_DAED["3D"].ObservacaoParalaxe(scene, camera);
+//            referencial.addZoom($("#campo-de-observacao"));
+        }, function (cameraControl, renderer, scene, camera, stats, clock) {
+            if ($('#campo-de-observacao canvas').is(':hover')) {
+                cameraControl.enabled = true;
+                cameraControl.update(clock.getDelta());
+            } else {
+                cameraControl.enabled = false;
+            }
+            ON_DAED["3D"].update();
+            ThreeHelper.updateText(camera, $('#campo-de-observacao')[0]);
+            TWEEN.update();
+            renderer.render(scene, camera);
+        }, document.getElementById('campo-de-observacao'),
+                function (camera, renderer, scene, stats) {
+                    return new THREE.OrbitControls(camera);
+                });
+
+        var extTipoTransformacao = parseInt('${param.tipo}');
+        var extValor = parseFloat('${param.valor}');
+
+        if (!isNaN(extValor) && !isNaN(extTipoTransformacao)) {
+            var validTipo = $('#tipo-transformacao').children('[value=' + extTipoTransformacao + ']');
+
+            if (validTipo.length > 0) {
+                $(document).ready(function () {
+                    $('#tipo-transformacao').val(extTipoTransformacao);
+                    $('#input-entrada-quantidade').val(extValor);
+                    $('#enviar-formulario-transformar-unidade').trigger('click');
+                });
+            }
+        }
+
+        disableBodyScroll('#campo-de-observacao');
+
+    })();
+</script>

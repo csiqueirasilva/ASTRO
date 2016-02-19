@@ -1,0 +1,240 @@
+<div class="row-fluid campo-de-input">
+    <h1 class="titulo-widget">Obter Data Juliana</h1>
+    <div class="col-md-offset-3 col-md-6">
+        <form>
+            <div class="form-group">
+                <div class="row-fluid linha-form">
+                    <div class="col-md-4">
+                        <label for="data-gregoriana">De</label>
+                        <input readonly="readonly" class="form-control input-centralizado jlink dataju-datepicker" name="data-gregoriana-de" size="16" type="text" id="dataju-datepicker-de" value="12/02/2012" />
+                    </div>
+                    <div class="col-md-4">
+                        <label for="data-gregoriana">Até</label>
+                        <input readonly="readonly" class="form-control input-centralizado jlink dataju-datepicker" name="data-gregoriana-ate" size="16" type="text" id="dataju-datepicker-ate" value="12/02/2012" />
+                    </div>
+                    <div class="col-md-4">
+                        <label for="fuso-horario">Fuso Horário</label>
+                        <select id="fuso-horario-select" class="form-control" name="fuso-horario">
+                            <option value="-12">-12</option>
+                            <option value="-11">-11</option>
+                            <option value="-10">-10</option>
+                            <option value="-9">-9</option>
+                            <option value="-8">-8</option>
+                            <option value="-7">-7</option>
+                            <option value="-6">-6</option>
+                            <option value="-5">-5</option>
+                            <option value="-4">-4</option>
+                            <option selected="selected" value="-3">-3</option>
+                            <option value="-2">-2</option>
+                            <option value="-1">-1</option>
+                            <option value="0">0</option>
+                            <option value="1">+1</option>
+                            <option value="2">+2</option>
+                            <option value="3">+3</option>
+                            <option value="4">+4</option>
+                            <option value="5">+5</option>
+                            <option value="6">+6</option>
+                            <option value="7">+7</option>
+                            <option value="8">+8</option>
+                            <option value="9">+9</option>
+                            <option value="10">+10</option>
+                            <option value="11">+11</option>
+                            <option value="12">+12</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row-fluid linha-form">
+                    <div class="col-md-12">
+                        <div>
+                            <label for="hora-utc">Hora Local</label>
+                        </div>
+                        <input id="input-hora-hora" min="0" max="23" class="input-numerico input-hora form-control input-centralizado jlink input-small" name="hora-utc" type="number" />
+                        <input id="input-hora-minuto" min="0" max="59" class="input-numerico input-hora form-control input-centralizado jlink input-small" name="hora-utc" type="number" />
+                        <input id="input-hora-segundo" min="0" max="59.9999" class="input-numerico input-hora form-control input-centralizado jlink input-small" name="hora-utc" type="number" />
+                    </div>
+                </div>
+
+                <div class="row-fluid linha-form margin-top-2">
+                    <div class="col-md-5 margin-top-2">
+                        <button type="button" class="btn btn-info form-control" id="dataju-carregar-hora-local">Carregar horário atual</button>
+                    </div>
+                    <div class="col-md-7 margin-top-2">
+                        <button type="button" class="btn btn-success form-control" id="enviar-formulario-servidor">Converter para Data Juliana</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="hidden" id="campo-de-resultados">
+            <div id="resultados-input">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Data</th>
+                            <th>Hora</th>
+                            <th>Fuso Horário</th>
+                            <th>D. Juliana</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="container-fluid margin-top-2">
+                <div class="col-md-12 margin-top-2">
+                    <form method="POST" id="csv-form" action="csv" target="_BLANK">
+                        <input type="hidden" value="" id='csv-form-titulos' name="titulos" />
+                        <input type="hidden" value="" id='csv-form-corpo' name="corpo" />
+                        <button type="button" class="btn btn-success form-control" id="enviar-geracao-csv">Gerar CSV</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    (function () {
+        var date = new Date();
+        
+        $('#dataju-datepicker-de')
+                .val(date.getUTCDate() + '/' + (date.getUTCMonth() < 9 ? '0' + (date.getUTCMonth() + 1) : date.getUTCMonth() + 1) + '/' + date.getUTCFullYear())
+                .datepicker({
+                    orientation: "top",
+                    format: 'dd/mm/yyyy',
+                    language: 'pt-BR',
+                    autoclose: true
+                })
+                .on('changeDate', function (ev) {
+                    if (!ON_DAED.dataValida($(this).datepicker('getDate'))) {
+                        $(this).datepicker('update', new Date());
+                    }
+                    $('#dataju-datepicker-ate').datepicker('setStartDate', $('#dataju-datepicker-de').datepicker('getDate'));
+                    $('#dataju-datepicker-ate').datepicker('update', $('#dataju-datepicker-de').datepicker('getDate'));
+                });
+
+        $('#dataju-datepicker-ate')
+                .datepicker({
+                    orientation: "top",
+                    format: 'dd/mm/yyyy',
+                    language: 'pt-BR',
+                    autoclose: true
+                })
+                .on('changeDate', function (ev) {
+                    if (!ON_DAED.dataValida($(this).datepicker('getDate'))) {
+                        $(this).datepicker('update', $('#dataju-datepicker-de').datepicker('getDate'));
+                    }
+                });
+
+        $('#dataju-datepicker-ate').datepicker('setStartDate', $('#dataju-datepicker-de').datepicker('getDate'));
+        $('#dataju-datepicker-ate').datepicker('update', $('#dataju-datepicker-de').datepicker('getDate'));
+
+        ON_DAED.numberInputMinMax('.input-numerico');
+
+        $('#enviar-formulario-servidor').click(function () {
+            var data_de = $('#dataju-datepicker-de').val();
+            var data_ate = $('#dataju-datepicker-ate').val();
+            var exploded_ate = data_ate.split("/");
+            var exploded_de = data_de.split("/");
+
+            var fuso = $('#fuso-horario-select').val();
+
+            var dataDeFinal = new Date(Date.UTC(exploded_de[2], parseInt(exploded_de[1]) - 1, exploded_de[0],
+                    parseInt($('#input-hora-hora').val()) - fuso, $('#input-hora-minuto').val(), $('#input-hora-segundo').val()));
+
+            var dataAteFinal = new Date(Date.UTC(exploded_ate[2], parseInt(exploded_ate[1]) - 1, exploded_ate[0],
+                    parseInt($('#input-hora-hora').val()) - fuso, $('#input-hora-minuto').val(), $('#input-hora-segundo').val()));
+
+            var hora = ON_DAED.formatarHora($('#input-hora-hora').val(), $('#input-hora-minuto').val(), $('#input-hora-segundo').val());
+            var horaSend = dataDeFinal.getUTCHours() + ":" + dataDeFinal.getUTCMinutes() + ":" + dataDeFinal.getUTCSeconds();
+            var dataDeSend = dataDeFinal.getUTCDate() + '/' + (parseInt(dataDeFinal.getUTCMonth()) + 1) + '/' + dataDeFinal.getUTCFullYear();
+            var dataAteSend = dataAteFinal.getUTCDate() + '/' + (parseInt(dataAteFinal.getUTCMonth()) + 1) + '/' + dataAteFinal.getUTCFullYear();
+
+            ON_DAED.astro('/data-juliana', {hora: horaSend, dataDe: dataDeSend, dataAte: dataAteSend},
+            function (dadosDeRetorno) {
+                $('#resultados-input').hide();
+                $('#resultados-input > table > tbody > tr').remove();
+
+                for (var i = 0; i < dadosDeRetorno.length; i++) {
+                    var row = "<tr><td>%ID%</td><td>%DATA%</td><td>%HORA%</td><td>%FUSO%</td><td>%DATAJU%</td></tr>";
+
+                    row = row.replace("%ID%", $('#resultados-input > table > tbody > tr').length + 1);
+                    row = row.replace("%DATA%", ON_DAED.formatarData(dadosDeRetorno[i].dia, dadosDeRetorno[i].mes, dadosDeRetorno[i].ano));
+                    row = row.replace("%FUSO%", fuso);
+                    row = row.replace("%HORA%", hora);
+                    row = row.replace("%DATAJU%", dadosDeRetorno[i].dataJuliana.toFixed(9));
+
+                    $('#resultados-input > table > tbody').append(row);
+                }
+
+                $('#campo-de-resultados').removeClass('hidden');
+                $('#resultados-input').show();
+                
+                $('#resultados-input').scrollTop(0);
+                $('body').animate({scrollTop: $('#campo-de-resultados').offset().top}, 500); 
+                
+            });
+
+        });
+
+        function preencherHorarioAtual() {
+            var date = new Date();
+            $('#dataju-datepicker').val(date.getUTCDate() + '/' + (date.getUTCMonth() < 9 ? '0' + (date.getUTCMonth() + 1) : date.getUTCMonth() + 1) + '/' + date.getUTCFullYear());
+
+            $('#input-hora-hora').val(date.getHours());
+            $('#input-hora-minuto').val(date.getMinutes());
+            $('#input-hora-segundo').val(date.getSeconds());
+
+            var selectedUTC = parseInt(-date.getTimezoneOffset() / 60);
+
+            $('#fuso-horario-select').val(selectedUTC);
+        }
+
+        $('#dataju-carregar-hora-local').click(preencherHorarioAtual);
+
+        preencherHorarioAtual();
+
+        ON_DAED.csv("#enviar-geracao-csv", "click");
+
+        var extData = '${param.data}';
+        var extFuso = '${param.fuso}';
+        var extHora = '${param.hora}';
+
+        var checkedHora = extHora.match(/\d{2,2}\:\d{2,2}\:\d{2,2}/g);
+        var checkedData = extData.match(/\d{2,2}\-\d{2,2}\-\d{4,4}/g);
+        var checkedFuso = parseInt(extFuso);
+
+        if (!isNaN(checkedFuso) && checkedHora !== null && checkedData !== null) {
+            checkedData = checkedData[0];
+            checkedHora = checkedHora[0].split(':');
+
+            var hora = $('#input-hora-hora');
+            var minuto = $('#input-hora-minuto');
+            var segundo = $('#input-hora-segundo');
+
+            $(document).ready(function () {
+                hora.val(checkedHora[0]);
+                minuto.val(checkedHora[1]);
+                segundo.val(checkedHora[2]);
+
+                hora.trigger('blur');
+                minuto.trigger('blur');
+                segundo.trigger('blur');
+
+                $('#fuso-horario-select').val(extFuso);
+                $('#dataju-datepicker-de').datepicker('update', checkedData);
+                $('#dataju-datepicker-de').trigger('changeDate');
+
+                $('#enviar-formulario-servidor').trigger('click');
+            });
+        }
+        
+        ON_DAED['3D'].START_RENDER = true;
+        
+    })();
+    /*]]>*/
+</script>

@@ -1,0 +1,28 @@
+<div th:fragment="texto(tipoPlanoCoordenada)">
+
+    <div class="btn-exemplo-ajuda">
+        <div  class="btn-group" role="group">
+            <button  type="button" class="btn btn-info">Plano Galáctico</button>
+            <button type="button" class="btn btn-primary active">Plano Supergaláctico</button>
+        </div>
+    </div>
+
+    <p>Ao clicar no botão "Plano <span th:text="${tipoPlanoCoordenada}"></span>", o plano de referência ao qual este
+    sistema de coordenadas celestes tem como base é visualizado. Para fins
+    didáticos e de percepção de cada plano, pode-se ligar e desligar
+    individualmente cada botão ou fazer uma combinação deles. Assim a
+    visualização dos planos pode ser melhor compreendida.</p>
+
+    <h3>Funções do Mouse</h3>
+
+    <ul>
+
+        <li><b>Botão Esquerdo:</b> com este botão pode-se deslocar (rotação) a imagem do
+            sistema.</li>
+
+        <li><b>Botão de rolagem:</b> o programa permite aproximar ou afastar a imagem,
+            bastando para isso girar este botão.</li>
+
+    </ul>
+
+</div>

@@ -1,0 +1,622 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="UTF-8">
+
+        <title>Astro - QUIZ</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="description" content="">
+        <meta name="author" content="Observatório Nacional">
+
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery-ui.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/bootstrap-datepicker.js"></script>
+        <script src="js/locales/bootstrap-datepicker.pt-BR.js"></script>
+        <script src="js/anglepicker.js"></script>
+        <script src="lib/on-daed-js/geral.js"></script>
+        <script src="lib/on-daed-js/vsop87.min.js"></script>
+        <script src="lib/on-daed-js/astro.js"></script>
+
+        <script src="js/three.min.js"></script>
+        <script src="js/MTLLoader.js"></script>
+        <script src="js/OBJMTLLoader.js"></script>
+        <script src="js/OrbitControls.js"></script>
+        <script src="js/stats.min.js"></script>
+        <script src="js/tween.min.js"></script>
+        <script src="js/ThreeHelper.js"></script>
+        <script src="lib/on-daed-js/MathHelper.js"></script>
+        <script src="lib/on-daed-js/3D.js"></script>
+
+        <link href="css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="css/bootstrap-responsive.css" rel="stylesheet"/>
+
+        <link href="css/anglepicker.css" rel="stylesheet"/>
+        <link href="css/datepicker3.css" rel="stylesheet"/>
+        <link href="css/jquery-ui.structure.min.css" rel="stylesheet"/>
+        <link href="css/jquery-ui.theme.min.css" rel="stylesheet"/>
+
+        <!--        <link href="http://fonts.googleapis.com/css?family=Syncopate" rel="stylesheet" type="text/css">
+                <link href="http://fonts.googleapis.com/css?family=Abel" rel="stylesheet" type="text/css">
+                <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet" type="text/css">
+                <link href="http://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+                <link href="http://fonts.googleapis.com/css?family=Pontano+Sans" rel="stylesheet" type="text/css">
+                <link href="http://fonts.googleapis.com/css?family=Oxygen" rel="stylesheet" type="text/css">-->
+
+        <style>
+            body, html {
+                height: 100%;
+            }
+
+            body {
+                background: linear-gradient(#A1A1A1, #E1E1E1, #A1A1A1) no-repeat; /* Standard syntax */  
+                background-size: 100% 100%;
+                text-align: center;
+            }
+
+            #main-quiz {
+                width: 100px;
+                height: 100px;
+                position: fixed;
+                display: none;
+            }
+
+            #main-quiz:hover {
+                cursor: default;
+            }
+
+            .label-redondo:hover {
+                cursor: pointer;
+            }
+
+            .label-redondo {
+                display: inline-block;
+                border-radius: 50%;
+                background: linear-gradient(#4520A1, #7853E1, #4520A1) no-repeat; /* Standard syntax */  
+                text-align: center;
+                font-weight: bold;
+                color: #FFFFFF;
+                border: 4px solid #000000;
+                font-size: 2em;
+                line-height:316%;
+            }
+
+            #wrapper-menu {
+                width: 220px;
+                height: 220px;
+                position: fixed;
+                display: none;
+            }
+
+            #wrapper-menu .label-redondo {
+                width: 100px;
+                height: 100px;
+            }
+
+            nav {
+                display: none;
+            }
+
+            #navbar-back {
+                display: none;
+            }
+
+            .jlink:hover {
+                cursor: pointer;
+            }
+
+            #navbar-logo {
+                width: 28px;
+                height: 28px;
+                font-size: 0.45em;
+                line-height:250%;
+            }
+
+            .navbar {
+                margin-bottom: 0px;
+            }            
+
+            /* MENU FASES */
+            #play-menu .jlink:hover {
+                background: #dbdbdb;
+                color: #000000;
+            }
+
+            .op-fase {
+                font-weight: bold;
+                font-size: 3em;
+                padding-top: 20px;
+            }
+
+            #fase-sistema-solar {
+                height: 170px;
+                background: #c8e6f1;
+                color: #000000;
+            }
+
+            #fase-planetas {
+                height: 170px;
+                background: #7683e4;
+                color: #FFFFFF;
+            }
+
+            #fase-missao-espacial {
+                height: 170px;
+                background: #90D93F;
+                color: #000000;
+            }
+
+            #fase-universo {
+                height: 170px;
+                background: #c8e6f1;
+                color: #000000;
+            }
+
+            #fase-asteroides {
+                height: 170px;
+                background: #9acfea;
+                color: #000000;
+            }
+
+            #fase-estrelas {
+                height: 170px;
+                background: #7683e4;
+                color: #000000;
+            }
+
+            #fase-astrofisica {
+                height: 170px;
+                background: #90D93F;
+                color: #000000;
+            }
+
+            .fase-img {
+                width: 100%;
+                height: 300px;
+            }
+
+            .fase-img img {
+                width: auto;
+                height: 100%;
+            }
+
+            #tela-de-fase > div {
+                padding-top: 20px;
+            }
+
+            #tela-de-fase {
+                font-size: 2.4em;
+            }
+
+            #tela-de-fase .row-fase-atual {
+                background: #88AAEC;
+            }
+
+            .fase-op-1 {
+                background: #F0DE7D;
+            }
+
+            .fase-op-2 {
+                background: #88AAEC;
+            }
+
+            .fase-op-3 {
+                background: #f2dede;
+            }
+
+            .fase-op-4 {
+                background: #cc7777;
+            }
+
+            @media (max-width: 767px) {
+                body > div {
+                    margin-left: -20px;
+                    margin-right: -20px;
+                }
+            }
+
+        </style>
+
+    </head>
+    <body>
+
+        <nav class="navbar navbar-inverse navbar-static-top">
+            <div class="navbar-inner">
+                <ul class="nav">
+                    <li>
+                        <a class="navbar-brand" href="quiz" style="float: right;">
+                            <div id="navbar-logo" class="label-redondo">
+                                QUIZ
+                            </div>
+                        </a>
+                        <a id="navbar-back" class="navbar-brand jlink" style="float: left;">
+                            <i class="glyphicon glyphicon-arrow-left"></i> 
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </nav>
+
+        <div class="label-redondo" id="main-quiz">
+            QUIZ
+        </div>
+
+        <div id="wrapper-menu">
+            <div>
+                <div style="float: left; width: 100px; margin-right: 20px;">
+                    <div class="label-redondo" data-type="trig-menu" data-target="#play-menu">
+                        <i class="glyphicon glyphicon-play"></i>
+                    </div>
+                </div>
+                <div style="float: left; width: 100px;">
+                    <div class="label-redondo" data-type="trig-menu" data-target="#ajuda-menu">
+                        ?
+                    </div>
+                </div>
+            </div>
+            <div style="clear: both;"></div>
+            <div style="margin-top: 20px;">
+                <div style="float: left; width: 100px; margin-right: 20px;">
+                    <div class="label-redondo" data-type="trig-menu" data-target="#config-menu">
+                        <i class="glyphicon glyphicon-wrench"></i>
+                    </div>
+                </div>
+                <div style="float: left; width: 100px;">
+                    <a href="http://www.on.br/" target="_blank">
+                        <div class="label-redondo">
+                            ON
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div data-type="op-menu" id="config-menu">
+            CONFIG MENU
+        </div>
+
+        <div data-type="op-menu" id="play-menu">
+        </div>
+
+        <div data-type="op-menu" id="ajuda-menu">
+            HELP MENU
+        </div>
+
+        <div data-type="op-menu" id="fases-menu">
+        </div>
+
+        <div id="tela-de-fase" style="display: none;">
+            <div class="row-fase-atual">
+                <span class="count-fase"></span>/<span class="count-max-fase"></span>
+            </div>
+            <div class="fase-img">
+                <img />
+            </div>
+            <div class="fase-pergunta">
+            </div>
+            <div class="fase-menu-op">
+            </div>
+        </div>
+
+        <script>
+            (function () {
+
+                var faseHTMLString = '<div id="%id%" class="op-fase" data-fase="%idx%">\
+                <div>\
+                    %label%\
+                </div>\
+                <div class="lock-score-row">\
+                    <i class="glyphicon glyphicon-lock"></i>\
+                </div>\
+                <div style="display:none;" class="count-score-row">\
+                    (<span class="count-score">0</span>/%max-perguntas%)\
+                </div>\
+            </div>';
+
+                var perguntas = [
+                    {
+                        tema: "SISTEMA SOLAR",
+                        id: "fase-sistema-solar",
+                        perguntas: [
+                            {
+                                p: "1?",
+                                op: [
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4"
+                                ],
+                                img: "http://placekitten.com/g/250/250",
+                                correto: 0
+                            },
+                            {
+                                p: "ping?",
+                                op: [
+                                    "long",
+                                    "pong",
+                                    "tong",
+                                    "gong"
+                                ],
+                                correto: 1
+                            }
+                        ]
+                    },
+                    {
+                        tema: "PLANETAS",
+                        id: "fase-planetas",
+                        perguntas: [
+                            {
+                                p: "1",
+                                op: [
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4"
+                                ],
+                                correto: 0
+                            }
+                        ]
+                    },
+                    {
+                        tema: "MISSAO ESPACIAL",
+                        id: "fase-missao-espacial",
+                        perguntas: [
+                            {
+                                p: "1",
+                                op: [
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4"
+                                ],
+                                correto: 0
+                            }
+                        ]
+                    },
+                    {
+                        tema: "UNIVERSO",
+                        id: "fase-universo",
+                        perguntas: [
+                            {
+                                p: "1",
+                                op: [
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4"
+                                ],
+                                correto: 0
+                            }
+                        ]
+                    },
+                    {
+                        tema: "ASTEROIDES",
+                        id: "fase-asteroides",
+                        perguntas: [
+                            {
+                                p: "1",
+                                op: [
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4"
+                                ],
+                                correto: 0
+                            }
+                        ]
+                    },
+                    {
+                        tema: "ESTRELAS",
+                        id: "fase-estrelas",
+                        perguntas: [
+                            {
+                                p: "1",
+                                op: [
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4"
+                                ],
+                                correto: 0
+                            }
+                        ]
+                    },
+                    {
+                        tema: "ASTROFISICA",
+                        id: "fase-astrofisica",
+                        perguntas: [
+                            {
+                                p: "1",
+                                op: [
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4"
+                                ],
+                                correto: 0
+                            }
+                        ]
+                    }
+                ];
+
+                function addTema(tema, idx) {
+                    var html = faseHTMLString
+                            .replace("%id%", tema.id)
+                            .replace("%label%", tema.tema)
+                            .replace("%idx%", idx)
+                            .replace("%max-perguntas%", tema.perguntas.length);
+                    $('#play-menu').append(html);
+                }
+
+                function abrirProximaPergunta() {
+                    var pergunta = perguntas[faseJogadaAtualmente].perguntas[++perguntaAtual];
+
+                    var telaDeFase = $('#tela-de-fase');
+
+                    telaDeFase.find('.count-fase').html(perguntaAtual + 1);
+                    telaDeFase.find('.count-max-fase').html(perguntas[faseJogadaAtualmente].perguntas.length);
+
+                    if (pergunta.img) {
+                        telaDeFase.find('.fase-img').children('img').prop('src', pergunta.img);
+                        telaDeFase.find('.fase-img').show();
+                    } else {
+                        telaDeFase.find('.fase-img').hide();
+                    }
+
+                    telaDeFase.find('.fase-pergunta').html(pergunta.p);
+
+                    var ops = "";
+
+                    for (var i = 0; i < pergunta.op.length; i++) {
+                        ops += "<div data-op='" + i + "' class='jlink fase-op-" + ((i % 4) + 1) + "'>" + pergunta.op[i] + "</div>";
+                    }
+
+                    telaDeFase.find('.fase-menu-op').html(ops);
+
+                    telaDeFase.find('.fase-menu-op').find('div').click(function () {
+                        if (parseInt($(this).attr('data-op')) === pergunta.correto) {
+                            scoreAtual++;
+                            alert('acertou!');
+                        } else {
+                            alert('errou!');
+                        }
+
+                        var qtdPerguntas = perguntas[faseJogadaAtualmente].perguntas.length;
+
+                        if (perguntaAtual + 1 === qtdPerguntas) {
+                            var ultScore = parseInt($('[data-fase="' + faseJogadaAtualmente + '"]').find('.count-score').html());
+
+                            if (faseJogadaAtualmente === faseAtual &&
+                                    scoreAtual === qtdPerguntas) {
+                                if (faseAtual !== (perguntas.length - 1)) {
+                                    abrirProximaFase(true);
+                                    alert('voce avancou de fase!');
+                                } else /* JA NA ULTIMA FASE */ {
+                                    alert('rejogue todas as fases!');
+                                }
+                            } else if (ultScore !== qtdPerguntas) {
+                                alert('tente novamente!');
+                            }
+
+                            if (ultScore < scoreAtual) {
+                                alert('novo recorde!');
+                                $('[data-fase="' + faseJogadaAtualmente + '"]').find('.count-score').html(scoreAtual);
+                            }
+
+                            $('#navbar-back').trigger('click');
+                        } else {
+                            $('#tela-de-fase').fadeOut(fadeTime, function () {
+                                abrirProximaPergunta();
+                                $(this).fadeIn(fadeTime);
+                            });
+                        }
+                    });
+                }
+
+                var scoreAtual = 0;
+                var perguntaAtual = -1;
+                var faseJogadaAtualmente = -1;
+                var faseAtual = -1;
+
+                function abrirProximaFase() {
+
+                    var faseRow = $('[data-fase="' + (++faseAtual) + '"]');
+                    faseRow.find('.lock-score-row').remove();
+                    faseRow.find('.count-score-row').show();
+                    faseRow.addClass('jlink');
+
+                    faseRow.click(function () {
+                        faseJogadaAtualmente = parseInt($(this).attr('data-fase'));
+                        perguntaAtual = -1;
+                        scoreAtual = 0;
+                        abrirProximaPergunta(faseRow);
+                        trocarTela("#tela-de-fase");
+                    });
+
+
+                }
+
+                for (var i = 0; i < perguntas.length; i++) {
+                    addTema(perguntas[i], i);
+                }
+
+                abrirProximaFase();
+
+                function setCenter(elem) {
+                    $(elem).css({
+                        "left": window.innerWidth / 2 - $(elem).width() / 2, "top": window.innerHeight / 2 - $(elem).height() / 2
+                    });
+                }
+
+                var fadeTime = 1000;
+
+                var lastItem = [];
+
+                function trocarTela(elem, callbackNovaTela) {
+
+                    var testBackBtn = $(elem).is(menuPrincipal);
+
+                    function nTela() {
+                        $(elem).fadeIn(fadeTime, function () {
+                            if (callbackNovaTela instanceof Function) {
+                                callbackNovaTela();
+                            }
+
+                            if (!testBackBtn) {
+                                $('#navbar-back').show();
+                            }
+                        });
+                    }
+
+                    if ($('body').children(':visible').not("nav").length > 0) {
+                        lastItem.push($('body').children(':visible').not("nav").fadeOut(fadeTime, nTela));
+                    } else {
+                        nTela();
+                    }
+
+                    if (testBackBtn) {
+                        $('#navbar-back').hide();
+                    }
+                }
+
+                $(window).bind('resize', function () {
+                    setCenter("#main-quiz");
+                    setCenter("#wrapper-menu");
+                });
+
+                $(window).trigger('resize');
+
+                $('[data-type="op-menu"]').hide();
+
+                $('[data-type="trig-menu"]').bind('click', function () {
+                    var target = $(this).attr('data-target');
+                    if (target) {
+                        trocarTela(target);
+                    } else {
+                        console.error('Sem target para trig-menu');
+                    }
+                });
+
+                $('#navbar-back').bind('click', function () {
+                    trocarTela(lastItem.pop());
+                    lastItem.pop(); // remove current
+                });
+
+                var menuPrincipal = $("#wrapper-menu");
+
+                $(document).ready(function () {
+                    trocarTela('#main-quiz', function () {
+                        window.setTimeout(function () {
+                            trocarTela("#wrapper-menu, nav", function () {
+                                fadeTime = 300;
+                            });
+                        }, 1000);
+                    });
+                });
+            })();
+        </script>
+
+    </body>
+</html>

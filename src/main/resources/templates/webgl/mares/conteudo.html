@@ -1,0 +1,538 @@
+<link href="css/bootstrap-slider.css" rel="stylesheet" />
+<script src='js/bootstrap-slider.js'>
+</script>
+
+<div th:replace="ferramentas/fragmentos/entrada-plataforma-observacao">
+</div>
+
+<script src='lib/on-daed-js/3D/PosicaoSol.js'>
+</script>
+
+<script src='lib/on-daed-js/3D/PosicaoLua.js'>
+</script>
+
+<script src='lib/on-daed-js/3D/PosicaoEclipse.js'>
+</script>
+
+<script src='lib/on-daed-js/3D/PosicaoMare.js'>
+</script>
+
+<button type="button" id="btn-tabua-mares" class="btn btn-primary btn-lg ui-observacao-horizontal" data-toggle="modal" data-target="#data-tabuas">
+    Tábuas de Maré
+</button>
+
+<div id="parent-exibir-setas" class="checkbox ui-observacao-horizontal">
+    <label>
+        <input type="checkbox" id="exibir-setas"/> Diagrama de Forças
+    </label>
+</div>
+
+<div id="parent-mares-escala-mar" class="parent-bs-slider noselect">
+    <div class="titulo-slider">Escala da forma da Maré</div>
+    <input class="bs-slider" data-slider-tooltip="hide" id="mares-escala-mar" data-slider-id='mares-escala-mar' type="text" data-slider-min="1" data-slider-max="5" data-slider-step="1" data-slider-value="1" />
+    <span class="label-slider"></span>
+</div>
+
+<div class="modal fade ui-observacao-horizontal" id="data-tabuas" tabindex="-1" role="dialog" aria-labelledby="Tábuas de Maré" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Tábuas de Maré</h4>
+            </div>
+
+            <div class="modal-body">
+                <div id="carregando-tabua-mares"><h2>Carregando dados!</h2></div>
+                <div id="erro-tabua-mares"><h2>Site da Divisão de Marés da Diretoria de Hidrografia e Navegação (DHN) está temporariamente inacessível. Clique <a class="jlink" id="tentativa-tabua-mares">aqui</a> para tentar novamente.</h2></div>
+                <div id="campo-tabua-mares">
+
+                    <div>Tábuas de Maré obtidas <a id="mares-link-fonte" href="http://www.mar.mil.br/dhn/chm/box-previsao-mare/tabuas/index.htm" target="_blank">na página da Divisão de Marés da Diretoria de Hidrografia e Navegação (DHN).</a></div>
+
+                    <div class="campo-form-mare">
+                        <div><label>Portos do Brasil</label></div>
+                        <select class="form-control" id="mares-seletor-porto">
+                        </select>
+                    </div>
+
+                    <div id="mares-informacao-nao-disponivel">Informação para data <span id="mares-data-nao-disponivel"></span>, selecionada no ASTRO, não está disponível no site da Divisão de Marés da Diretoria de Hidrografia e Navegação (DHN) para o porto selecionado.</div>
+
+                    <div class="campo-form-mare" id="mares-campo-data">
+                        <div><label>Data</label></div>
+
+                        <select class="form-control" id="mares-seletor-dia">
+                        </select>
+
+                        <select class="form-control" id="mares-seletor-mes">
+                            <option data-value="01" value="Jan">Janeiro</option>
+                            <option data-value="02" value="Fev">Fevereiro</option>
+                            <option data-value="03" value="Mar">Março</option>
+                            <option data-value="04" value="Abr">Abril</option>
+                            <option data-value="05" value="Mai">Maio</option>
+                            <option data-value="06" value="Jun">Junho</option>
+                            <option data-value="07" value="Jul">Julho</option>
+                            <option data-value="08" value="Ago">Agosto</option>
+                            <option data-value="09" value="Set">Setembro</option>
+                            <option data-value="10" value="Out">Outubro</option>                    
+                            <option data-value="11" value="Nov">Novembro</option>
+                            <option data-value="12" value="Dez">Dezembro</option>
+                        </select>
+
+                        <select class="form-control" id="mares-seletor-ano">
+                        </select>
+                    </div>
+
+                    <div class="campo-form-mare" id="tabua-mare-especifica">
+                        <div id="tabua-mare-especifica-erro">
+                            <h2>Site da Divisão de Marés da Diretoria de Hidrografia e Navegação (DHN) está temporariamente inacessível. Clique <a class="jlink" id="tentativa-tabua-especifica-mares">aqui</a> para tentar novamente.</h2>
+                        </div>
+                        <div id="tabua-mare-especifica-dados">
+                            <div id='tabua-mare-ajuda'>Clique na linha da tabela abaixo para exibir a visualização correspondente.</div>
+                            <table class="table table-bordered table-striped table-hover table-responsive">
+                                <tr class="hidden">
+                                    <th>Latitude</th>
+                                    <th>Longitude</th>
+                                    <th>Fuso</th>
+                                    <th>Nível Médio</th>
+                                </tr>
+
+                                <tr class="hidden">
+                                    <td id="mares-latitude">01º41',6S</td>
+                                    <td id="mares-longitude">050º29',6W</td>
+                                    <td id="mares-fuso">+03.0</td>
+                                    <td id="mares-nivel-medio">2.21</td>
+                                </tr>
+
+                                <tr class="hidden">
+                                    <th colspan="2">Instituição</th>
+                                    <th>Carta</th>
+                                    <th>Componentes</th>
+                                </tr>
+
+                                <tr class="hidden">
+                                    <td colspan="2" id="mares-instituicao">DHN34</td>
+                                    <td id="mares-carta">4341</td>
+                                    <td id="mares-componentes">34</td>
+                                </tr>
+
+                                <tr class="hidden">
+                                    <th colspan="4">Data</th>
+                                </tr>
+
+                                <tr class="hidden">
+                                    <td colspan="4" id="mares-especifico-data-da-mare">SAB 01/07/2015</td>
+                                </tr>
+
+                                <tr>
+                                    <th>Hora Local da Maré</th>
+                                    <th>Altura da Maré (m)</th>
+                                    <th colspan="2">Fase da Lua</th>
+                                </tr>
+
+                                <tbody id="mares-entradas-especificas">
+                                </tbody>
+
+                            </table>
+
+                            <div id="mares-agradecimento-marinha">Agradecemos a Diretoria de Hidrografia e Navegação (DHN) pela oportunidade de disponibilizar na página do Observatório Nacional o trabalho que é realizado pela Marinha do Brasil.</div>
+                        </div>
+                        <div id="tabua-mare-especifica-carregando">
+                            Carregando dados!
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="label-dados" class="img-rounded elemento-ui ui-observacao-horizontal">
+    <div><i id="ver-fase-atual-lua" class="glyphicon glyphicon-eye-open lua-ligado jlink"></i></div>
+    <div><span id="label-data"></span> às <span id="label-hora"></span></div>
+    <div id='mares-info-marinha'>
+        <div><span id="mares-local"></span></div>
+        <div><div class="mare-distancia-label">Altura da Maré</div><div class="mare-distancia-input"><span id="mares-altura"></span> m</div></div>
+    </div>
+    <div><div class="mare-distancia-label">Fase da Lua</div><div class="mare-distancia-input" id="mares-fase-lua"></div></div>
+    <div><div class="mare-distancia-label">Distância Terra-Sol</div><div class="mare-distancia-input"><span id="distancia-sol"></span> KM</div></div>
+    <div><div class="mare-distancia-label">Distância Terra-Lua</div><div class="mare-distancia-input"><span id="distancia-lua"></span> KM</div></div>
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+
+    function setMareData(parent) {
+        var children = $(parent).find('td');
+        var horario = children[0].innerHTML.split(":");
+
+        var inputsHora = $("#hora-minuto-segundo-row input");
+        var inputsDia = $("#dia-mes-ano-row input");
+
+        $(inputsHora[0]).val(horario[0]);
+        $(inputsHora[1]).val(horario[1]);
+        $(inputsHora[2]).val("00");
+
+        $(inputsDia[0]).val($('#mares-seletor-dia').val());
+        $(inputsDia[1]).val($('#mares-seletor-mes').find(':selected').attr("data-value"));
+        $(inputsDia[2]).val($('#mares-seletor-ano').val());
+
+        $('#fuso').val(-parseInt($('#mares-fuso').html()));
+
+        $('#fuso').trigger('change');
+
+        $('#mares-altura').html(children[1].innerHTML);
+        $('#mares-local').html($('#mares-seletor-porto option:selected').html());
+
+        $('#mares-info-marinha').show();
+
+        $('.modal:visible').modal('hide');
+    }
+
+    (function () {
+
+        $('#exibir-setas').click(function () {
+            var v;
+            if ($(this).is(':checked')) {
+                v = true;
+            } else {
+                v = false;
+            }
+            pMare.toggleSetas(v);
+        });
+
+        var anoMaximoMares = 2015;
+        var anoMinimoMares = 2005;
+
+        var baseUrlFonte = "http://www.mar.mil.br/dhn/chm/box-previsao-mare/tabuas/";
+
+        function loadTabuaEspecifica() {
+            $('#tabua-mare-especifica-erro').hide();
+            $('#tabua-mare-especifica-dados').hide();
+            $('#tabua-mare-especifica-carregando').show();
+
+            $('#tabua-mare-especifica-dados').find('td').empty();
+            $('#mares-entradas-especificas').empty();
+
+            var codigo = $('#mares-seletor-porto').val();
+            var dia = $('#mares-seletor-dia').val();
+            var mes = $('#mares-seletor-mes').val();
+            var numMes = $('#mares-seletor-mes').find(':selected').attr('data-value');
+            var ano = $('#mares-seletor-ano').val();
+            var idx = parseInt($('#mares-seletor-dia').val()) - 1;
+
+            var complementoUrl = codigo + mes + ano;
+
+            $("#mares-link-fonte").attr('href', baseUrlFonte + complementoUrl + ".htm");
+
+            $.ajax({
+                url: "tabua-mares/" + complementoUrl,
+                dataType: "json",
+                method: "GET"
+            })
+
+                    .complete(function () {
+                        $('#tabua-mare-especifica-carregando').hide();
+                    })
+
+                    .done(function (o) {
+                        $('#mares-latitude').html(o.latitude);
+                        $('#mares-longitude').html(o.longitude);
+                        $('#mares-nivel-medio').html(o.nivelMedio);
+                        $('#mares-instituicao').html(o.instituicao);
+                        $('#mares-carta').html(o.carta);
+                        $('#mares-fuso').html(o.fuso);
+                        $('#mares-componentes').html(o.componentes);
+
+                        var entradas = o.entradas[idx].horaAltura;
+                        var diaMare = o.entradas[idx].dia;
+
+                        $('#mares-especifico-data-da-mare').html(diaMare);
+
+                        var linha = $('#mares-entradas-especificas');
+                        for (var hora in entradas) {
+                            var horario = hora.split(":");
+                            var jd = ON_DAED.ASTRO.getJulianFromGregorian(parseInt(dia), parseInt(numMes), parseInt(ano), parseInt(horario[0]), parseInt(horario[1]), 0, parseInt(o.fuso));
+                            var faseLua = ON_DAED.obterFaseLua(jd);
+
+                            linha.append("<tr onclick='setMareData(this);' class='jlink'><td>" + hora + "</td><td>" + entradas[hora] + "</td><td colspan='2'>" + faseLua + "</td></tr>");
+                        }
+
+                        $('#tabua-mare-especifica-dados').show();
+                    })
+
+                    .fail(function () {
+                        $('#tabua-mare-especifica-erro').show();
+                    });
+        }
+
+        $('#mares-seletor-dia').change(loadTabuaEspecifica);
+
+        function loadNumeroDias(carregarDataAtual) {
+            var ano = $('#mares-seletor-ano').val();
+            var mes = $('#mares-seletor-mes').find(':selected').attr("data-value");
+
+            $('#mares-seletor-dia').empty();
+
+            var ultimoDia = new Date(ano, mes, 0).getDate();
+
+
+            for (var i = 1; i <= ultimoDia; i++) {
+                var dia = (i < 10 ? "0" + new String(i) : i);
+                $('#mares-seletor-dia').append("<option value='" + dia + "'>" + dia + "</option>");
+            }
+
+            if (carregarDataAtual) {
+                tabuaMaresDataAtual();
+            }
+
+            loadTabuaEspecifica();
+        }
+
+        $('#mares-seletor-mes').change(function () {
+            loadNumeroDias();
+        });
+
+        $('#mares-seletor-ano').change(function () {
+            loadNumeroDias();
+        });
+
+        function loadTabuaPorto(carregarDataAtual) {
+            $('#mares-seletor-ano').empty();
+
+            var op = $('#mares-seletor-porto').find(':selected');
+
+            var anoMax = parseInt(op.attr("data-ano-maximo"));
+            var anoMin = parseInt(op.attr("data-ano-minimo"));
+
+            for (var i = anoMin; i <= anoMax; i++) {
+                $('#mares-seletor-ano').append("<option value='" + i + "'>" + i + "</option>");
+            }
+
+            loadNumeroDias(carregarDataAtual);
+        }
+
+        $('#mares-seletor-porto').change(function () {
+            loadTabuaPorto(true);
+        });
+
+        function loadTabuaMares() {
+            $('#campo-tabua-mares').hide();
+            $('#erro-tabua-mares').hide();
+            $('#carregando-tabua-mares').show();
+
+            $('#mares-link-fonte').attr('href', baseUrlFonte + "index.htm");
+            $('#mares-seletor-porto').empty();
+
+            $.ajax({
+                url: "tabua-mares",
+                dataType: "json",
+                method: "GET"
+            })
+
+                    .done(function (o) {
+                        $('#campo-tabua-mares').show();
+                        for (var i = 0; i < o.length; i++) {
+                            $('#mares-seletor-porto').append("<option data-ano-maximo=" + (o[i].anoMaximo || anoMaximoMares) + " data-ano-minimo=" + (o[i].anoMinimo || anoMinimoMares) + " value=" + o[i].codigo + ">" + o[i].nome + "</option>");
+                        }
+
+                        loadTabuaPorto(true);
+                    })
+
+                    .fail(function () {
+                        $('#erro-tabua-mares').show();
+                    })
+
+                    .complete(function () {
+                        $('#carregando-tabua-mares').hide();
+                    });
+
+
+        }
+
+        function tabuaMaresDataAtual() {
+            $('#mares-informacao-nao-disponivel').hide();
+
+            var dia = parseInt($($('#dia-mes-ano-row input')[0]).val());
+            var mes = parseInt($($('#dia-mes-ano-row input')[1]).val());
+            var ano = $($('#dia-mes-ano-row input')[2]).val();
+
+            mes = mes < 10 ? "0" + new String(mes) : mes;
+            dia = dia < 10 ? "0" + new String(dia) : dia;
+
+            var menorAno = $('#mares-seletor-ano option:first').attr('value');
+            var maiorAno = $('#mares-seletor-ano option:last').attr('value');
+
+            if (maiorAno >= ano && menorAno <= ano) {
+                $('#mares-seletor-ano').val(ano);
+
+                var valMes = $('#mares-seletor-mes').find('option[data-value=' + mes + ']').attr('value');
+                $('#mares-seletor-mes').val(valMes);
+
+                $('#mares-seletor-dia').val(dia);
+            } else if (maiorAno < ano) {
+                $('#mares-informacao-nao-disponivel').show();
+
+                $('#mares-data-nao-disponivel').html(dia + '/' + mes + '/' + ano);
+
+                $('#mares-seletor-ano').val(maiorAno);
+                $('#mares-seletor-mes').val('Dez');
+                $('#mares-seletor-dia').val('31');
+            } else {
+                $('#mares-informacao-nao-disponivel').show();
+
+                $('#mares-seletor-ano').val(menorAno);
+                $('#mares-seletor-mes').val('Jan');
+                $('#mares-seletor-dia').val('01');
+            }
+        }
+
+        var pMare;
+
+        /* SRC: http://stackoverflow.com/questions/3169786/clear-text-selection-with-javascript */
+        function clearTextSelection() {
+            if (window.getSelection) {
+                if (window.getSelection().empty) {  // Chrome
+                    window.getSelection().empty();
+                } else if (window.getSelection().removeAllRanges) {  // Firefox
+                    window.getSelection().removeAllRanges();
+                }
+            } else if (document.selection) {  // IE?
+                document.selection.empty();
+            }
+        }
+
+        $('.bs-slider').bootstrapSlider();
+
+        function sliderBtn(slideEvt) {
+            var value = parseInt(slideEvt.value);
+            if (isNaN(value)) {
+                value = parseInt($(this).attr('data-slider-value'));
+            }
+
+            var cb = $('#' + this.id).data('cb');
+            cb(value);
+            $('#' + this.id).siblings('.label-slider').html(value);
+            clearTextSelection();
+        }
+
+        $('.bs-slider').on('slideStop', sliderBtn);
+        $('.bs-slider').on('slide', sliderBtn);
+
+        $('.parent-bs-slider').bind('mouseup', clearTextSelection);
+
+        $('.campo-de-observacao').bind('mouseup', clearTextSelection);
+
+        $('#mares-escala-mar').data('cb', function (value) {
+            pMare.setEscalaExterna(value);
+        });
+
+        var it = setInterval(function () {
+            if (posicaoAparente) {
+                clearInterval(it);
+
+                var pSol = ON_DAED['3D'].PosicaoSol(posicaoAparente);
+                var pLua = ON_DAED['3D'].PosicaoLua(posicaoAparente);
+
+                var pEclipse = ON_DAED['3D'].PosicaoEclipse(posicaoAparente, pLua);
+
+                pMare = ON_DAED['3D'].PosicaoMare(posicaoAparente, pEclipse, pSol, pLua);
+
+                pMare.addRequestUpdateWorker();
+
+                pMare.toggleSetas(false);
+
+                $('#btn-passagem-do-tempo').data('maxTimescale', 50);
+                $('#btn-passagem-do-tempo').data('baseVelocidade', 3000);
+                $('#btn-passagem-do-tempo').data('setTimescale')(25);
+
+                $('#load-modal').data('beforeReady').push(function () {
+                    posicaoAparente.esconderElementosEstaticos();
+                });
+
+                $('#load-modal').data('beforeReady').push(loadTabuaMares);
+
+                $('.modal').on('show.bs.modal', function () {
+                    posicaoAparente.control().enabled = false;
+                });
+
+                $('.modal').on('hide.bs.modal', function () {
+                    if (!pMare.getCameraPlano()) {
+                        posicaoAparente.control().enabled = true;
+                    }
+                });
+
+                $('#data-tabuas').on('show.bs.modal', function () {
+                    if ($('#atualizacao-automatica').is(':checked')) {
+                        $('#atualizacao-automatica').trigger('click');
+                    }
+
+                    if ($('#btn-passagem-do-tempo').hasClass('active')) {
+                        $('#btn-passagem-do-tempo').trigger('click');
+                    }
+
+                    tabuaMaresDataAtual();
+                });
+
+                $('#data-tabuas').on('shown.bs.modal', function () {
+                    $('#mares-seletor-dia').trigger('change');
+                });
+
+                $('#tentativa-tabua-mares').click(loadTabuaMares);
+
+                $('#btn-abrir-form').html('Alterar Data');
+                $('#btn-cidade-form').hide();
+                $('#label-cidade-form').hide();
+                $('#coordenada-latitude-local').parent().hide();
+                $('#coordenada-longitude-local').parent().hide();
+
+                function flashMsg(msg) {
+                    $('#flash-mudanca-camera').remove();
+                    var conteudo = "<h1 class='noselect' id='flash-mudanca-camera'>" + msg + "</h1>";
+                    $('body').append(conteudo);
+                    setTimeout(function () {
+                        $('#flash-mudanca-camera').fadeOut(100, function () {
+                            $(this).remove();
+                        });
+                    }, 1500);
+                }
+
+                function alternarCameraVisualizacao(msg) {
+                    var ativoClass = 'glyphicon-eye-close lua-desligado';
+                    var inativoClass = 'glyphicon-eye-open lua-ligado';
+
+                    $('#ver-fase-atual-lua').toggleClass(ativoClass);
+                    $('#ver-fase-atual-lua').toggleClass(inativoClass);
+
+                    if ($('#ver-fase-atual-lua').hasClass(ativoClass)) {
+                        pMare.cameraMare();
+                        if (msg) {
+                            flashMsg('VISTA DE CIMA');
+                        }
+                    } else {
+                        pMare.cameraNormal();
+                        if (msg) {
+                            flashMsg('VISTA DE PERFIL');
+                        }
+                    }
+                }
+
+                $('#ver-fase-atual-lua').bind('click', function () {
+                    alternarCameraVisualizacao(true);
+                });
+
+                alternarCameraVisualizacao();
+
+                $('#load-modal').on('remove', function () {
+                    flashMsg('VISTA DE CIMA');
+                });
+
+                $('#load-modal').data('beforeReady').push(function () {
+                    posicaoAparente.pegarHorario();
+                    $('#btn-passagem-do-tempo').click();
+                });
+            }
+        }, 100);
+
+    })();
+    /*]]>*/
+</script>

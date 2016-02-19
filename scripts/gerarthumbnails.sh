@@ -1,0 +1,16 @@
+slimerjs gerarthumbnails.js coordenadas-eclipticas
+slimerjs gerarthumbnails.js coordenadas-equatoriais
+slimerjs gerarthumbnails.js coordenadas-horizontais
+slimerjs gerarthumbnails.js coordenadas-galacticas
+slimerjs gerarthumbnails.js coordenadas-supergalacticas
+slimerjs gerarthumbnails.js movimentos-da-terra
+slimerjs gerarthumbnails.js calendario-gregoriano
+slimerjs gerarthumbnails.js data-juliana
+slimerjs gerarthumbnails.js angulo-horario
+slimerjs gerarthumbnails.js posicao-lua
+slimerjs gerarthumbnails.js posicao-sol
+slimerjs gerarthumbnails.js obliquidade-da-ecliptica
+slimerjs gerarthumbnails.js eclipses
+slimerjs gerarthumbnails.js linhas-de-forca
+slimerjs gerarthumbnails.js mares
+slimerjs gerarthumbnails.js carta-magnetica

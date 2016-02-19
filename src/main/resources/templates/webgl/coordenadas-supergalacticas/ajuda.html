@@ -1,0 +1,35 @@
+<h3>Sistema Supergaláctico de Coordenadas</h3>
+
+<p>O aglomerado de Virgem com suas coordenadas (ascensão reta (&alpha;)=12h 27m 00s e
+    declinação (&delta;)=+12° 43' 0"), são usadas para o exemplo desta transformação de
+    coordenadas.</p>
+
+<p>O Equador Celeste ou de referência, utilizado neste programa, é o da época 1 de
+    janeiro de 2000 às 12h, também conhecido como J2000.</p>
+
+<div class="btn-exemplo-ajuda">
+    <button id="exemplo-btn" type="button" class="btn btn-primary">Veja o exemplo</button>
+</div>
+
+<h3>Saiba mais em:</h3>
+
+<a href=" http://pt.wikipedia.org/wiki/Aglomerado_de_Virgem" target="_blank">http://pt.wikipedia.org/wiki/Aglomerado_de_Virgem</a>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    $('#exemplo-btn').click(function () {
+        $('#escolha-coordenadas').val('EQUATORIAL').trigger('change');
+        $('#coordenada_ascensao_reta').anglepicker('value', ON_DAED.tempoSideralRadiano(12, 27, 00));
+        $('#coordenada_declinacao').anglepicker('value', ON_DAED.parseTempoSideral(-12, -43, -0) * 2);
+
+        $('#enviar-formulario-obter-coordenadas').trigger('click');
+        $('.modal').modal('hide');
+    });
+    /*]]>*/
+</script>
+
+<div th:include="descricoes/botao-visualizacao-galaxias-coordenadas :: texto('Inserir Coordenadas', 'Permite inserir, para visualizar ou determinar, as Coordenadas
+       Supergalácticas a partir de outros sistemas de coordenadas: Horizontal,
+       Equatorial, Eclíptico e Galáctico.',
+       'Supergaláctico')">
+</div>

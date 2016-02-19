@@ -1,0 +1,186 @@
+<script src='lib/on-daed-js/3D/AnimacaoOrbital.js'>
+</script>
+
+<div id="campo-de-observacao" class="row-fluid">
+</div>
+
+<button type="button" id="btn-abrir-form-coords" class="btn btn-primary ui-observacao-horizontal" data-toggle="modal" data-target="#data-form">
+    Alterar Excentricidade Orbital
+</button>
+
+<div class="modal fade ui-observacao-horizontal" id="data-form" tabindex="-1" role="dialog" aria-labelledby="Alterar Obliquidade" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Alterar Excentricidade Orbital</h4>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row-fluid margin-top-2">
+                    <div class="col-md-12">
+                        <form>
+                            <div class="form-group">
+                                <div class="row-fluid">
+
+                                    <div class="row-fluid">
+                                        <div class="col-md-12">
+                                            <label>Excentricidade Orbital</label>
+                                            <input value="0.67" id="input-excentricidade-orbital" class="form-control input-centralizado jlink input-small input-numerico" min="0" max="1" type="number" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row-fluid margin-top-2">
+                                        <div class="col-md-12 margin-top-2">
+                                            <button type="button" class="btn btn-success form-control" id="enviar-formulario-obter-coordenadas">Alterar</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    (function () {
+        function criarCampoResultados() {
+            $('#resultados-campo-coords').remove();
+            $('body').append('<div id="resultados-campo-coords">' +
+                    '<div id="parent-exibir-resultados-coords" class="checkbox">' +
+                    '<label>' +
+                    '<input type="checkbox" id="exibir-resultados-coords" checked="checked"> Resultados' +
+                    '</label>' +
+                    '</div>' +
+                    '<div id="label-resultados-coords"></div>' +
+                    '</div>');
+
+            $('#exibir-resultados-coords').click(function () {
+                if ($(this).is(':checked')) {
+                    $('#label-resultados-coords').show();
+                } else {
+                    $('#label-resultados-coords').hide();
+                }
+            });
+
+            if ($('body').hasClass('noselect')) {
+                $('#resultados-campo-coords').mouseover(function () {
+                    $('body').removeClass('noselect');
+                });
+
+                $('#resultados-campo-coords').mouseout(function () {
+                    $('body').addClass('noselect');
+                });
+            }
+        }
+
+        function adicionarResultado(label, text) {
+            if (label && text !== undefined) {
+                $('#label-resultados-coords').append(
+                        '<div style="width: 166px; display: inline-block;">' + label + ' </div>'
+                        + '<div style="display: inline-block;"> ' + text + '</div>' +
+                        '<div style="clear:both;"></div>'
+                        );
+            } else {
+                $('#label-resultados-coords').append(
+                        '<div><b>' + label + '</b></div>'
+                        );
+            }
+        }
+
+        $('#enviar-formulario-obter-coordenadas').click(function() {
+            var excentricidadeOrbital = parseFloat($('#input-excentricidade-orbital').val());
+            animacaoOrbital.setExcentricidade(excentricidadeOrbital);
+            $('#data-form').modal('hide');
+        });
+
+        var minTimescale = 5;
+        var timescale = minTimescale;
+        ON_DAED.numberInputMinMax('.input-numerico');
+
+        var parent = $('#campo-de-observacao');
+
+        parent.append('<div id="terra-timescale-btn-group" class="btn-group" role="group">\
+            <button disabled="disabled" id="terra-remove-timescale" type="button" class="btn btn-default"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>\
+            <button class="btn btn-success" type="button" id="terra-timescale-label">Atualização: ' + minTimescale + ' ms</button>\
+            <button id="terra-add-timescale" type="button" class="btn btn-default"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>\
+        </div>');
+
+        var maxTimescale = minTimescale * 100;
+
+        $('#terra-add-timescale').click(function () {
+            timescale += minTimescale;
+
+            console.log(timescale);
+
+            if (timescale === maxTimescale) {
+                $(this).prop("disabled", true);
+            }
+
+            $('#terra-remove-timescale').prop("disabled", false);
+
+            $("#terra-timescale-label").html("Atualização: " + timescale + " ms");
+        });
+
+        $('#terra-remove-timescale').click(function () {
+            timescale -= minTimescale;
+
+            if (timescale === minTimescale) {
+                $(this).prop("disabled", true);
+            }
+
+            $('#terra-add-timescale').prop("disabled", false);
+            $("#terra-timescale-label").html("Atualização: " + timescale + " ms");
+        });
+
+        criarCampoResultados();
+
+        var f = function (anomaliaExcentrica) {
+            window.setTimeout(function () {
+                var anomalia = animacaoOrbital.exibirPosicaoNova(anomaliaExcentrica);
+                $('#label-resultados-coords').empty();
+                
+                adicionarResultado("<span style='color:#00AF00;'>Anomalia Excêntrica (E)</span>", anomaliaExcentrica.toFixed(2) + 'º');
+                adicionarResultado("<span style='color:#DF00DF;'>Anomalia Média (M)</span>", (anomalia.media * (180 / Math.PI)).toFixed(2) + 'º');
+                adicionarResultado("<span style='color:#DFDF00;'>Anomalia Verdadeira (&nu;)</span>", (anomalia.verdadeira * (180 / Math.PI)).toFixed(2) + 'º');
+                adicionarResultado("Excentricidade Orbital", animacaoOrbital.getExcentricidade());
+                adicionarResultado("Semi-eixo maior (a)", animacaoOrbital.getSemiEixoMaior() + " U.C.");
+                adicionarResultado("Semi-eixo menor (b)", animacaoOrbital.getSemiEixoMenor() + " U.C.");
+
+                f((anomaliaExcentrica + 0.1) % 360);
+            }, timescale);
+        };
+
+        f(0);
+
+        var animacaoOrbital;
+
+        ON_DAED["3D"].create(function (scene, camera) {
+            animacaoOrbital = ON_DAED["3D"].AnimacaoOrbital(scene, camera);
+        }, function (cameraControl, renderer, scene, camera, stats, clock) {
+
+            if ($('#campo-de-observacao canvas').is(':hover')) {
+                cameraControl.enabled = true;
+                cameraControl.update(clock.getDelta());
+            } else {
+                cameraControl.enabled = false;
+            }
+
+            ON_DAED["3D"].update();
+            ThreeHelper.updateText(camera, $('#campo-de-observacao')[0]);
+            TWEEN.update();
+            renderer.render(scene, camera);
+        }, document.getElementById('campo-de-observacao'),
+                function (camera, renderer, scene, stats) {
+                    return new THREE.OrbitControls(camera);
+                });
+    })();
+    /*]]>*/
+</script>

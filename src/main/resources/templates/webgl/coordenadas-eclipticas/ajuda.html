@@ -1,0 +1,34 @@
+<h3>Sistema Eclíptico de Coordenadas</h3>
+
+<p>As coordenadas de Rígel (ascensão reta (&alpha;)=05h 14m 32s e declinação (&delta;)=-08° 12'
+6"), a estrela mais brilhante da constelação de Orion, foram utilizadas para
+exemplificar esse sistema de transformação de coordenadas.</p>
+
+<p>O Equador Celeste ou de referência, utilizado neste programa, é o da época 1 de
+janeiro de 2000 às 12h, também conhecido como J2000.</p>
+
+<div class="btn-exemplo-ajuda">
+    <button id="exemplo-btn" type="button" class="btn btn-primary">Veja o exemplo</button>
+</div>
+
+<h3>Saiba mais em:</h3>
+
+<a href="http://pt.wikipedia.org/wiki/R%C3%ADgel" target="_blank">http://pt.wikipedia.org/wiki/Rígel</a>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    $('#exemplo-btn').click(function () {
+        $('#escolha-coordenadas').val('EQUATORIAL').trigger('change');
+        $('#coordenada_ascensao_reta').anglepicker('value', ON_DAED.tempoSideralRadiano(05, 14, 32));
+        $('#coordenada_declinacao').anglepicker('value', ON_DAED.parseTempoSideral(-08, -12, -06) * 2);
+
+        $('#enviar-formulario-obter-coordenadas').trigger('click');
+        $('.modal').modal('hide');
+    });
+    /*]]>*/
+</script>
+
+<div th:include="descricoes/botao-visualizacao-esfera-celeste-coordenadas :: texto('Inserir Coordenadas', 'Permite inserir, para visualizar ou determinar, as Coordenadas
+       Eclípticas a partir de outros sistemas de coordenadas: Horizontal,
+       Equatorial, Galáctico e Supergaláctico.')">
+</div>

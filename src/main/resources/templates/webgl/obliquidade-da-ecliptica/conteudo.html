@@ -1,0 +1,173 @@
+<script src='lib/on-daed-js/3D/ObservacaoTerra.js'>
+</script>
+
+<div id="campo-de-observacao" class="row-fluid">
+</div>
+
+<button type="button" id="btn-abrir-form-coords" class="btn btn-primary ui-observacao-horizontal" data-toggle="modal" data-target="#data-form">
+    Alterar Obliquidade
+</button>
+
+<div class="modal fade ui-observacao-horizontal" id="data-form" tabindex="-1" role="dialog" aria-labelledby="Alterar Obliquidade" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Alterar Obliquidade</h4>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row-fluid margin-top-2">
+                    <div class="col-md-12">
+                        <form>
+                            <div class="form-group">
+                                <div class="row-fluid">
+
+                                    <div class="col-md-12 celula-angulo">
+                                        <div id="obliquidade-da-ecliptica">
+                                        </div>
+
+                                        <div class="row-fluid">
+                                            <div class="col-md-12">
+                                                <label>Obliquidade da Eclíptica</label>
+                                                <div class="input-group">
+                                                    <input value="0" id="input-entrada-obliquidade-da-ecliptica-hora" class="form-control input-centralizado jlink input-small input-numerico" min="0" type="number" />
+                                                    <span class="input-group-addon">º</span>
+                                                    <input value="0" id="input-entrada-obliquidade-da-ecliptica-min" class="form-control input-centralizado jlink input-small input-numerico" min="0" max="59" type="number" />
+                                                    <span class="input-group-addon">'</span>
+                                                    <input value="0" id="input-entrada-obliquidade-da-ecliptica-sec" class="form-control input-centralizado jlink input-small input-numerico" min="0" max="59" type="number" />
+                                                    <span class="input-group-addon">"</span>
+                                                    <input name="obliquidade" type="hidden" class="data-source-coordenada" id="input-entrada-obliquidade-da-ecliptica-hidden" value="0" min="0" max="360" />
+                                                </div> 
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row-fluid margin-top-2">
+                                        <div class="col-md-12 margin-top-2">
+                                            <button type="button" class="btn btn-success form-control" id="enviar-formulario-obter-coordenadas">Visualizar</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    (function () {
+        ON_DAED.numberInputMinMax('.input-numerico');
+
+        ON_DAED.addTempoSideralAnglepicker($('#obliquidade-da-ecliptica'), '#input-entrada-obliquidade-da-ecliptica');
+
+        function criarCampoResultados() {
+            $('#resultados-campo-coords').remove();
+            $('body').append('<div id="resultados-campo-coords">' +
+                    '<div id="parent-exibir-resultados-coords" class="checkbox">' +
+                    '<label>' +
+                    '<input type="checkbox" id="exibir-resultados-coords" checked="checked"> Resultados' +
+                    '</label>' +
+                    '</div>' +
+                    '<div id="label-resultados-coords"></div>' +
+                    '</div>');
+
+            $('#exibir-resultados-coords').click(function () {
+                if ($(this).is(':checked')) {
+                    $('#label-resultados-coords').show();
+                } else {
+                    $('#label-resultados-coords').hide();
+                }
+            });
+
+            if ($('body').hasClass('noselect')) {
+                $('#resultados-campo-coords').mouseover(function () {
+                    $('body').removeClass('noselect');
+                });
+
+                $('#resultados-campo-coords').mouseout(function () {
+                    $('body').addClass('noselect');
+                });
+            }
+        }
+
+        function adicionarResultado(label, text) {
+            if (label && text !== undefined) {
+                $('#label-resultados-coords').append(
+                        '<div style="width: 184px; display: inline-block;">' + label + ' </div>'
+                        + '<div style="display: inline-block;"> ' + text + '</div>' +
+                        '<div style="clear:both;"></div>'
+                        );
+            } else {
+                $('#label-resultados-coords').append(
+                        '<div><b>' + label + '</b></div>'
+                        );
+            }
+        }
+
+        var terra;
+        var control;
+
+        $('#enviar-formulario-obter-coordenadas').click(function () {
+            var obliq = parseFloat($('#input-entrada-obliquidade-da-ecliptica-hidden').val()) * Math.PI / 180;
+            var religarNutacao = false;
+
+            if($('#terra-prop-nutacao').hasClass('active')) {
+                $('#terra-prop-nutacao').trigger('click');
+                religarNutacao = true;
+            }
+
+            terra.limparCacheObliquidade();
+
+            terra.obliquidadeEcliptica(obliq);
+
+            terra.iniciarVerticesRastro();
+
+            criarCampoResultados();
+
+            adicionarResultado("Obliquidade da Eclíptica (" + ON_DAED['3D'].TEXT_LABEL.ECLIPTICA + ")", ON_DAED.tempoSideral(obliq, true));
+
+            if(religarNutacao) {
+                $('#terra-prop-nutacao').trigger('click');
+            }
+            
+            $('#data-form').modal('hide');
+        });
+
+        ON_DAED["3D"].create(function (scene, camera) {
+            var raioPlaneta = 63.71;
+            terra = ON_DAED["3D"].ObservacaoTerra(scene, camera, raioPlaneta, control);
+            terra.sempreMostrarObliquidade();
+        }, function (cameraControl, renderer, scene, camera, stats, clock) {
+
+            if ($('#campo-de-observacao canvas').is(':hover')) {
+                cameraControl.enabled = true;
+                cameraControl.update(clock.getDelta());
+            } else {
+                cameraControl.enabled = false;
+            }
+
+            ON_DAED["3D"].update(camera);
+            renderer.render(scene, camera);
+        }, document.getElementById('campo-de-observacao'),
+                function (camera, renderer, scene, stats) {
+                    control = new THREE.OrbitControls(camera);
+                    return control;
+                });
+
+        $(document).ready(function () {
+            $('#obliquidade-da-ecliptica').anglepicker('value', 23.4);
+            terra.obliquidadeEcliptica(23.4 * Math.PI / 180, true);
+            $('#enviar-formulario-obter-coordenadas').trigger('click');
+        });
+
+    })();
+    /*]]>*/
+</script>

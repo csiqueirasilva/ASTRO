@@ -1,0 +1,102 @@
+<h2 class="astro-dialog-label">Magnetismo Terrestre</h2>
+
+<h3>Botões de Tela</h3>
+
+<h4>Gráfico do Mapa</h4>
+
+<div class='dicas-de-uso-ferramenta dicas-de-uso-terra'>
+    <select class="form-control">
+        <option>Declinacao</option>
+        <option>Inclinacao</option>
+        <option>Intensidade</option>
+    </select>
+</div>
+
+<p>Esse botão permite gerar as Cartas Magnéticas de Intensidade, Declinação,
+    Inclinação do campo magnético e suas variações seculares,
+    respectivamente.</p>
+
+<p>Para obter esses parâmetros, o usuário deve escolher uma das opções:
+    Declinação, Inclinação ou Intensidade do campo magnético ou uma de
+    suas variações seculares. O resultado é fornecido "clicando-se" sobre
+    as linhas ou qualquer posição do mapa.</p>
+
+<p>As imagens abaixo mostram exemplos de alguns dos resultados
+    fornecidos. No caso da Declinação Magnética (imagem da esquerda), o
+    valor do ângulo é mostrado no centro do símbolo da Rosa dos Ventos. No
+    caso da Intensidade ou Inclinação Magnética (imagem da direita), um
+    símbolo indica o local escolhido pelo usuário.</p>
+
+<div class="dialog-image">
+    <img src="imgs/magnetismo-ajuda-1e2.png" />    
+</div>
+
+<p>Veja abaixo um clipe que explica como encontrar o Norte Geográfico Verdadeiro a partir da
+    correção da Declinação Magnética usada em uma Bússola.</p>
+
+<div class="embed-responsive embed-responsive-16by9">
+    <iframe class="embed-responsive-item" src="http://www.youtube.com/embed/3DMVVnt175U?rel=0&amp;nologo=1&amp;showinfo=0">
+    </iframe>
+</div>
+
+<div class='dicas-de-uso-ferramenta'>
+    <h3>Data</h3>
+    <input readonly="readonly" class="form-control input-centralizado jlink dataju-datepicker" size="16" type="text" id="dataju-datepicker-ajuda" value="12/02/2012" />
+</div>
+
+<p>No <b>calendário</b>, a <b>Data</b> é alterada clicando-se sobre ela. O <b>Ano</b> é alterado
+    clicando-se sobre o <b>Mês</b>. Os intervalos dos anos são alterados clicando-se
+    sobre o <b>Ano</b>. Clicando-se nas setas esquerda ou direita é possível mudar os
+    intervalos (décadas). Note que esses sucessivos cliques permitem ao
+    usuário avançar ou regredir rapidamente no tempo. O modelo utilizado
+    nesse programa permite regredir até o ano de 1900.</p>
+
+<h3>Resultados</h3>
+
+<div class='dicas-de-uso-ferramenta dicas-de-uso-terra'>
+    <h5 style="font-weight: bold;">MOUSE/TOQUE</h5>
+</div>
+
+<p>Esta função permite ao usuário conhecer os resultados realizando "cliques"
+    com o botão esquerdo do Mouse sobre as curvas de nível ou qualquer ponto do mapa. Ao utilizar dispositivos móveis, o usuário
+    poderá ver os resultados a partir do TOQUE na tela.</p>
+
+<p>São exemplos desses resultados:</p>
+
+<div class="dialog-image">
+    <img src="imgs/magnetismo-ajuda-3.png" />
+</div>
+
+<p>Em todos os resultados as coordenadas geográficas e os ângulos são expressos em
+    graus (°), minutos (') e segundos (") de arco. O valor das componentes da
+    Intensidade é dado em nT (nano Tesla). O Tesla (símbolo T) é a unidade usada no
+    Sistema Internacional de unidades para representar a densidade de fluxo magnético
+    (1nT= 10<sup>-9</sup>T).</p>
+
+<p>Para esconder os "quadros" de busca e resultados da tela no Magnetismo Terrestre,
+    clique no ícone <i class="glyphicon glyphicon-chevron-left"></i> à esquerda da frase "GRÁFICO DO MAPA".</p>
+
+<div class='dicas-de-uso-ferramenta dicas-de-uso-terra'>
+    <a class="btn btn-primary">Salvar imagem</a>
+</div>
+
+<p>Acionando este botão, o usuário poderá salvar a imagem para um dos itens
+    escolhidos.</p>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    $(document).ready(function () {
+
+        $('#dataju-datepicker-ajuda')
+                .datepicker({
+                    orientation: "top",
+                    format: 'dd/mm/yyyy',
+                    language: 'pt-BR',
+                    autoclose: true,
+                    startDate: "01/01/1900",
+                    endDate: "31/12/2020"
+                });
+
+    });
+    /*]]>*/
+</script>

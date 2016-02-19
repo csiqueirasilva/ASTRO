@@ -1,0 +1,44 @@
+<style>
+	.aviso-principal-red {
+		text-align: center;
+		color: #FF0000;
+	}
+
+	.aviso-principal-red a {
+		color: #FF0000;
+	}
+
+	.aviso-principal-red h1, .aviso-principal-red h3 {
+		margin-top: 0px;
+		margin-bottom: 10px;
+	}
+
+	.principal-video-wrapper {
+		margin-top: 10px;
+		margin-bottom: 10px;
+	}
+</style>
+
+<div class="aviso-principal-red">
+	<h1><b><a href="http://astroaprendizagem.on.br/daed/moodle/">ACESSO À 3ª PROVA</a></b></h1>
+	<h3>03 a 06 de julho de 2015</h3>
+	<h3><b><a href="passo-a-passo-prova-1.pdf">Confira o Passo a Passo da Prova</a></b></h3>
+</div>
+
+<p>
+	<b>Lembrete:</b>
+</p>
+<ul>
+	<li>A prova terá duração de 4 (quatro) dias. Inicia sexta-feira (03/07) às 0h e termina na segunda-feira (06/07) à meia-noite.</li>
+
+	<li>Recomendamos copiar (download) a prova (PDF) para o seu computador. Responda as questões e depois retorne à página do curso para realizar a prova.</li>
+
+	<li>Evite realizar a prova no último dia, pois o sistema poderá ficar lento ao acesso à prova.</li>
+		
+	<li>Quando terminar a prova, clique, obrigatoriamente, no botão PRÓXIMO. Escolha: “<b>RETORNAR À TENTATIVA</b>” ou “<b>ENVIAR TUDO E TERMINAR</b>”.</li>
+		
+	<div class="aviso-principal-red">
+		<br>
+		<li><b>Não haverá, em hipótese alguma, segunda chamada.</b></li>
+	</div>
+</ul>

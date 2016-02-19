@@ -1,0 +1,177 @@
+<script src="js/three.min.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/stats.min.js"></script>
+<script src="js/tween.min.js"></script>
+<script src="js/ThreeHelper.js"></script>
+<script src="js/MathHelper.js"></script>
+<script src="js/daed/3D.js"></script>
+
+<h1 class="titulo-widget">Obter coordenadas horárias</h1>
+
+<div id="campo-de-observacao" class="row-fluid">
+</div>
+
+<div class="row-fluid margin-top-2">
+    <div class="col-md-12">
+        <form>
+            <div class="form-group">
+                <div class="row-fluid">
+
+                    <div class="row-fluid">
+                        <div class="col-md-12">
+                            <select id="escolha-coordenadas" class="form-control">
+                                <option value="entrada-horaria">Entrar coordenadas horárias</option>
+                                <option value="entrada-ecliptica">Converter a partir de coordenadas Eclípticas</option>
+                                <option value="entrada-equatorial">Converter a partir de coordenadas Equatoriais</option>
+                                <option value="entrada-coordenada-horizontal">Converter a partir de coordenadas Horizontais</option>
+                                <option value="entrada-galactica">Converter a partir de coordenadas Galácticas</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="margin-top-2 col-md-12">
+
+                        <jsp:include page="fragmentos/entrada-coordenada-ecliptica.jsp" />
+                        <jsp:include page="fragmentos/entrada-coordenada-horaria.jsp" />
+                        <jsp:include page="fragmentos/entrada-coordenada-horizontal.jsp" />
+                        <jsp:include page="fragmentos/entrada-coordenada-equatorial.jsp" />
+                        <jsp:include page="fragmentos/entrada-coordenada-galactica.jsp" />
+
+                        <div class="row-fluid margin-top-2">
+                            <div class="col-md-12 margin-top-2">
+                                <button type="button" class="btn btn-success form-control" id="enviar-formulario-obter-coordenadas">Visualizar</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+</div>
+
+
+
+
+<script>
+    (function () {
+        var tipoPagina = '${tipoCoordenadaHoraria}';
+
+        $('#escolha-coordenadas').change(function () {
+            var value = $('#escolha-coordenadas').val();
+            $('.entrada-coordenadas').hide();
+            $('#' + value).show();
+        }).trigger('change');
+
+        $('#coordenada-galactica-latitude-local').parent().remove();
+
+        $('#coordenada-ecliptica-latitude-local').parent().remove();
+
+        $('#coordenada_latitude_local').parent().remove();
+
+        $('#coordenada-horaria-latitude').parent().remove();
+
+        $('#coordenada-horaria-tempo-sideral').parent().remove();
+
+        $('#enviar-formulario-obter-coordenadas').click(function () {
+
+            var sendData = parseAllData();
+
+            var selecionado = $('#escolha-coordenadas').val();
+
+            var anguloHorario;
+            var longitude;
+            var declinacao;
+
+            if (selecionado === "entrada-horaria") {
+                longitude = (Math.PI / 180) * parseFloat($('#input-entrada-horaria-longitude-hidden').val());
+                anguloHorario = (Math.PI / 12) * parseFloat($('#input-entrada-horaria-angulo-hidden').val());
+                declinacao = (Math.PI / 180) * parseFloat($('#input-entrada-horaria-declinacao-hidden').val());
+
+                if (ON_DAED["WEBGL_SUPPORT"]) {
+                    terra.coordenadasHorarias(longitude, anguloHorario, declinacao);
+                } else {
+                    preencherDados({
+                        longitude: longitude,
+                        anguloHorario: anguloHorario,
+                        declinacao: declinacao
+                    });
+                }
+            } else {
+                var tipoConversao;
+
+                if (selecionado === "entrada-galactica") {
+                    tipoConversao = '${tipoCoordenadaGalactica}';
+                } else if (selecionado === "entrada-equatorial") {
+                    tipoConversao = '${tipoCoordenadaEquatorial}';
+                } else if (selecionado === "entrada-coordenada-horizontal") {
+                    tipoConversao = '${tipoCoordenadaHorizontal}';
+                } else if (selecionado === "entrada-ecliptica") {
+                    tipoConversao = '${tipoCoordenadaEcliptica}';
+                }
+
+                $('#escolha-coordenadas').find('input.btn').prop('disabled', true);
+
+                ON_DAED.astro(
+                        '/conversao/' + tipoConversao + '-' + tipoPagina,
+                        sendData,
+                        function (data) {
+                            if (ON_DAED["WEBGL_SUPPORT"]) {
+                                terra.coordenadasHorarias(data.longitude, data.anguloHorario, data.declinacao);
+                            } else {
+                                preencherDados(data);
+                            }
+                        },
+                        function () {
+                            $('#escolha-coordenadas').find('input.btn').prop('disabled', false);
+                        });
+            }
+        });
+
+        var terra;
+
+        ON_DAED["3D"].create(function (scene, camera) {
+            var raioPlaneta = 63.71;
+            terra = ON_DAED["3D"].ObservacaoTerra(scene, camera, raioPlaneta);
+        }, function (cameraControl, renderer, scene, camera, stats, clock) {
+
+            if ($('#campo-de-observacao canvas').is(':hover')) {
+                cameraControl.enabled = true;
+                cameraControl.update(clock.getDelta());
+            } else {
+                cameraControl.enabled = false;
+            }
+
+            ON_DAED["3D"].update();
+            ThreeHelper.updateText(camera, $('#campo-de-observacao')[0]);
+            TWEEN.update();
+            renderer.render(scene, camera);
+        }, document.getElementById('campo-de-observacao'),
+                function (camera, renderer, scene, stats) {
+                    return new THREE.OrbitControls(camera);
+                });
+
+
+        var extAnguloHorario = parseFloat('${param.anguloHorario}');
+        var extDeclinacao = parseFloat('${param.declinacao}');
+        var extLongitude = parseFloat('${param.longitude}');
+
+        if (!isNaN(extDeclinacao) && !isNaN(extAnguloHorario) && !isNaN(extLongitude)) {
+
+            $(document).ready(function () {
+
+                tempoSideralLoadInput('#input-entrada-horaria-angulo', extAnguloHorario, true);
+                tempoSideralLoadInput('#input-entrada-horaria-declinacao', extDeclinacao);
+                tempoSideralLoadInput('#input-entrada-horizontal-longitude', extLongitude);
+
+                $('#enviar-formulario-obter-coordenadas').trigger('click');
+            });
+
+        }
+
+        disableBodyScroll('#campo-de-observacao');
+
+    })();
+</script>

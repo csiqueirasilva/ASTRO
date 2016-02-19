@@ -1,0 +1,419 @@
+<button type="button" id="btn-abrir-form-coords" class="btn btn-primary ui-observacao-horizontal" data-toggle="modal" data-target="#data-form">
+    Inserir Coordenadas
+</button>
+
+<div class="modal fade ui-observacao-horizontal" id="data-form" tabindex="-1" role="dialog" aria-labelledby="Inserir Coordenadas" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Inserir Coordenadas</h4>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row-fluid margin-top-2">
+                    <div>
+                        <form>
+                            <div class="form-group">
+                                <div class="row-fluid">
+
+                                    <div class="row-fluid">
+                                        <div class="col-md-12">
+                                            <select id="escolha-coordenadas" class="form-control">
+                                                <option value="EQUATORIAL">Converter a partir de coordenadas Equatoriais</option>
+                                                <option value="ECLIPTIC">Converter a partir de coordenadas Eclípticas</option>
+                                                <option value="HORIZONTAL">Converter a partir de coordenadas Horizontais</option>
+                                                <option value="GALACTIC">Converter a partir de coordenadas Galácticas</option>
+                                                <option value="SUPERGALACTIC">Converter a partir de coordenadas Supergalácticas</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="margin-top-2">
+
+                                        <div th:include='ferramentas/fragmentos/entrada-coordenada-ecliptica'>
+                                        </div>
+                                        <div th:include='ferramentas/fragmentos/entrada-coordenada-horizontal'>
+                                        </div>
+                                        <div th:include='ferramentas/fragmentos/entrada-coordenada-equatorial'>
+                                        </div>
+                                        <div th:include='ferramentas/fragmentos/entrada-coordenada-galactica'>
+                                        </div>
+                                        <div th:include='ferramentas/fragmentos/entrada-coordenada-supergalactica'>
+                                        </div>
+
+                                        <div class="col-md-12 celula-angulo">
+                                            <div id="coordenada_latitude_local">
+                                            </div>
+
+                                            <div class="row-fluid">
+                                                <div class="col-md-12">
+                                                    <label>Latitude Local</label>
+
+                                                    <div class="input-group">
+                                                        <span class="input-group-btn">
+                                                            <button id="input-entrada-latitude-sinal" class="btn btn-info" type="button">+</button>
+                                                        </span>
+                                                        <input value="0" id="input-entrada-latitude-hora" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                                                        <span class="input-group-addon">º</span>
+                                                        <input value="0" id="input-entrada-latitude-min" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                                                        <span class="input-group-addon">'</span>
+                                                        <input value="0" id="input-entrada-latitude-sec" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                                                        <span class="input-group-addon">"</span>
+                                                        <input name="localLatitude" type="hidden" class="data-source-coordenada" id="input-entrada-latitude-hidden" value="0" min="-90" max="90" />
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-md-12 celula-angulo">
+                                            <div id="coordenada_longitude_local">
+                                            </div>
+
+                                            <div class="row-fluid">
+                                                <div class="col-md-12">
+                                                    <label>Longitude Local</label>
+
+                                                    <div class="input-group">
+                                                        <span class="input-group-btn">
+                                                            <button id="input-entrada-longitude-sinal" class="btn btn-info" type="button">+</button>
+                                                        </span>
+                                                        <input value="0" id="input-entrada-longitude-hora" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                                                        <span class="input-group-addon">º</span>
+                                                        <input value="0" id="input-entrada-longitude-min" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                                                        <span class="input-group-addon">'</span>
+                                                        <input value="0" id="input-entrada-longitude-sec" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                                                        <span class="input-group-addon">"</span>
+                                                        <input name="localLongitude" type="hidden" class="data-source-coordenada" id="input-entrada-longitude-hidden" value="0" min="-180" max="180" />
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div id="input-data-local">
+
+                                            <div id="dia-mes-ano-row">
+                                                <div>
+                                                    <label class="control-label">Dia (DD/MM/AAAA)</label>
+                                                </div>
+                                                <input type="number" placeholder="DD" class="input-hora form-control" value="0" />
+                                                <input type="number" placeholder="MM" class="input-hora form-control" value="0" />
+                                                <input type="number" placeholder="AAAA" class="input-hora form-control" value="0" />
+                                            </div>
+
+                                            <div id="hora-minuto-segundo-row">
+                                                <div>
+                                                    <label class="control-label">Hora (HH:MM:SS)</label>
+                                                </div>
+                                                <input type="number" placeholder="HH" class="input-hora form-control" value="0" />
+                                                <input type="number" placeholder="MM" class="input-hora form-control" value="0" />
+                                                <input type="number" placeholder="SS" class="input-hora form-control" value="0" />
+                                            </div>
+
+                                            <div>
+                                                <label class="control-label">Fuso Horário</label>
+                                                <input value="0" type="number" class="form-control" id="fuso" placeholder="fuso" />
+                                            </div>
+
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" id="input-horario-verao"/> Horário de Verão
+                                                </label>
+                                            </div>
+
+                                            <input value="0" id="input-data-juliana" class="form-control" type="hidden" />
+
+                                            <div class="row-fluid">
+                                                <div class="col-md-12">
+                                                    <button type="button" class="btn btn-info form-control" id="enviar-formulario-carregar-horario">Carregar Hora Local</button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row-fluid margin-top-2">
+                                            <div class="col-md-12 margin-top-2">
+                                                <button type="button" class="btn btn-success form-control" id="enviar-formulario-obter-coordenadas">Visualizar</button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+
+    (function () {
+
+        function criarCampoResultados() {
+            $('#resultados-campo-coords').remove();
+            $('body').append('<div id="resultados-campo-coords">' +
+                    '<div id="parent-exibir-resultados-coords" class="checkbox">' +
+                    '<label>' +
+                    '<input type="checkbox" id="exibir-resultados-coords" checked="checked"> Resultados' +
+                    '</label>' +
+                    '</div>' +
+                    '<div id="label-resultados-coords"></div>' +
+                    '</div>');
+
+            $('#exibir-resultados-coords').click(function () {
+                if ($(this).is(':checked')) {
+                    $('#label-resultados-coords').show();
+                } else {
+                    $('#label-resultados-coords').hide();
+                }
+            });
+
+            if ($('body').hasClass('noselect')) {
+                $('#resultados-campo-coords').mouseover(function () {
+                    $('body').removeClass('noselect');
+                });
+
+                $('#resultados-campo-coords').mouseout(function () {
+                    $('body').addClass('noselect');
+                });
+            }
+        }
+
+        function adicionarResultado(label, text) {
+            if (label && text !== undefined) {
+                $('#label-resultados-coords').append(
+                        '<div style="width: 200px; display: inline-block;">' + label + ' </div>'
+                        + '<div style="display: inline-block;"> ' + text + '</div>' +
+                        '<div style="clear:both;"></div>'
+                        );
+            } else {
+                $('#label-resultados-coords').append(
+                        '<div><b>' + label + '</b></div>'
+                        );
+            }
+        }
+        
+        $('body').data('adicionarResultado', adicionarResultado);
+
+        function parseResultado(type, op, val) {
+            switch (op) {
+                case "obliquity":
+                    if (type === ON_DAED.ASTRO.CoordinateType.ECLIPTIC || type === "ECLIPTIC") {
+                        adicionarResultado("Obliquidade (" + ON_DAED["3D"].TEXT_LABEL.ECLIPTICA + ")", ON_DAED.tempoSideral(val, true));
+                    }
+                    break;
+                case "longitude":
+                    switch (type) {
+                        case ON_DAED.ASTRO.CoordinateType.ECLIPTIC:
+                        case "ECLIPTIC":
+                            adicionarResultado("Longitude Eclíptica (" + ON_DAED["3D"].TEXT_LABEL.LONGITUDE_ECLIPTICA + ")", ON_DAED.tempoSideral(val, true));
+                            break;
+                        case ON_DAED.ASTRO.CoordinateType.GALACTIC:
+                        case "GALACTIC":
+                            adicionarResultado("Longitude Galáctica (" + ON_DAED["3D"].TEXT_LABEL.LONGITUDE_GALACTICA + ")", ON_DAED.tempoSideral(val, true));
+                            break;
+                        case ON_DAED.ASTRO.CoordinateType.SUPERGALACTIC:
+                        case "SUPERGALACTIC":
+                            adicionarResultado("Longitude Supergaláctica (" + ON_DAED["3D"].TEXT_LABEL.LONGITUDE_SUPERGALACTICA + ")", ON_DAED.tempoSideral(val, true));
+                            break;
+                    }
+                    break;
+                case "latitude":
+                    switch (type) {
+                        case ON_DAED.ASTRO.CoordinateType.ECLIPTIC:
+                        case "ECLIPTIC":
+                            adicionarResultado("Latitude Eclíptica (" + ON_DAED["3D"].TEXT_LABEL.LATITUDE_ECLIPTICA + ")", ON_DAED.tempoSideral(val, true));
+                            break;
+                        case ON_DAED.ASTRO.CoordinateType.GALACTIC:
+                        case "GALACTIC":
+                            adicionarResultado("Latitude Galáctica (" + ON_DAED["3D"].TEXT_LABEL.LATITUDE_GALACTICA + ")", ON_DAED.tempoSideral(val, true));
+                            break;
+                        case ON_DAED.ASTRO.CoordinateType.SUPERGALACTIC:
+                        case "SUPERGALACTIC":
+                            adicionarResultado("Latitude Supergaláctica (" + ON_DAED["3D"].TEXT_LABEL.LATITUDE_SUPERGALACTICA + ")", ON_DAED.tempoSideral(val, true));
+                            break;
+                    }
+                    break;
+                case "rightAscension":
+                    adicionarResultado("Ascensão Reta (" + ON_DAED["3D"].TEXT_LABEL.ASCENSAO_RETA + ")", ON_DAED.tempoSideral(val));
+                    break;
+                case "declination":
+                    adicionarResultado("Declinação (" + ON_DAED["3D"].TEXT_LABEL.DECLINACAO + ")", ON_DAED.tempoSideral(val, true));
+                    break;
+                case "azimute":
+                    adicionarResultado("Azimute (" + ON_DAED["3D"].TEXT_LABEL.AZIMUTE + ")", ON_DAED.tempoSideral(val, true));
+                    break;
+                case "altitude":
+                    adicionarResultado("Altura (" + ON_DAED["3D"].TEXT_LABEL.ALTURA + ")", ON_DAED.tempoSideral(val, true));
+                    adicionarResultado("Distância Zenital (" + ON_DAED["3D"].TEXT_LABEL.ZENITE + ")", ON_DAED.tempoSideral(Math.PI / 2 - val, true));
+                    break;
+                case "localLatitude":
+                    if (type === ON_DAED.ASTRO.CoordinateType.HORIZONTAL || type === "HORIZONTAL") {
+                        adicionarResultado("Latitude Local", ON_DAED.tempoSideral(val, true));
+                    }
+                    break;
+                case "localLongitude":
+                    if (type === ON_DAED.ASTRO.CoordinateType.HORIZONTAL || type === "HORIZONTAL") {
+                        adicionarResultado("Longitude Local", ON_DAED.tempoSideral(-val));
+                    }
+                    break;
+                case "julian":
+                    if (type === ON_DAED.ASTRO.CoordinateType.HORIZONTAL || type === "HORIZONTAL") {
+                        adicionarResultado("Data", ON_DAED.formatarDataJuliana(val, parseFloat($('#fuso').val()) + getHorarioVerao()));
+                    }
+            }
+        }
+
+        function adicionarResultados(tipo, entrada, ops) {
+            var nome;
+
+            var types = ON_DAED.ASTRO.CoordinateType;
+
+            switch (tipo) {
+                case types.ECLIPTIC:
+                case "ECLIPTIC":
+                    nome = "ECLIPTICA";
+                    break;
+                case types.EQUATORIAL:
+                case "EQUATORIAL":
+                    nome = "EQUATORIAL";
+                    break;
+                case types.GALACTIC:
+                case "GALACTIC":
+                    nome = "GALACTICA";
+                    break;
+                case types.SUPERGALACTIC:
+                case "SUPERGALACTIC":
+                    nome = "SUPERGALACTICA";
+                    break;
+                case types.HORIZONTAL:
+                case "HORIZONTAL":
+                    nome = "HORIZONTAL";
+            }
+
+            adicionarResultado(entrada + " " + nome);
+
+            for (var id in ops) {
+                parseResultado(tipo, id, ops[id]);
+            }
+        }
+
+        ON_DAED.addTempoSideralAnglepicker($('#coordenada_latitude_local'), '#input-entrada-latitude');
+        ON_DAED.addTempoSideralAnglepicker($('#coordenada_longitude_local'), '#input-entrada-longitude');
+
+        var inputDJ = $('#input-data-juliana');
+
+        $('#enviar-formulario-obter-coordenadas').click(function () {
+            var ops;
+
+            if (window.setTransformacaoOps instanceof Function) {
+                ops = window.setTransformacaoOps();
+            } else {
+                ops = {};
+            }
+
+            ops.from = $('#escolha-coordenadas').val();
+            ops.to = $('#escolha-coordenadas').data('to');
+
+            $.each($('#' + ops.from).find('.data-source-coordenada'), function (k, v) {
+                var val = parseFloat($(this).val());
+
+                if ($(this).hasClass('input-tempo-sideral')) {
+                    val *= 15;
+                }
+
+                val *= Math.PI / 180;
+                ops[$(this).prop('name')] = val;
+            });
+
+            ops.julian = parseFloat(inputDJ.val());
+            ops.localLatitude = parseFloat($('#input-entrada-latitude-hidden').val()) * Math.PI / 180;
+            ops.localLongitude = -parseFloat($('#input-entrada-longitude-hidden').val()) * Math.PI / 180;
+
+            var coords = ON_DAED.ASTRO.getTransformedCoordinates(ops);
+
+            criarCampoResultados();
+
+            adicionarResultados(ops.from, "ENTRADA", ops);
+
+            if (ops !== coords) {
+                adicionarResultados(ops.to, "SAIDA", coords);
+            }
+
+            window.showCoordenadas(coords);
+            
+            $('.modal').modal('hide');
+        });
+
+        function getHorarioVerao() {
+            return $('#input-horario-verao').is(':checked') ? 1 : 0;
+        }
+
+        function updateFromGregorian() {
+            var data = $('#dia-mes-ano-row').children('input').map(function (k, v) {
+                return parseFloat($(v).val());
+            });
+
+            var horario = $('#hora-minuto-segundo-row').children('input').map(function (k, v) {
+                return parseFloat($(v).val());
+            });
+
+            var fuso = parseFloat($('#fuso').val()) + getHorarioVerao();
+
+            var jd = Math.round(ON_DAED.ASTRO.getJulianFromGregorian(data[0], data[1], data[2], horario[0], horario[1], horario[2], -fuso) * 10000) / 10000;
+
+            inputDJ.val(jd);
+        }
+
+        $('#input-data-local').find('input').not('[type="hidden"]').change(updateFromGregorian);
+
+        function lerHoraLocal() {
+            var gregorian = new Date();
+
+            var fusoInput = ON_DAED.fusoOriginal(gregorian);
+            $('#fuso').val(fusoInput);
+
+            if (ON_DAED.horarioVerao(gregorian)) {
+                $('#input-horario-verao').prop('checked', 'checked');
+            } else {
+                $('#input-horario-verao').prop('checked', false);
+            }
+
+            var fuso = parseFloat(fusoInput) + getHorarioVerao();
+            var dateInput = $('#dia-mes-ano-row').children('input');
+            var horaInput = $('#hora-minuto-segundo-row').children('input');
+
+            $(dateInput[0]).val(gregorian.getDate());
+            $(dateInput[1]).val(gregorian.getMonth() + 1);
+            $(dateInput[2]).val(gregorian.getFullYear());
+
+            var hora = gregorian.getUTCHours() + fuso;
+
+            if (hora < 0) {
+                hora += 24;
+            }
+
+            $(horaInput[0]).val(hora);
+            $(horaInput[1]).val(gregorian.getUTCMinutes());
+            $(horaInput[2]).val(gregorian.getUTCSeconds());
+
+            updateFromGregorian();
+        }
+
+        $('#enviar-formulario-carregar-horario').click(lerHoraLocal).trigger('click');
+
+    })();
+
+    /*]]>*/
+</script>

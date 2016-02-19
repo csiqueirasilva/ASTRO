@@ -1,0 +1,61 @@
+<div class="entrada-coordenadas" id="HORIZONTAL">
+
+    <div class="row-fluid margin-top-2">
+
+        <div class="col-md-12 celula-angulo">
+            <div id="coordenada_azimute">
+            </div>
+
+            <div class="row-fluid">
+                <div class="col-md-12">
+                    <label>Azimute</label>
+
+                    <div class="input-group">
+                        <input value="0" id="input-entrada-horizontal-azimute-hora" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">º</span>
+                        <input value="0" id="input-entrada-horizontal-azimute-min" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">'</span>
+                        <input value="0" id="input-entrada-horizontal-azimute-sec" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">"</span>
+                        <input name="azimute" type="hidden" class="data-source-coordenada" id="input-entrada-horizontal-azimute-hidden" value="0" min="0" max="360" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 celula-angulo">
+
+            <div id="coordenada_altura">
+            </div>
+
+            <div class="row-fluid">
+                <div class="col-md-12">
+                    <label>Altura</label>
+
+                    <div class="input-group">
+                        <input value="0" id="input-entrada-horizontal-altura-hora" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">º</span>
+                        <input value="0" id="input-entrada-horizontal-altura-min" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">'</span>
+                        <input value="0" id="input-entrada-horizontal-altura-sec" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">"</span>
+                        <input name="altitude" type="hidden" class="data-source-coordenada" id="input-entrada-horizontal-altura-hidden" value="0" min="0" max="90" />
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    ON_DAED.numberInputMinMax('.input-numerico');
+    ON_DAED.addTempoSideralAnglepicker($('#coordenada_azimute'), '#input-entrada-horizontal-azimute');
+    ON_DAED.addTempoSideralAnglepicker($('#coordenada_altura'), '#input-entrada-horizontal-altura');
+    /*]]>*/
+</script>

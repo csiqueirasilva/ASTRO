@@ -1,0 +1,64 @@
+.ui-anglepicker {
+    width: 52px;
+    height: 52px;
+
+    background: #dbdbdb;
+    background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2RiZGJkYiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjIwJSIgc3RvcC1jb2xvcj0iI2UxZTFkZSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmOGY4ZjMiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+    background: -moz-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#dbdbdb), color-stop(20%,#e1e1de), color-stop(100%,#f8f8f3));
+    background: -webkit-linear-gradient(top, #dbdbdb 0%,#e1e1de 20%,#f8f8f3 100%);
+    background: -o-linear-gradient(top, #dbdbdb 0%,#e1e1de 20%,#f8f8f3 100%);
+    background: -ms-linear-gradient(top, #dbdbdb 0%,#e1e1de 20%,#f8f8f3 100%);
+    background: linear-gradient(to bottom, #dbdbdb 0%,#e1e1de 20%,#f8f8f3 100%);
+    
+    border: 2px solid #666;
+
+    -moz-box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;
+    -webkit-box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;
+    box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;
+
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+    position: relative;
+    display: inline-block;
+}
+.ui-anglepicker-pointer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50%;
+
+    margin: -2px 0 0 -2px;
+    -moz-transform-origin: 2px 2px;
+    -webkit-transform-origin: 2px 2px;
+    -ms-transform-origin: 2px 2px;
+    -o-transform-origin: 2px 2px;
+    transform-origin: 2px 2px;
+}
+
+.ui-anglepicker:hover, .ui-anglepicker.ui-anglepicker-dragging {
+    border-color: #494949;
+}
+
+.ui-anglepicker-dragging .ui-anglepicker-dot, .ui-anglepicker-dragging .ui-anglepicker-line,
+.ui-anglepicker:hover .ui-anglepicker-dot, .ui-anglepicker:hover .ui-anglepicker-line {
+    background: #494949;
+}
+
+.ui-anglepicker-dot {
+    height: 4px;
+    width: 4px;
+    position: absolute;
+    background: #838383;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+}
+
+.ui-anglepicker-line {
+    margin-top: 1.5px;
+    margin-right: -2px;
+    height: 1px;
+    background: #838383;
+}​

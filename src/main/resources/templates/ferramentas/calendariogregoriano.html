@@ -1,0 +1,97 @@
+<h1 class="titulo-widget">Data Juliana para Calendário Gregoriano</h1>
+<div class="row-fluid campo-de-input">
+    <div class="col-md-12">
+        <form>
+            <div class="form-group">
+
+                <label class="margin-top-2" for="data-juliana">Data Juliana</label>
+                <div class="row-fluid">
+                    <div class="col-md-12">
+                        <input id="input-data-juliana" value="0" class="input-numerico form-control input-centralizado jlink input-small" name="data-juliana" min="0" type="number" />
+                    </div>
+                </div>
+
+                <div class="row-fluid margin-top-2">
+                    <div class="col-md-12 margin-top-2">
+                        <button type="button" class="btn btn-success form-control" id="enviar-formulario-servidor">Converter para Calendário Gregoriano</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="hidden" id="campo-de-resultados">
+            <div id="resultados-input">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>D. Juliana</th>
+                            <th>Data</th>
+                            <th>Hora</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="container-fluid margin-top-2">
+                <form method="POST" id="csv-form" action="csv" target="_BLANK">
+                    <input type="hidden" value="" id='csv-form-titulos' name="titulos" />
+                    <input type="hidden" value="" id='csv-form-corpo' name="corpo" />
+                    <button type="button" class="btn btn-success form-control" id="enviar-geracao-csv">Gerar CSV</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    (function () {
+        ON_DAED.numberInputMinMax('.input-numerico');
+
+        $('#input-data-juliana').change(function () {
+            var val = parseFloat($('#input-data-juliana').val());
+
+            if (!$('#input-data-juliana').val() || val < 0) {
+                $('#input-data-juliana').val('0');
+            }
+        });
+
+        $('#enviar-formulario-servidor').click(function () {
+            var entradaJuliana = parseFloat($('#input-data-juliana').val());
+
+            ON_DAED.astro('/calendario-gregoriano', {entradaJuliana: entradaJuliana}, function (dadosDeRetorno) {
+                var row = "<tr><td>%ID%</td><td>%DATAJU%</td><td>%DATA%</td><td>%HORA%</td></tr>";
+
+                dadosDeRetorno.tempoUniversal = parseFloat(dadosDeRetorno.tempoUniversal).toFixed(7);
+
+                var horas = parseInt(dadosDeRetorno.tempoUniversal);
+                var minutos = (parseFloat(dadosDeRetorno.tempoUniversal) - horas) * 60;
+                var segundos = (parseFloat(minutos) - parseInt(minutos)) * 60;
+                minutos = parseInt(minutos);
+                segundos = segundos.toFixed(0);
+
+                row = row.replace("%ID%", $('#resultados-input > table > tbody > tr').length + 1);
+                row = row.replace("%DATA%", (parseInt(dadosDeRetorno.dia) < 10 ? '0' + dadosDeRetorno.dia : dadosDeRetorno.dia) + '/' + (parseInt(dadosDeRetorno.mes) < 10 ? '0' + dadosDeRetorno.mes : dadosDeRetorno.mes) + '/' + dadosDeRetorno.ano);
+                row = row.replace("%HORA%", (parseInt(horas) < 10 ? '0' + horas : horas) + ":" + (parseInt(minutos) < 10 ? '0' + minutos : minutos) + ":" + (parseInt(segundos) < 10 ? '0' + segundos : segundos));
+                row = row.replace("%DATAJU%", entradaJuliana);
+
+                $('#resultados-input > table > tbody').append(row);
+                $('#campo-de-resultados').removeClass('hidden');
+
+                $('#resultados-input').animate({scrollTop: Infinity});
+            });
+
+        });
+
+        ON_DAED.csv("#enviar-geracao-csv", "click");
+
+        var extData = '${param.dataJuliana}';
+
+        if (!isNaN(parseFloat(extData))) {
+            $('#input-data-juliana').val(extData);
+            $('#enviar-formulario-servidor').trigger('click');
+        }
+
+    })();
+</script>

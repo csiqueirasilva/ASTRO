@@ -1,0 +1,64 @@
+<div class="row-fluid entrada-coordenadas" id="ECLIPTIC">
+
+    <div class="row-fluid margin-top-2">
+
+        <div class="col-md-12 celula-angulo">
+            <div id="coordenada-ecliptica-latitude">
+            </div>
+
+            <div class="row-fluid">
+                <div class="col-md-12">
+                    <label>Latitude Eclíptica</label>
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button id="input-entrada-ecliptica-latitude-sinal" class="btn btn-info" type="button">+</button>
+                        </span>
+                        <input value="0" id="input-entrada-ecliptica-latitude-hora" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">º</span>
+                        <input value="0" id="input-entrada-ecliptica-latitude-min" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">'</span>
+                        <input value="0" id="input-entrada-ecliptica-latitude-sec" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">"</span>
+                        <input name="latitude" type="hidden" class="data-source-coordenada" id="input-entrada-ecliptica-latitude-hidden" value="0" min="-90" max="90" />
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-12 celula-angulo">
+            <div id="coordenada-ecliptica-longitude">
+            </div>
+
+            <div class="row-fluid">
+                <div class="col-md-12">
+                    <label>Longitude Eclíptica</label>
+
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button id="input-entrada-ecliptica-longitude-sinal" class="btn btn-info" type="button">+</button>
+                        </span>
+                        <input value="0" id="input-entrada-ecliptica-longitude-hora" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">º</span>
+                        <input value="0" id="input-entrada-ecliptica-longitude-min" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">'</span>
+                        <input value="0" id="input-entrada-ecliptica-longitude-sec" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">"</span>
+                        <input name="longitude" type="hidden" class="data-source-coordenada" id="input-entrada-ecliptica-longitude-hidden" value="0" min="-180" max="180" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    ON_DAED.numberInputMinMax('.input-numerico');
+    ON_DAED.addTempoSideralAnglepicker($('#coordenada-ecliptica-longitude'), '#input-entrada-ecliptica-longitude');
+    ON_DAED.addTempoSideralAnglepicker($('#coordenada-ecliptica-latitude'), '#input-entrada-ecliptica-latitude');
+    /*]]>*/
+</script>

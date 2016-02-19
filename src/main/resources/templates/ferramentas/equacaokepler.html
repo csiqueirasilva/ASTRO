@@ -1,0 +1,116 @@
+<script src="js/three.min.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/stats.min.js"></script>
+<script src="js/tween.min.js"></script>
+<script src="js/ThreeHelper.js"></script>
+<script src="js/MathHelper.js"></script>
+<script src="js/daed/3D.js"></script>
+
+<h1 class="titulo-widget">Posição Orbital usando Equação de Kepler</h1>
+
+<div id="campo-de-observacao" class="row-fluid">
+</div>
+
+<style>
+    #anomalia-excentrica {
+        color: #00AF00;
+    }
+
+    #anomalia-media {
+        color: #DF00DF;
+    }
+
+    #anomalia-verdadeira {
+        color: #DFDF00;
+    }
+</style>
+
+<h3 id="anomalia-excentrica"></h3>
+<h3 id="anomalia-media"></h3>
+<h3 id="anomalia-verdadeira"></h3>
+
+<script>
+    (function () {
+        var minTimescale = 5;
+        var timescale = minTimescale;
+        ON_DAED.numberInputMinMax('.input-numerico');
+
+        if (!ON_DAED["WEBGL_SUPPORT"]) {
+            $("#campo-de-observacao")
+                    .empty()
+                    .html("SEM SUPORTE A WEBGL PARA A ANIMAÇÃO");
+        } else {
+
+            var parent = $('#campo-de-observacao');
+
+            parent.append('<div id="terra-timescale-btn-group" class="btn-group" role="group">\
+            <button disabled="disabled" id="terra-remove-timescale" type="button" class="btn btn-default"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>\
+            <button class="btn btn-success" type="button" id="terra-timescale-label">Atualização: ' + minTimescale + ' ms</button>\
+            <button id="terra-add-timescale" type="button" class="btn btn-default"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>\
+        </div>');
+
+            var maxTimescale = minTimescale * 100;
+
+            $('#terra-add-timescale').click(function () {
+                timescale += minTimescale;
+
+                console.log(timescale);
+
+                if (timescale === maxTimescale) {
+                    $(this).prop("disabled", true);
+                }
+
+                $('#terra-remove-timescale').prop("disabled", false);
+
+                $("#terra-timescale-label").html("Atualização: " + timescale + " ms");
+            });
+
+            $('#terra-remove-timescale').click(function () {
+                timescale -= minTimescale;
+
+                if (timescale === minTimescale) {
+                    $(this).prop("disabled", true);
+                }
+
+                $('#terra-add-timescale').prop("disabled", false);
+                $("#terra-timescale-label").html("Atualização: " + timescale + " ms");
+            });
+
+            var f = function (anomaliaExcentrica) {
+                window.setTimeout(function () {
+                    var anomalia = animacaoOrbital.exibirPosicaoNova(anomaliaExcentrica);
+                    $('#anomalia-excentrica').html('E = ' + anomaliaExcentrica.toFixed(2) + 'º');
+                    $('#anomalia-media').html('M = ' + (anomalia.media * (180 / Math.PI)).toFixed(2) + 'º');
+                    $('#anomalia-verdadeira').html('&nu; = ' +
+                            (anomalia.verdadeira * (180 / Math.PI)).toFixed(2) + 'º');
+                    f((anomaliaExcentrica + 0.1) % 360);
+                }, timescale);
+            };
+            f(0);
+        }
+
+        var animacaoOrbital;
+
+        ON_DAED["3D"].create(function (scene, camera) {
+            animacaoOrbital = ON_DAED["3D"].AnimacaoOrbital(scene, camera);
+        }, function (cameraControl, renderer, scene, camera, stats, clock) {
+
+            if ($('#campo-de-observacao canvas').is(':hover')) {
+                cameraControl.enabled = true;
+                cameraControl.update(clock.getDelta());
+            } else {
+                cameraControl.enabled = false;
+            }
+
+            ON_DAED["3D"].update();
+            ThreeHelper.updateText(camera, $('#campo-de-observacao')[0]);
+            TWEEN.update();
+            renderer.render(scene, camera);
+        }, document.getElementById('campo-de-observacao'),
+                function (camera, renderer, scene, stats) {
+                    return new THREE.OrbitControls(camera);
+                });
+
+        disableBodyScroll('#campo-de-observacao');
+    })();
+</script>

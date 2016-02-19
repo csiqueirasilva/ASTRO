@@ -1,0 +1,23 @@
+<p>O programa permite ao usuário experimentar ângulos bem diferentes do intervalo
+    de variação máxima da Obliquidade da Eclíptica (&epsilon;) que é entre 22,1° e 24,5°. É uma
+    provocação à reflexão. Por exemplo, como seriam as estações do ano na Terra se &epsilon;
+    fosse muito maior ou muito menor que o valor médio da Obliquidade da Eclíptica,
+    que é de 23,4°.</p>
+
+<div class="btn-exemplo-ajuda">
+    <button id="exemplo-btn" type="button" class="btn btn-primary">Veja um exemplo quando o valor de &epsilon; = 80° 00' 00"</button>
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    $('#exemplo-btn').click(function () {
+        $('#obliquidade-da-ecliptica').anglepicker('value', 80);
+        $('#enviar-formulario-obter-coordenadas').trigger('click');
+        $('.modal').modal('hide');
+    });
+    /*]]>*/
+</script>
+
+<div th:include="descricoes/botao-visualizacao-esfera-celeste-coordenadas :: texto('Alterar Obliquidade', 'Permite alterar a Obliquidade da Eclíptica
+     para um valor entre 0° e 360°.')">
+</div>

@@ -1,0 +1,65 @@
+<div class="row-fluid entrada-coordenadas" id="SUPERGALACTIC">
+
+    <div class="row-fluid margin-top-2">
+
+        <div class="col-md-12 celula-angulo">
+            <div id="coordenada-supergalactica-latitude">
+            </div>
+
+            <div class="row-fluid">
+                <div class="col-md-12">
+                    <label>Latitude Supergaláctica</label>
+
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button id="input-entrada-supergalactica-latitude-sinal" class="btn btn-info" type="button">+</button>
+                        </span>
+                        <input value="0" id="input-entrada-supergalactica-latitude-hora" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">º</span>
+                        <input value="0" id="input-entrada-supergalactica-latitude-min" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">'</span>
+                        <input value="0" id="input-entrada-supergalactica-latitude-sec" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">"</span>
+                        <input name="latitude" type="hidden" class="data-source-coordenada" id="input-entrada-supergalactica-latitude-hidden" value="0" min="-90" max="90" />
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-12 celula-angulo">
+            <div id="coordenada-supergalactica-longitude">
+            </div>
+
+            <div class="row-fluid">
+                <div class="col-md-12">
+                    <label>Longitude Supergaláctica</label>
+
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button id="input-entrada-supergalactica-longitude-sinal" class="btn btn-info" type="button">+</button>
+                        </span>
+                        <input value="0" id="input-entrada-supergalactica-longitude-hora" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">º</span>
+                        <input value="0" id="input-entrada-supergalactica-longitude-min" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">'</span>
+                        <input value="0" id="input-entrada-supergalactica-longitude-sec" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">"</span>
+                        <input name="longitude" type="hidden" class="data-source-coordenada" id="input-entrada-supergalactica-longitude-hidden" value="0" min="-180" max="180" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    ON_DAED.numberInputMinMax('.input-numerico');
+    ON_DAED.addTempoSideralAnglepicker($('#coordenada-supergalactica-latitude'), '#input-entrada-supergalactica-latitude');
+    ON_DAED.addTempoSideralAnglepicker($('#coordenada-supergalactica-longitude'), '#input-entrada-supergalactica-longitude');
+    /*]]>*/
+</script>

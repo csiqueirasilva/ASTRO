@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8"/>
+
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+
+        <link rel="icon" sizes="192x192" href="highres-icon.png" />
+
+        <title th:text="${conteudo} ? 'Astro - ' + ${conteudo}">Astro</title>
+
+        <meta property="og:title"
+              content="ASTRO - Ferramentas Básicas de Astronomia" />
+        <meta property="og:image"
+              content="http://daed.on.br/astro/imgs/fb-astro.png" />
+        <meta property="og:image:width" content="600" />
+        <meta property="og:image:height" content="600" />
+        <meta property="og:site_name" content="ASTRO"/>
+        <meta property="og:description" content="Conjunto de ferramentas de Astronomia com visualização em 3D através da tecnologia WebGL." />
+        <meta property="og:type" content="website" />
+
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+        <meta name="description" content="ASTRO"/>
+        <meta name="author" content="Observatório Nacional"/>
+
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery-ui.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/bootstrap-datepicker.js"></script>
+        <script src="js/locales/bootstrap-datepicker.pt-BR-ansi.js"></script>
+        <script src="js/anglepicker.js"></script>
+        <script src="lib/on-daed-js/geral.js"></script>
+        <script src="lib/on-daed-js/vsop87.min.js"></script>
+        <script src="lib/on-daed-js/astro.js"></script>
+        <script src="js/typeahead.min.js"></script>
+        <script src="js/imagesloaded.pkg.min.js"></script>
+        <script src="js/jquery.qtip.min.js"></script>
+
+        <script src="js/three.min.js"></script>
+        <script src="js/MTLLoader.js"></script>
+        <script src="js/OBJMTLLoader.js"></script>
+        <script src="js/OrbitControls.js"></script>
+        <script src="js/stats.min.js"></script>
+        <script src="js/tween.min.js"></script>
+        <script src="js/ThreeHelper.js"></script>
+        <script src="lib/on-daed-js/MathHelper.js"></script>
+        <script src="lib/on-daed-js/3D.js"></script>
+
+        <link href="css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="css/bootstrap-responsive.css" rel="stylesheet"/>
+
+        <link rel="SHORTCUT ICON" href="http://daed.on.br/astro/favicon.ico" />
+
+        <link href="css/anglepicker.css" rel="stylesheet"/>
+        <link href="css/datepicker3.css" rel="stylesheet"/>
+        <link href="css/jquery-ui.structure.min.css" rel="stylesheet"/>
+        <link href="css/jquery-ui.theme.min.css" rel="stylesheet"/>
+
+        <link rel="stylesheet" type="text/css" href="css/jquery.qtip.min.css"/>
+
+        <link href="http://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet" type="text/css"/>
+
+        <script>
+            (function (i, s, o, g, r, a, m) {
+                i['GoogleAnalyticsObject'] = r;
+                i[r] = i[r] || function () {
+                    (i[r].q = i[r].q || []).push(arguments)
+                }, i[r].l = 1 * new Date();
+                a = s.createElement(o),
+                        m = s.getElementsByTagName(o)[0];
+                a.async = 1;
+                a.src = g;
+                m.parentNode.insertBefore(a, m)
+            })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+            ga('create', 'UA-22359689-5', 'auto');
+            ga('send', 'pageview');
+        </script>
+
+        <style>
+
+            .astro-dialog-label {
+                text-align: center; font-weight: bold;
+            }
+
+            body.modal-open { overflow: hidden!important; }
+
+            * {
+                font-family: 'Ubuntu', sans-serif;
+            }
+
+            .btn-exemplo-ajuda {
+                text-align: center;
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+
+            .btn-exemplo-ajuda > i {
+                font-size: 2em;
+            }
+
+            #dia-mes-ano-row, #hora-minuto-segundo-row {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            .dialog-image {
+                text-align: center; 
+                padding-top: 10px; 
+                padding-bottom: 10px;
+                width: 100%;
+            }
+
+            .dialog-image img {
+                max-width: 100%;
+            }
+
+            .modal-body {
+                text-align: justify;
+            }
+
+            #wrapper-texto-explicativo > a > button {
+                width: 100%;
+            }
+
+            #titulo-wiki > h1 {
+                margin-top: 0px;
+            }
+
+            /*            #titulo-wiki,
+                        #conteudo-wiki
+                        {
+                            text-align: center;
+                        }*/
+
+            .ui-observacao-horizontal {
+                position: absolute; 
+            }
+
+            @media(max-width: 550px) {
+                .input-group-addon {
+                    padding: 1px;
+                }
+
+                .btn {
+                    padding-left: 1px;
+                    padding-right: 1px;
+                }
+            }
+
+            #home-btn i, #ajuda-btn i, #info-btn i, #credits-btn i {
+                font-size: 2em;
+            }
+
+            #ajuda-btn {
+                top: 1%;
+                right: 44px;
+            }
+
+            #home-btn {
+                top: 1%;
+                right: 112px;
+            }
+
+            #info-btn {
+                top: 1%;
+                right: 10px;
+            }
+
+            #credits-btn {
+                top: 1%;
+                right: 78px;
+            }
+
+            body {
+                overflow: hidden;
+                padding: 0px;
+            }
+
+            .jlink:hover {
+                cursor: pointer;
+            }
+
+            .hover-label-text {
+                text-align: center;
+                font-size: 1.75em;
+                text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                cursor: auto;
+                z-index: -1000;
+            }
+
+            html, body {
+                height: 100%;
+            }
+
+            .celula-angulo {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            .noselect {
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+
+            .input-hora {
+                width: 26%;
+                margin-left: 2%;
+                margin-right: 2%;
+                display: inline;
+            }
+
+            .margin-top-2 {
+                margin-top: 10px;
+            }
+
+
+            #bg-image-wrap {
+                position: absolute;
+                text-align: center;
+                width: 100%;
+                height: 640px;
+                z-index: -1000;
+                opacity: 0.1;
+                display: none;
+            }
+
+            @media (max-width: 767px) {
+                #bg-image-wrap img {
+                    width: 100%;
+                    margin-top: 23%;
+                }
+            }
+
+            @media (min-width: 768px) {
+                #bg-image-wrap img {
+                    height: 100%;
+                    margin-top: 6%;
+                }
+            }
+
+            #campo-de-observacao {
+                height: 100%;
+            }
+
+
+            #unidade-zoom-btn-group {
+                position: absolute;
+                bottom: 1%;
+                left: 1%;
+            }
+
+            #terra-timescale-btn-group {
+                position: absolute;
+                top: 1%;
+                left: 1%;
+            }
+
+            #terra-props-btn-group {
+                position: absolute;
+                bottom: 1%;
+                left: 1%;
+                width: 100%;
+                z-index: 1000;
+            }
+
+            body > * {
+                z-index: 1000;
+            }
+
+            #terra-obs-label-wrapper {
+                position: absolute;
+                top: 3.25em;
+                left: 1%;
+                z-index: 1000;
+            }
+
+            #resultados-campo-coords {
+                position: absolute;
+                top: 135px;
+                left: 1%;
+                color: #FFFFFF;
+                width: 372px;
+            }
+
+            #parent-exibir-resultados-coords {
+                margin-bottom: 0px;
+            }
+
+            @media(max-height: 480px) {
+                #label-resultados-coords {
+                    overflow-y: auto;
+                    height: 100px;
+                }
+            }
+
+            #btn-abrir-form-coords {
+                position: absolute;
+                bottom: 48px;
+                left: 1%;
+            }
+
+            #canvas-wrapper {
+                width: 100%;
+                height: 100%;
+            }
+
+            #load-modal {
+                background: #000;
+            }
+
+            @media (max-width: 767px) and (min-width: 448px) {
+                #load-modal {
+                    margin: -20px;
+                }
+            }
+
+            @media (max-width: 447px) {
+                #load-modal {
+                    margin: -10px;
+                }
+            }
+
+            #ajuda-texto-modal .modal-body p {
+                margin-top: 8px;
+                margin-bottom: 8px;
+            }
+
+        </style>
+
+    </head>
+    <body class="noselect">
+
+        <script>
+            /*<![CDATA[*/
+            if (!ON_DAED.WEBGL_SUPPORT) {
+                window.location.href = document.URL + "/../";
+            }
+            /*]]>*/
+        </script>
+
+        <div th:include="'webgl/' + ${conteudo} + '/css'">
+        </div>
+
+        <div id='bg-image-wrap'>
+            <img src='imgs/logo-on.jpg' />
+        </div>
+
+        <a id="home-btn" data-placement="left" href='./' data-toggle="tooltip" title="Página Inicial" class="ui-astro-tooltip ui-astro-icon hidden ui-observacao-horizontal jlink">
+            <i class="glyphicon glyphicon-home"></i>
+        </a>
+
+        <a id="ajuda-btn" data-placement="left" title="Dicas de Uso" class="ui-astro-tooltip ui-astro-icon hidden ui-observacao-horizontal jlink" target="_blank" data-toggle="modal" data-target="#ajuda-texto-modal">
+            <i class="glyphicon glyphicon-question-sign"></i>
+        </a>
+
+        <a id="info-btn" data-placement="left" title="Sobre" class="ui-astro-tooltip ui-astro-icon hidden ui-observacao-horizontal jlink" target="_blank" data-toggle="modal" data-target="#informacao-texto-modal">
+            <i class="glyphicon glyphicon-book"></i>
+        </a>
+
+        <a id="credits-btn" data-placement="left" title="Créditos" class="ui-astro-tooltip ui-astro-icon hidden ui-observacao-horizontal jlink" target="_blank" data-toggle="modal" data-target="#creditos-texto-modal">
+            <i class="glyphicon glyphicon-info-sign"></i>
+        </a>
+
+        <!-- AJUDA -->
+        <div class="modal fade ui-observacao-horizontal" id="ajuda-texto-modal" tabindex="-1" role="dialog" aria-labelledby="Créditos" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Dicas de Uso</h4>
+                    </div>
+
+                    <div class="modal-body" th:include="'webgl/' + ${conteudo} + '/ajuda'">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CREDITOS -->
+        <div class="modal fade ui-observacao-horizontal" id="creditos-texto-modal" tabindex="-1" role="dialog" aria-labelledby="Créditos" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Créditos</h4>
+                    </div>
+
+                    <div class="modal-body" th:include="creditos">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABOUT -->
+        <div class="modal fade ui-observacao-horizontal" id="informacao-texto-modal" tabindex="-1" role="dialog" aria-labelledby="Sobre" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Sobre</h4>
+                    </div>
+
+                    <div class="modal-body" th:include="'webgl/' + ${conteudo} + '/sobre'">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOAD -->
+        <div class='modal show' id='load-modal' tabindex='-1' role='dialog' data-backdrop="static" 
+             data-keyboard="false" aria-hidden='true' aria-labelledby='Carregando'>
+            <div class='modal-dialog hidden'>
+                <div class='modal-content'>
+                    <div class='modal-header'>
+                        <h4 class="modal-title">Carregando conteúdo (<span id='load-modal-counter'>0</span>/<span id='load-modal-counter-max'>0</span>)!</h4>
+                    </div>
+
+                    <div class='modal-body'>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped active" role="progressbar"
+                                 aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            (function () {
+
+                $('.ui-astro-tooltip').tooltip();
+
+                var textures = [];
+                var models = [];
+                var modelosIt = -1;
+
+                $('#load-modal').data('beforeReady', []);
+                $('#load-modal').data('texturas', textures);
+                $('#load-modal').data('modelos', models);
+
+                THREE.ImageUtils.loadTextureOriginal = THREE.ImageUtils.loadTexture;
+
+                THREE.ImageUtils.loadTexture = function (path) {
+                    var texture = THREE.ImageUtils.loadTextureOriginal(path);
+
+                    textures.push(texture);
+
+                    return texture;
+                };
+
+                $('#load-modal').data('loadOBJMTL', function (managerName, objFile, mtlFile, cb) {
+                    models[++modelosIt] = false;
+
+                    (function () {
+
+                        var modelLoadId = modelosIt;
+
+                        var loader = new THREE.OBJMTLLoader(ON_DAED["3D"].createManager(managerName));
+
+                        loader.load(objFile, mtlFile, function (object) {
+                            cb(object);
+                            models[modelLoadId] = true;
+                        });
+
+                    })();
+
+                });
+
+            })();
+            /*]]>*/
+        </script>
+
+        <div id="canvas-wrapper" class="hidden" th:include="'webgl/' + ${conteudo} + '/conteudo'">
+        </div>
+
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            $(document).ready(function () {
+                var overflowY = $('body').css('overflow-y');
+
+                $('.modal').on('show.bs.modal', function () {
+                    $('body').css({'overflow-y': 'auto'});
+                    $('body').toggleClass('noselect');
+                    $('.hover-label-text').hide();
+                });
+
+                $('.modal').on('hide.bs.modal', function () {
+                    $('body').css({'overflow-y': overflowY});
+                    $('body').toggleClass('noselect');
+                    $('.hover-label-text').show();
+                    window.scrollTo(0, 0);
+                });
+
+                function resizeLoadModal() {
+                    var loadModal = $('#load-modal');
+                    var $dialog = loadModal.find(".modal-dialog");
+                    var offset = ($(window).height() - 120) / 2;
+                    $dialog.css("margin-top", offset);
+                }
+
+                resizeLoadModal();
+
+                $('#load-modal .modal-dialog').hide().removeClass('hidden').fadeIn(5);
+
+                $(window).bind("resize", resizeLoadModal);
+
+                var conteudoCarregado = false;
+
+                $(window).load(function () {
+                    conteudoCarregado = true;
+                });
+
+                var texturasCounter = 0;
+                var texturas = $('#load-modal').data('texturas');
+                var texturasMax = texturas.length;
+                var modelosCounter = 0;
+                var modelos = $('#load-modal').data('modelos');
+                var modelosMax = modelos.length;
+
+                var loadInterval = window.setInterval(function () {
+
+                    texturasMax = Math.max(texturasMax, texturas.length);
+                    modelosMax = Math.max(modelosMax, modelos.length);
+
+                    $('#load-modal-counter').html(texturasCounter + modelosCounter);
+                    $('#load-modal-counter-max').html(texturasMax + modelosMax);
+
+                    for (var i = modelos.length - 1; i >= 0; i--) {
+                        if (modelos[i]) {
+                            modelos.splice(i, 1);
+                            modelosCounter++;
+                        }
+                    }
+
+                    for (var i = texturas.length - 1; i >= 0; i--) {
+                        if (texturas[i].image && texturas[i].image.complete) {
+                            texturas.splice(i, 1);
+                            texturasCounter++;
+                        }
+                    }
+
+                    if (modelosCounter === modelosMax && texturasCounter === texturasMax && ON_DAED['3D'].START_RENDER !== null && conteudoCarregado === true) {
+                        $('#load-modal-counter').html(texturasCounter + modelosCounter);
+
+                        window.clearInterval(loadInterval);
+                        window.setTimeout(function () {
+                            $(window).unbind("resize", resizeLoadModal);
+
+                            $('.ui-astro-icon').removeClass('hidden');
+                            $('#canvas-wrapper').removeClass('hidden');
+
+                            window.setTimeout(function () {
+                                if (ON_DAED['3D'].START_RENDER instanceof Function) {
+                                    ON_DAED['3D'].START_RENDER();
+                                }
+
+                                $(window).trigger('resize');
+
+                                if (window.onresize instanceof Function) {
+                                    window.onresize();
+                                }
+
+                                var beforeReady = $('#load-modal').data('beforeReady');
+
+                                for (var i = 0; i < beforeReady.length; i++) {
+                                    beforeReady[i]();
+                                }
+
+                                window.setTimeout(function () {
+                                    $('#load-modal').fadeOut(500, function () {
+                                        $(this).remove();
+                                    });
+                                }, 750);
+
+                            }, 500);
+
+                        }, 500);
+                    }
+                }, 100);
+
+            });
+            /*]]>*/
+        </script>
+
+    </body>
+</html>

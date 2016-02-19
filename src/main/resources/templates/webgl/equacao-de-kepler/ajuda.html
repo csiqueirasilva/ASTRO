@@ -1,0 +1,185 @@
+<h3>Solução da Equação de Kepler</h3>
+
+<p>É apresentada uma solução inicial a partir do valor da excentricidade igual a 0,67. O
+    usuário é estimulado a variar este parâmetro para refletir sobre a visualização do
+    resultado. O programa admite somente excentricidades que variam entre os valores
+    0 e 1. Os casos de órbitas com <b>e</b> &gt; 1 não são considerados.</p>
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>
+                Órbita
+            </th>
+            <th>
+                Excentricidade
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                Circular
+            </td>
+            <td>
+                e = 0
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Elíptica
+            </td>
+            <td>
+                0 &lt; e &lt; 1
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Parabólica
+            </td>
+            <td>
+                e = 1
+            </td>
+        </tr>
+    </tbody>
+</table>    
+
+<p>Podem ser verificados os casos no Sistema Solar:</p>
+
+<table id="equacao-de-kepler-tabela-exemplos" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+
+            <th>
+                Planeta
+            </th>
+            <th>
+                Excentricidade (e)
+            </th>
+
+
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="jlink">
+            <td>
+                Mercúrio
+            </td>
+            <td>
+                0.2056
+            </td>
+        </tr>
+        <tr class="jlink">
+            <td>
+                Vênus
+            </td>
+            <td>
+                0.0068
+            </td>
+        </tr>
+        <tr class="jlink">
+            <td>
+                Terra
+            </td>
+            <td>
+                0.0167
+            </td>
+        </tr>
+        <tr class="jlink">
+            <td>
+                Marte
+            </td>
+            <td>
+                0.093
+            </td>
+        </tr>
+        <tr class="jlink">
+            <td>
+                Júpiter
+            </td>
+            <td>
+                0.048
+            </td>
+        </tr>
+        <tr class="jlink">
+            <td>
+                Saturno
+            </td>
+            <td>
+                0.056
+            </td>
+        </tr>
+        <tr class="jlink">
+            <td>
+                Urano
+            </td>
+            <td>
+                0.046
+            </td>
+        </tr>
+        <tr class="jlink">
+            <td>
+                Netuno
+            </td>
+            <td>
+                0.0097
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    $('#equacao-de-kepler-tabela-exemplos').find('tr.jlink').click(function () {
+        var value = parseFloat($($(this).children('td')[1]).html());
+        $('#input-excentricidade-orbital').val(value);
+        $('#enviar-formulario-obter-coordenadas').trigger('click');
+        $('.modal').modal('hide');
+    });
+    /*]]>*/
+</script>
+
+<h3>Botões de Tela</h3>
+
+<div class="btn-exemplo-ajuda">
+    <button type="button" class="btn btn-primary">
+        Alterar Excentricidade Orbital
+    </button>
+</div>
+
+<p>
+    Permite inserir valores de excentricidade, entre 0 e 1, para visualizar a
+    forma da órbita.
+</p>
+
+<div class="btn-exemplo-ajuda">
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+        <button class="btn btn-success" type="button">Atualização: 5 ms</button>
+        <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+    </div>
+</div>
+
+<p>
+    Este botão permite visualizar o movimento orbital em diversas velocidades.
+    No caso deste exemplo, 5 ms é o intervalo de parada do movimento de 5
+    milisegundos para posterior reinício de exibição. Quanto maior o intervalo,
+    mais lento é o movimento. Note que os movimentos não obedecem a uma
+    escala real, mas sim àquela estabelecida pelo usuário.
+</p>
+
+<h3>Funções do Mouse</h3>
+
+<ul>
+
+    <li><b>Botão Esquerdo:</b> com este botão pode-se deslocar (rotação) a imagem do
+        sistema.</li>
+
+    <li><b>Botão de rolagem:</b> o programa permite aproximar ou afastar a imagem,
+        bastando para isso girar este botão.</li>
+
+</ul>
+
+<h3>Resultados</h3>
+
+<p>Os resultados são mostrados no canto superior esquerdo da tela.</p>

@@ -1,0 +1,44 @@
+<%@page import="br.on.daed.models.astro.unidades.ConversaoUnidade"%>
+
+<%request.setAttribute("KMParsec", ConversaoUnidade.KM_PARSEC.getValue());%>
+<%request.setAttribute("KMSegArco", ConversaoUnidade.KM_SEG_ARCO.getValue());%>
+<%request.setAttribute("KMUA", ConversaoUnidade.KM_UA.getValue());%>
+<%request.setAttribute("ParsecKM", ConversaoUnidade.PARSEC_KM.getValue());%>
+<%request.setAttribute("ParsecSegArco", ConversaoUnidade.PARSEC_SEG_ARCO.getValue());%>
+<%request.setAttribute("ParsecUA", ConversaoUnidade.PARSEC_UA.getValue());%>
+<%request.setAttribute("SegArcoKM", ConversaoUnidade.SEG_ARCO_KM.getValue());%>
+<%request.setAttribute("SegArcoParsec", ConversaoUnidade.SEG_ARCO_PARSEC.getValue());%>
+<%request.setAttribute("SegArcoUA", ConversaoUnidade.SEG_ARCO_UA.getValue());%>
+<%request.setAttribute("UAKM", ConversaoUnidade.UA_KM.getValue());%>
+<%request.setAttribute("UAParsec", ConversaoUnidade.UA_PARSEC.getValue());%>
+<%request.setAttribute("UASegArco", ConversaoUnidade.UA_SEG_ARCO.getValue());%>
+
+<div class="entrada-coordenadas" id="entrada-coordenada-horizontal">
+
+    <div class="row-fluid">
+
+        <div class="col-md-12 margin-top-2">
+            <select id="tipo-transformacao" class="form-control">
+                <option value="${KMParsec}" class="to-parsec from-km">Quilômetro para Parsec</option>
+<!--                <option value="${KMSegArco}" class="to-segarco from-km">Quilômetro para Segundo de Arco</option>-->
+                <option value="${KMUA}" class="to-ua from-km">Quilômetro para Unidade Astronômica</option>
+                <option value="${ParsecKM}" class="from-parsec to-km">Parsec para Quilômetro</option>
+<!--                <option value="${ParsecSegArco}" class="to-segarco from-parsec">Parsec para Segundo de Arco</option>-->
+                <option value="${ParsecUA}" class="from-parsec to-ua">Parsec para Unidade Astronômica</option>
+<!--                <option value="${SegArcoKM}" class="to-km from-segarco">Segundo de Arco para Quilômetro</option>-->
+<!--                <option value="${SegArcoParsec}" class="to-parsec from-segarco">Segundo de Arco para Parsec</option>-->
+<!--                <option value="${SegArcoUA}" class="to-ua from-segarco">Segundo de Arco para Unidade Astronômica</option>-->
+                <option value="${UAKM}" class="to-km from-ua">Unidade Astronômica para Quilômetro</option>
+                <option value="${UAParsec}" class="to-parsec from-ua">Unidade Astronômica para Parsec</option>
+<!--                <option value="${UASegArco}" class="to-segarco from-ua">Unidade Astronômica para Segundo de Arco</option>-->
+            </select>
+        </div>
+
+        <div class="col-md-12 margin-top-2">
+            <label>Quantidade</label>
+            <input name="quantidade" value="0" id="input-entrada-quantidade" min="0" max="9999999999999" class="form-control input-centralizado jlink input-numerico input-small" type="number" />
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,39 @@
+<script src='lib/on-daed-js/3D/ObservacaoTerra.js'>
+</script>
+
+<div id="campo-de-observacao" class="row-fluid">
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    (function () {
+
+        var terra;
+        var control;
+
+        ON_DAED["3D"].create(function (scene, camera) {
+            var raioPlaneta = 63.71;
+            terra = ON_DAED["3D"].ObservacaoTerra(scene, camera, raioPlaneta, control);
+        }, function (cameraControl, renderer, scene, camera, stats, clock) {
+
+            if ($('#campo-de-observacao canvas').is(':hover')) {
+                cameraControl.enabled = true;
+                cameraControl.update(clock.getDelta());
+            } else {
+                cameraControl.enabled = false;
+            }
+
+            ON_DAED["3D"].update();
+            ThreeHelper.updateText(camera, $('#campo-de-observacao')[0]);
+            TWEEN.update();
+            renderer.render(scene, camera);
+        }, document.getElementById('campo-de-observacao'),
+                function (camera, renderer, scene, stats) {
+                    control = new THREE.OrbitControls(camera);
+                    ON_DAED["3D"].setMouseOverPossible('#campo-de-observacao', renderer, camera);
+                    return control;
+                });
+
+    })();
+    /*]]>*/
+</script>

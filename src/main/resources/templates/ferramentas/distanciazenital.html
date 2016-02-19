@@ -1,0 +1,111 @@
+<script src="js/three.min.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/stats.min.js"></script>
+<script src="js/tween.min.js"></script>
+<script src="js/ThreeHelper.js"></script>
+<script src="js/MathHelper.js"></script>
+<script src="js/daed/3D.js"></script>
+
+<h1 class="titulo-widget">Obter distância zenital</h1>
+
+<div id="campo-de-observacao" class="row-fluid">
+</div>
+
+<div class="row-fluid margin-top-2">
+    <div class="col-md-12">
+        <form>
+            <div class="form-group">
+                <div class="row-fluid">
+
+                    <div class="margin-top-2 col-md-12">
+
+                        <jsp:include page="fragmentos/entrada-coordenada-horizontal.jsp" />
+
+                        <div class="row-fluid margin-top-2">
+                            <div class="col-md-12 margin-top-2">
+                                <button type="button" class="btn btn-success form-control" id="enviar-formulario-obter-coordenadas">Visualizar</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+</div>
+
+
+<script>
+    (function () {
+        ON_DAED.numberInputMinMax('.input-numerico');
+
+        var terra;
+
+        $('#enviar-formulario-obter-coordenadas').click(function () {
+            var latitude;
+            var longitude;
+            var azimute;
+            var altura;
+
+            latitude = (Math.PI / 180) * parseFloat($('#input-entrada-horizontal-latitude-hidden').val());
+            longitude = (Math.PI / 180) * parseFloat($('#input-entrada-horizontal-longitude-hidden').val());
+            azimute = (Math.PI / 180) * parseFloat($('#input-entrada-horizontal-azimute-hidden').val());
+            altura = (Math.PI / 180) * parseFloat($('#input-entrada-horizontal-altura-hidden').val());
+
+            if (ON_DAED["WEBGL_SUPPORT"]) {
+                terra.coordenadasHorizontais(longitude, latitude, azimute, altura);
+            } else {
+                preencherDados({
+                    longitude: longitude,
+                    latitude: latitude,
+                    azimute: azimute,
+                    altura: altura,
+                    zenite: Math.PI / 2 - altura
+                });
+            }
+        });
+
+        ON_DAED["3D"].create(function (scene, camera) {
+            var raioPlaneta = 63.71;
+            terra = ON_DAED["3D"].ObservacaoTerra(scene, camera, raioPlaneta);
+        }, function (cameraControl, renderer, scene, camera, stats, clock) {
+
+            if ($('#campo-de-observacao canvas').is(':hover')) {
+                cameraControl.enabled = true;
+                cameraControl.update(clock.getDelta());
+            } else {
+                cameraControl.enabled = false;
+            }
+
+            ON_DAED["3D"].update();
+            ThreeHelper.updateText(camera, $('#campo-de-observacao')[0]);
+            TWEEN.update();
+            renderer.render(scene, camera);
+        }, document.getElementById('campo-de-observacao'),
+                function (camera, renderer, scene, stats) {
+                    return new THREE.OrbitControls(camera);
+                });
+
+        var extLongitude = parseFloat('${param.longitude}');
+        var extLatitude = parseFloat('${param.latitude}');
+        var extAzimute = parseFloat('${param.azimute}');
+        var extAltura = parseFloat('${param.altura}');
+
+        if (!isNaN(extLongitude) && !isNaN(extLatitude) && !isNaN(extAltura) && !isNaN(extAzimute)) {
+            $(document).ready(function () {
+
+                tempoSideralLoadInput('#input-entrada-horizontal-longitude', extLongitude);
+                tempoSideralLoadInput('#input-entrada-horizontal-latitude', extLatitude);
+                tempoSideralLoadInput('#input-entrada-horizontal-azimute', extAzimute);
+                tempoSideralLoadInput('#input-entrada-horizontal-altura', extAltura);
+
+                $('#enviar-formulario-obter-coordenadas').trigger('click');
+            });
+        }
+
+        disableBodyScroll('#campo-de-observacao');
+
+    })();
+</script>

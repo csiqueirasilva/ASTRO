@@ -1,0 +1,431 @@
+<style>
+    #btn-abrir-form {
+        top: 1%;
+        left: 1%;
+    }
+
+    #parent-atualizacao-automatica {
+        top: 46px;
+        left: 1%;
+        color: #FFFFFF;
+    }
+
+    #parent-exibir-resultados {
+        top: 76px;
+        left: 1%;
+        color: #FFFFFF;
+    }
+
+    #main-div {
+        height: 100%;
+    }
+
+    .top-buffer { 
+        margin-top: 20px; 
+    }
+
+    .label-row-coords {
+        margin-bottom: 20px;
+    }
+
+    #coords-holder {
+        position: absolute;
+        top: 0; bottom: 0; left: 0; right: 0;
+        overflow: auto;
+        padding-bottom: 5%;
+    }
+
+    #label-dados {
+        position: absolute;
+        bottom: 1%;
+        left: 1%;
+        padding: 10px;
+        text-align: justify;
+        width: 370px;
+    }
+
+    #slider-passagem {
+        position: absolute;
+        bottom: 1%;
+        left: 1%;
+        padding: 10px;
+        text-align: justify;
+        width: 156px;
+    }
+
+    .elemento-ui {
+        color: #FFFFFF;
+    }
+
+    .label-resultado {
+        display: inline-block;
+        width: 160px;
+    }
+
+    #label-cidade-form {
+        padding: 10px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+
+    #label-cidade-form:before {
+        padding: 10px;
+        content: "Local escolhido:";
+    }
+
+    @media(max-width: 550px) {
+        #passagem-do-tempo {
+            display: none;
+        }   
+    }
+
+    #passagem-do-tempo {
+        bottom: 1%;
+        right: 1%;
+        position: absolute;
+    }
+
+</style>
+
+<script src='lib/on-daed-js/3D/ObservacaoFirmamento.js'>
+</script>
+
+<button type="button" id="btn-abrir-form" class="btn btn-primary btn-lg ui-observacao-horizontal" data-toggle="modal" data-target="#data-form">
+    Alterar Local e Data
+</button>
+
+<div id="passagem-do-tempo" class="btn-group" role="group">
+    <button disabled="disabled" id="obs-horizontal-remove-timescale" type="button" class="btn btn-default"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+    <button id="btn-passagem-do-tempo" class="btn btn-info" type="button">Passagem do Tempo <i class="glyphicon glyphicon-repeat"></i> <span id="obs-horizontal-timescale-label">1</span></button>
+    <button id="obs-horizontal-add-timescale" type="button" class="btn btn-default"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+</div>
+
+<div id="parent-atualizacao-automatica" class="checkbox ui-observacao-horizontal">
+    <label>
+        <input type="checkbox" id="atualizacao-automatica"/> Atualizacao Automatica
+    </label>
+</div>
+
+<div id="parent-exibir-resultados" class="checkbox ui-observacao-horizontal">
+    <label>
+        <input type="checkbox" id="exibir-resultados" checked='checked'/> Resultados
+    </label>
+</div>
+
+<div class="modal fade ui-observacao-horizontal" id="cidade-form" tabindex="-1" role="dialog" aria-labelledby="Localizar Cidade" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Localizar Cidade</h4>
+            </div>
+
+            <div class="modal-body">
+                <label id="busca-cidade-feedback"></label>
+                <input type="text" data-provide="typeahead" autocomplete="off" class="form-control" id="busca-cidade-input"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade ui-observacao-horizontal" id="data-form" tabindex="-1" role="dialog" aria-labelledby="Data/Hora" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Data/Hora</h4>
+            </div>
+
+            <div class="modal-body">
+                <div>
+                    <button type="button" id="btn-cidade-form" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#cidade-form">
+                        Escolher Local
+                    </button>
+
+                    <div id="label-cidade-form">OBSERVATORIO NACIONAL</div>
+
+                    <div class="celula-angulo">
+                        <div id="coordenada-longitude-local">
+                        </div>
+
+                        <div class="row-fluid">
+                            <div class="col-md-12">
+                                <label>Longitude Local (Leste Positivo)</label>
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <button id="input-entrada-longitude-local-sinal" class="btn btn-info" type="button">+</button>
+                                    </span>
+                                    <input value="0" id="input-entrada-longitude-local-hora" class="input-longitude form-control input-centralizado jlink input-small" type="number" min="0" />
+                                    <span class="input-group-addon">º</span>
+                                    <input value="0" id="input-entrada-longitude-local-min" class="input-longitude form-control input-centralizado jlink input-small" type="number" min="0" />
+                                    <span class="input-group-addon">'</span>
+                                    <input value="0" id="input-entrada-longitude-local-sec" class="input-longitude form-control input-centralizado jlink input-small" type="number" min="0" />
+                                    <span class="input-group-addon">"</span>
+                                    <input name="longitudeLocal" type="hidden" class="data-source-coordenada geo-coords-input" id="input-entrada-longitude-local-hidden" value="0" min="-180" max="180" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="celula-angulo">
+                        <div id="coordenada-latitude-local">
+                        </div>
+
+                        <div class="row-fluid">
+                            <div class="col-md-12">
+                                <label>Latitude Local (Norte Positivo)</label>
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <button id="input-entrada-latitude-local-sinal" class="btn btn-info" type="button">+</button>
+                                    </span>
+                                    <input value="0" id="input-entrada-latitude-local-hora" class="input-latitude form-control input-centralizado jlink input-small" type="number" min="0" />
+                                    <span class="input-group-addon">º</span>
+                                    <input value="0" id="input-entrada-latitude-local-min" class="input-latitude form-control input-centralizado jlink input-small" type="number" min="0" />
+                                    <span class="input-group-addon">'</span>
+                                    <input value="0" id="input-entrada-latitude-local-sec" class="input-latitude form-control input-centralizado jlink input-small" type="number" min="0" />
+                                    <span class="input-group-addon">"</span>
+                                    <input name="latitudeLocal" type="hidden" class="data-source-coordenada geo-coords-input" id="input-entrada-latitude-local-hidden" value="0" min="-90" max="90" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div id="dia-mes-ano-row">
+                    <div>
+                        <label class="control-label">Dia (DD/MM/AAAA)</label>
+                    </div>
+                    <input type="number" placeholder="DD" class="input-hora form-control" value="0" />
+                    <input type="number" placeholder="MM" class="input-hora form-control" value="0" />
+                    <input type="number" placeholder="AAAA" class="input-hora form-control" value="0" />
+                </div>
+
+                <div id="hora-minuto-segundo-row">
+                    <div>
+                        <label class="control-label">Hora (HH:MM:SS)</label>
+                    </div>
+                    <input type="number" placeholder="HH" class="input-hora form-control" value="0" />
+                    <input type="number" placeholder="MM" class="input-hora form-control" value="0" />
+                    <input type="number" placeholder="SS" class="input-hora form-control" value="0" />
+                </div>
+
+                <div>
+                    <label class="control-label">Fuso Horário</label>
+                    <input value="0" type="number" class="form-control" id="fuso" placeholder="fuso" />
+                </div>
+
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" id="input-horario-verao"/> Horário de Verão
+                    </label>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<input value="0" id="input-data-juliana" class="form-control" type="hidden" />
+
+<div id="main-div">
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    var posicaoAparente;
+
+    (function () {
+        $.getJSON('lib/on-daed-js/CID-ALL.json', function (data) {
+
+            $('#cidade-form').on('show.bs.modal', function () {
+                $('#busca-cidade-input').val('');
+                $('#data-form').modal('hide');
+                $('#busca-cidade-feedback').html("Digite a cidade");
+            });
+
+            $('#cidade-form').on('hide.bs.modal', function () {
+                $('#data-form').modal('show');
+            });
+
+            $('#exibir-resultados').click(function () {
+                if ($(this).is(':checked')) {
+                    $('#label-dados').show();
+                } else {
+                    $('#label-dados').hide();
+                }
+            });
+
+            var cidades = [];
+
+            for (var i in data) {
+                var estado = data[i];
+                for (var j = 0; j < estado.length; j++) {
+                    cidades.push({
+                        name: i + ' - ' + data[i][j].c,
+                        l: parseFloat(data[i][j].l),
+                        b: parseFloat(data[i][j].b)
+                    });
+                }
+            }
+
+            var buscaCidadeInput = $('#busca-cidade-input');
+
+            buscaCidadeInput.on('keyup', function () {
+                window.setTimeout(function () {
+                    if ($('ul.typeahead li:visible').length === 0 && buscaCidadeInput.val()) {
+                        $('#busca-cidade-feedback').html("Nenhuma cidade foi localizada");
+                    } else if (!buscaCidadeInput.val()) {
+                        $('#busca-cidade-feedback').html("Digite a cidade");
+                    } else if ($('ul.typeahead li:visible').length !== 0) {
+                        $('#busca-cidade-feedback').html("Escolha a cidade");
+                    } else {
+                        $('#busca-cidade-feedback').empty();
+                    }
+                }, 10);
+            });
+
+            buscaCidadeInput.typeahead({source: cidades,
+                autoSelect: true});
+
+            function labelCidade(nome) {
+                $('#label-cidade').html(nome);
+                $('#label-cidade-form').html(nome);
+                $('#label-cidade-form').show();
+                $('#row-label-resultado-cidade').show();
+                $('#row-label-resultado-latitude').hide();
+                $('#row-label-resultado-longitude').hide();
+            }
+
+            buscaCidadeInput.change(function () {
+                var current = buscaCidadeInput.typeahead("getActive");
+                if (current) {
+                    // Some item from your model is active!
+                    if (current.name === buscaCidadeInput.val().toUpperCase()) {
+                        // This means the exact match is found. Use toLowerCase() if you want case insensitive match.
+                        posicaoAparente.updateGeoCoords(current.l, current.b);
+                        labelCidade(current.name);
+                        $('#cidade-form').modal('hide');
+                    } else {
+
+                    }
+                } else {
+                    // new value
+                }
+            });
+
+            ON_DAED.addTempoSideralAnglepicker($('#coordenada-longitude-local'), '#input-entrada-longitude-local');
+            ON_DAED.addTempoSideralAnglepicker($('#coordenada-latitude-local'), '#input-entrada-latitude-local');
+
+            var controls;
+
+            var timescale = 1;
+
+            $('#btn-passagem-do-tempo').data('setTimescale', function(n) {
+                $('#obs-horizontal-timescale-label').html(n);
+                timescale = n;
+                var max = parseInt($('#btn-passagem-do-tempo').data('maxTimescale'));
+                var min = 1;
+                
+                if(n >= max) {
+                    $('#obs-horizontal-remove-timescale').attr("disabled", true);
+                    $('#obs-horizontal-add-timescale').attr("disabled", false);
+                } else if (n <= min) {
+                    $('#obs-horizontal-remove-timescale').attr("disabled", false);
+                    $('#obs-horizontal-add-timescale').attr("disabled", true);
+                } else {
+                    $('#obs-horizontal-remove-timescale').attr("disabled", false);
+                    $('#obs-horizontal-add-timescale').attr("disabled", false);
+                }
+            });
+
+            $('#btn-passagem-do-tempo').data('maxTimescale', 5);
+            $('#btn-passagem-do-tempo').data('baseVelocidade', 2000);
+
+            function passagemDoTempo() {
+                var baseVelocidade = $('#btn-passagem-do-tempo').data('baseVelocidade');
+                $('#btn-passagem-do-tempo').toggleClass('btn-info');
+                $('#btn-passagem-do-tempo').toggleClass('btn-primary');
+                $('#btn-passagem-do-tempo').toggleClass('active');
+                if ($('#btn-passagem-do-tempo').hasClass('btn-primary')) {
+                    posicaoAparente.posicaoAnimacao(null, timescale * baseVelocidade);
+                } else {
+                    posicaoAparente.pararAnimacao();
+                }
+            }
+
+            $('#obs-horizontal-add-timescale').click(function () {
+                var baseVelocidade = $('#btn-passagem-do-tempo').data('baseVelocidade');
+                var maxTimescale = $('#btn-passagem-do-tempo').data('maxTimescale');
+                timescale++;
+
+                if (timescale === maxTimescale) {
+                    $(this).prop("disabled", true);
+                }
+
+                $('#obs-horizontal-remove-timescale').prop("disabled", false);
+
+                $("#obs-horizontal-timescale-label").html(timescale);
+
+                if ($('#btn-passagem-do-tempo').hasClass('btn-primary')) {
+                    posicaoAparente.pararAnimacao();
+                    posicaoAparente.posicaoAnimacao(null, timescale * baseVelocidade);
+                }
+            });
+
+            $('#obs-horizontal-remove-timescale').click(function () {
+                var baseVelocidade = $('#btn-passagem-do-tempo').data('baseVelocidade');
+                
+                timescale--;
+
+                if (timescale === 1) {
+                    $(this).prop("disabled", true);
+                }
+
+                $('#obs-horizontal-add-timescale').prop("disabled", false);
+                $("#obs-horizontal-timescale-label").html(timescale);
+
+                if ($('#btn-passagem-do-tempo').hasClass('btn-primary')) {
+                    posicaoAparente.pararAnimacao();
+                    posicaoAparente.posicaoAnimacao(null, timescale * baseVelocidade);
+                }
+            });
+
+            $('#btn-passagem-do-tempo').click(function () {
+                if ($('#atualizacao-automatica').is(':checked')) {
+                    $('#atualizacao-automatica').click();
+                }
+
+                passagemDoTempo();
+            });
+
+            $('#atualizacao-automatica').bind('change', function () {
+                if ($('#btn-passagem-do-tempo').hasClass('active')) {
+                    passagemDoTempo();
+                }
+            });
+
+            $('#data-form').on('show.bs.modal', function () {
+                if ($('#btn-passagem-do-tempo').hasClass('active')) {
+                    passagemDoTempo();
+                }
+            });
+
+            ON_DAED["3D"].create(function (scene, camera) {
+                posicaoAparente = ON_DAED["3D"].ObservacaoFirmamento(scene, camera, $('#main-div'));
+            }, function (cameraControl, renderer, scene, camera, stats, clock) {
+                posicaoAparente.control()
+                        .update(clock.getDelta());
+                ON_DAED["3D"].update();
+                posicaoAparente.updateRosaDosVentos();
+                ThreeHelper.updateText(camera, $('#main-div')[0]);
+                TWEEN.update();
+                renderer.render(scene, camera);
+            }, document.getElementById('main-div'));
+
+        });
+    })();
+    /*]]>*/
+</script>

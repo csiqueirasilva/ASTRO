@@ -1,0 +1,91 @@
+<h3>Ângulo Horário</h3>
+
+<p>Tomamos como exemplo as coordenadas de Alpha Centauri (ascensão reta
+    (&alpha;)=14h 39m 37s e declinação (&delta;)=-60° 50' 02").</p>
+
+<p>O Equador Celeste ou de referência, utilizado neste programa, é o da época 1 de janeiro de 2000 às 12h, também
+    conhecido como J2000.</p>
+
+<div class="btn-exemplo-ajuda">
+    <button id="exemplo-btn" type="button" class="btn btn-primary">Veja o exemplo</button>
+</div>
+
+<h3>Saiba mais em:</h3>
+
+<a href="http://pt.wikipedia.org/wiki/Alpha_Centauri" target="_blank">http://pt.wikipedia.org/wiki/Alpha_Centauri</a>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    $('#exemplo-btn').click(function () {
+        $('#ascensao-reta').anglepicker('value', ON_DAED.tempoSideralRadiano(14, 39, 37));
+        $('#longitude-local').anglepicker('value', 0);
+
+        $('#enviar-formulario-obter-coordenadas').trigger('click');
+        $('.modal').modal('hide');
+    });
+    /*]]>*/
+</script>
+
+<h3>Botões de Tela</h3>
+
+<div class="btn-exemplo-ajuda">
+    <button type="button" class="btn btn-primary">
+        Inserir Dados
+    </button>
+</div>
+
+<p>Permite inserir a Ascensão Reta de um corpo celeste e a Longitude Local.
+    Com esses parâmetros visualiza-se o Ângulo Horário, Tempo Sideral Local
+    e para o Meridiano de Greenwich.</p>
+
+<div class="btn-exemplo-ajuda">
+    <div class="btn-group" role="group">
+        <button class="btn btn-info" type="button" >Nutação</button>
+        <button class="btn btn-info" type="button" >Precessão</button>
+        <button class="btn btn-info" type="button" >Translação</button>
+        <button class="btn btn-primary active" type="button" >Rotação</button>
+    </div>
+</div>
+
+<p>Ao clicar em algum desses botões a ação é realizada. O botão muda o tom de
+    sua cor quando é acionado. Para fins didáticos e de percepção de cada
+    movimento, pode-se ligar e desligar individualmente cada botão ou fazer
+    uma combinação deles. Assim os movimentos podem ser melhor
+    explorados e compreendidos.</p>
+
+<p>No caso do <b>Ângulo Horário</b> o botão <b>Rotação</b> é que permitirá a sua
+    visualização de seu incremento com o passar do movimento (a haste do Ângulo Horário marca o seu valor no círculo interno de números).</p>
+
+<p>O botão Rotação também permite visualizar o incremento do Tempo Sideral (Local e em Greenwich) com o passar do movimento (suas hastes respectivas marcam o seu valor no círculo externo de números).</p>
+
+<div class="btn-exemplo-ajuda">
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+        <button class="btn btn-success" type="button"><i class="glyphicon glyphicon-repeat"></i> <span>1</span></button>
+        <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+    </div>
+</div>
+
+<p>Este botão permite visualizar os movimentos em diversas velocidades. Note
+    que os movimentos não obedecem a uma escala real, mas sim àquela
+    estabelecida pelo usuário.</p>
+
+<p>No caso do Ângulo Horário o intervalo de velocidade foi estendido até 50 para que os outros movimentos de Nutação, Precessão e Translação sejam
+    percebidos.
+</p>
+
+<h3>Funções do Mouse</h3>
+
+<ul>
+
+    <li><b>Botão Esquerdo:</b> com este botão pode-se deslocar (rotação) a imagem do
+        sistema.</li>
+
+    <li><b>Botão de rolagem:</b> o programa permite aproximar ou afastar a imagem,
+        bastando para isso girar este botão.</li>
+
+</ul>
+
+<h3>Resultados</h3>
+
+<p>Os resultados são mostrados no canto superior esquerdo da tela.</p>

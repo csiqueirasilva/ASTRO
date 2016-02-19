@@ -1,0 +1,5 @@
+src/main/webapp
+src/test
+target
+nbactions.xml
+nb-configuration.xml

@@ -1,0 +1,36 @@
+<h3>Sistema Galáctico de Coordenadas</h3>
+
+<p>As coordenadas da Galáxia de Andrômeda (ascensão reta (&alpha;)=00h 42m 44s e declinação
+(&delta;)=+41° 16' 9"), a galáxia espiral mais próxima da Via Láctea, somente 2,5 milhões
+de anos-luz da Terra, servirão como exemplo para esta transformação de coordenadas.</p>
+
+<p>O Equador Celeste ou de referência, utilizado neste programa, é o da época 1 de
+janeiro de 2000 às 12h, também conhecido como J2000.</p>
+
+<div class="btn-exemplo-ajuda">
+    <button id="exemplo-btn" type="button" class="btn btn-primary">Veja o exemplo</button>
+</div>
+
+<h3>Saiba mais em:</h3>
+
+<a href=" http://pt.wikipedia.org/wiki/Gal%C3%A1xia_de_Andr%C3%B4meda" target="_blank">http://pt.wikipedia.org/wiki/Galáxia_de_Andrômeda</a>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    $('#exemplo-btn').click(function () {
+        $('#escolha-coordenadas').val('EQUATORIAL').trigger('change');
+        $('#coordenada_ascensao_reta').anglepicker('value', ON_DAED.tempoSideralRadiano(00, 42, 44));
+        $('#coordenada_declinacao').anglepicker('value', ON_DAED.parseTempoSideral(41, 16, 09) * 2);
+
+        $('#enviar-formulario-obter-coordenadas').trigger('click');
+        $('.modal').modal('hide');
+    });
+
+    /*]]>*/
+</script>
+
+<div th:include="descricoes/botao-visualizacao-galaxias-coordenadas :: texto('Inserir Coordenadas', 'Permite inserir, para visualizar ou determinar, as Coordenadas
+       Galácticas a partir de outros sistemas de coordenadas: Horizontal,
+       Equatorial, Eclíptico e Supergaláctico.', 
+       'Galáctico')">
+</div>

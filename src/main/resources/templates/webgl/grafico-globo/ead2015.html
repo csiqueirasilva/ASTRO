@@ -1,0 +1,13 @@
+<script th:inline="javascript">
+    /*<![CDATA[*/
+        $.ajax({
+            async: false,
+            url: atob('${dataUrl}'),
+            dataType: "json"
+        })
+        
+        .done(function(d) {
+            data = d;
+        });
+    /*]]>*/
+</script>

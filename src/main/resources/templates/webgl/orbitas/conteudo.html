@@ -1,0 +1,155 @@
+<link href="css/bootstrap-slider.css" rel="stylesheet" />
+<script src='js/bootstrap-slider.js'>
+</script>
+
+<script src="lib/on-daed-js/3D/Orbitas.js"></script>
+
+<div id="campo-de-observacao"></div>
+
+<div id="parent-exibir-galaxia" class="checkbox ui-observacao-horizontal">
+    <label>
+        <input type="checkbox" checked="checked" id="exibir-galaxia"/> Exibir Via Láctea de Referência
+    </label>
+</div>
+
+<div id="parent-via-lactea-raio-slider" class="parent-bs-slider noselect">
+    <div class="titulo-slider">Raio Via Láctea</div>
+    <input class="bs-slider" data-slider-tooltip="hide" id="via-lactea-raio-slider" data-slider-id='via-lactea-raio-slider-instance' type="text" data-slider-min="16" data-slider-max="20" data-slider-step="1" data-slider-value="16" />
+    <span class="label-slider">16 KPC</span>
+</div>
+
+<div id="parent-data-juliana-slider" class="parent-bs-slider noselect">
+    <div class="titulo-slider">Data Juliana</div>
+    <input class="bs-slider" data-slider-tooltip="hide" id="data-juliana-slider" data-slider-id='data-juliana-slider-instance' type="text" data-slider-min="2" data-slider-max="2" data-slider-step="4" data-slider-value="2" />
+    <span class="label-slider"></span>
+</div>
+
+<div id="label-dados" class="img-rounded elemento-ui ui-observacao-horizontal">
+    <select class="form-control" id="select-orbitas"></select>
+    <div><div class="orbita-distancia-label">Distância Centro da Galáxia</div><div class="orbita-distancia-input"><span id="distancia-centro-galaxia"></span> KPC</div></div>
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+
+    $.getJSON("lib/on-daed-js/orbitas/referencia.json", {}, function (dataReferencia) {
+
+        var selectOrbita = document.getElementById('select-orbitas');
+
+        var arquivoEscolhido = [[${arquivoDados}]];
+
+        for(var key in dataReferencia) {
+            var value = dataReferencia[key];
+            var option = document.createElement("option");
+            option.innerHTML = key;
+            option.value = value;
+            
+            if(value === arquivoEscolhido) {
+                option.selected = true;
+            }
+            
+            selectOrbita.appendChild(option);
+        }
+
+        $('#exibir-galaxia').click(function () {
+            var v;
+            if ($(this).is(':checked')) {
+                v = true;
+            } else {
+                v = false;
+            }
+            pOrbitas.setGalaxia(v);
+        });
+
+        /* SRC: http://stackoverflow.com/questions/3169786/clear-text-selection-with-javascript */
+        function clearTextSelection() {
+            if (window.getSelection) {
+                if (window.getSelection().empty) {  // Chrome
+                    window.getSelection().empty();
+                } else if (window.getSelection().removeAllRanges) {  // Firefox
+                    window.getSelection().removeAllRanges();
+                }
+            } else if (document.selection) {  // IE?
+                document.selection.empty();
+            }
+        }
+
+        $('.bs-slider').bootstrapSlider();
+
+        function sliderRaioGalaxia(slideEvt) {
+            var value = parseInt(slideEvt.value);
+            if (isNaN(value)) {
+                value = parseInt($(this).attr('data-slider-value'));
+            }
+
+            pOrbitas.setRaioGalaxia(value);
+
+            $('#' + this.id).siblings('.label-slider').html(value + " KPC");
+            clearTextSelection();
+        }
+
+        function sliderDataJuliana(slideEvt) {
+            var value = parseInt(slideEvt.value);
+            if (isNaN(value)) {
+                value = parseInt($(this).attr('data-slider-value'));
+            }
+
+            var updatedValue = pOrbitas.update(value);
+
+            $('#' + this.id).siblings('.label-slider').html(updatedValue);
+            clearTextSelection();
+        }
+
+        $('#data-juliana-slider').on('slideStop', sliderDataJuliana);
+        $('#data-juliana-slider').on('slide', sliderDataJuliana);
+
+        $('#via-lactea-raio-slider').on('slideStop', sliderRaioGalaxia);
+        $('#via-lactea-raio-slider').on('slide', sliderRaioGalaxia);
+
+        $('.parent-bs-slider').bind('mouseup', clearTextSelection);
+
+        $('.campo-de-observacao').bind('mouseup', clearTextSelection);
+
+        $('#select-orbitas').change(function() {
+            pOrbitas.loadData($(this).val());
+        });
+
+        //var pOrbitas = null;
+
+        var forceUpdateControls = false;
+
+        ON_DAED["3D"].create(function (scene, camera) {
+            pOrbitas = ON_DAED['3D'].Orbitas(scene, $(selectOrbita).val());
+            camera.position.set(1, 1, -50);
+        }, function (cameraControl, renderer, scene, camera, stats, clock) {
+
+            if ($('#campo-de-observacao canvas').is(':hover') || forceUpdateControls) {
+                cameraControl.enabled = true;
+                cameraControl.update(clock.getDelta());
+                forceUpdateControls = false;
+            } else {
+                cameraControl.enabled = false;
+            }
+
+            ON_DAED["3D"].update();
+            ThreeHelper.updateText(camera, $('#campo-de-observacao')[0]);
+            TWEEN.update();
+            renderer.render(scene, camera);
+        }, document.getElementById('campo-de-observacao'),
+                function (camera, renderer, scene, stats) {
+                    var c = new THREE.OrbitControls(camera);
+                    c.noPan = true;
+                    c.maxDistance = 600;
+                    c.minDistance = 10;
+                    forceUpdateControls = true;
+                    return c;
+                });
+
+        // definindo raio galaxia default
+        sliderRaioGalaxia({
+            value: 16
+        });
+
+    });
+    /*]]>*/
+</script>

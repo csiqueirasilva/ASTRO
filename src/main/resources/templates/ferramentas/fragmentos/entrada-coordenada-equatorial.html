@@ -1,0 +1,61 @@
+<div class="entrada-coordenadas" id="EQUATORIAL">
+
+    <div class="row-fluid margin-top-2">
+
+        <div class="col-md-12 celula-angulo">
+            <div id="coordenada_ascensao_reta">
+            </div>
+
+            <div class="row-fluid">
+                <div class="col-md-12">
+                    <label>Ascensão Reta</label>
+                    <div class="input-group">
+                        <input value="0" id="input-entrada-equatorial-ar-hora" class="form-control input-centralizado jlink input-small input-numerico" min="0" max="23" type="number" />
+                        <span class="input-group-addon">h</span>
+                        <input value="0" id="input-entrada-equatorial-ar-min" class="form-control input-centralizado jlink input-small input-numerico" min="0" max="59" type="number" />
+                        <span class="input-group-addon">m</span>
+                        <input value="0" id="input-entrada-equatorial-ar-sec" class="form-control input-centralizado jlink input-small input-numerico" min="0" max="59" type="number" />
+                        <span class="input-group-addon">s</span>
+                        <input name="rightAscension" type="hidden" class="data-source-coordenada" id="input-entrada-equatorial-ar-hidden" value="0" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 celula-angulo">
+            <div id="coordenada_declinacao">
+            </div>
+
+            <div class="row-fluid">
+                <div class="col-md-12">
+                    <label>Declinação</label>
+
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button id="input-entrada-equatorial-declinacao-sinal" class="btn btn-info" type="button">+</button>
+                        </span>
+                        <input value="0" id="input-entrada-equatorial-declinacao-hora" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">º</span>
+                        <input value="0" id="input-entrada-equatorial-declinacao-min" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">'</span>
+                        <input value="0" id="input-entrada-equatorial-declinacao-sec" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">"</span>
+                        <input name="declination" type="hidden" class="data-source-coordenada" id="input-entrada-equatorial-declinacao-hidden" value="0" min="-90" max="90" />
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    ON_DAED.numberInputMinMax('.input-numerico');
+    ON_DAED.addTempoSideralAnglepicker($('#coordenada_ascensao_reta'), '#input-entrada-equatorial-ar', true);
+    ON_DAED.addTempoSideralAnglepicker($('#coordenada_declinacao'), '#input-entrada-equatorial-declinacao');
+    /*]]>*/
+</script>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8" />
+
+        <title>Astro - Ferramentas de Astronomia</title>
+
+        <meta property="og:title"
+              content="ASTRO - Ferramentas Básicas de Astronomia" />
+        <meta property="og:image"
+              content="http://daed.on.br/astro/imgs/fb-astro.png" />
+        <meta property="og:image:width" content="600" />
+        <meta property="og:image:height" content="600" />
+        <meta property="og:site_name" content="ASTRO"/>
+        <meta property="og:description" content="Conjunto de ferramentas de Astronomia com visualização em 3D através da tecnologia WebGL." />
+        <meta property="og:type" content="website" />
+        
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+        <meta name="description" content="ASTRO"/>
+        <meta name="author" content="Observatório Nacional"/>
+
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery-ui.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/bootstrap-datepicker.js"></script>
+        <script src="js/locales/bootstrap-datepicker.pt-BR-ansi.js"></script>
+        <script src="js/anglepicker.js"></script>
+        <script src="lib/on-daed-js/geral.js"></script>
+        <script src="lib/on-daed-js/vsop87.min.js"></script>
+        <script src="lib/on-daed-js/astro.js"></script>
+        <script src="js/typeahead.min.js"></script>
+        <script src="js/imagesloaded.pkg.min.js"></script>
+        <script src="js/jquery.qtip.min.js"></script>
+
+        <script src="lib/on-daed-js/3D.js"></script>
+
+        <link href="css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="css/bootstrap-responsive.css" rel="stylesheet"/>
+
+        <link rel="SHORTCUT ICON" href="http://daed.on.br/astro/favicon.ico" />
+        
+        <link href="http://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet" type="text/css"/>
+
+        <script>
+            (function (i, s, o, g, r, a, m) {
+                i['GoogleAnalyticsObject'] = r;
+                i[r] = i[r] || function () {
+                    (i[r].q = i[r].q || []).push(arguments)
+                }, i[r].l = 1 * new Date();
+                a = s.createElement(o),
+                        m = s.getElementsByTagName(o)[0];
+                a.async = 1;
+                a.src = g;
+                m.parentNode.insertBefore(a, m)
+            })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+            ga('create', 'UA-22359689-5', 'auto');
+            ga('send', 'pageview');
+
+        </script>
+
+        <style>
+            body {
+                background-image: url(imgs/bg-principal.gif);
+                background-size: 100%;
+            }
+
+            * {
+                font-family: 'Ubuntu', sans-serif;
+            }
+
+            .label-thumbnail:hover {
+                text-decoration: none;
+                color: #FFFFFF;
+            }
+
+            .label-thumbnail {
+                font-weight: bold;
+                background: rgb(0, 0, 132);
+                bottom: 0;
+                text-align: center;
+                color: #FFFFFF;
+            }
+
+            @media(min-width: 1099px) {
+                #historico-texto-modal .modal-dialog {
+                    width: 75%;
+                }
+            }
+
+            .dialog-image {
+                text-align: center; 
+                padding-top: 10px; 
+                padding-bottom: 10px;
+                width: 100%;
+            }
+
+            .dialog-image img {
+                max-width: 100%;
+            }
+
+            .modal-body {
+                text-align: justify;
+            }
+
+            .modal-body h1 {
+                text-align: center;
+            }
+
+            #conteudo {
+                text-align: justify;
+            }
+
+            #astro-index-jumbo {
+                margin-top: -10px;
+            }
+
+            #astro-index-jumbo, #menu > div > div, #app-conteudo > div.panel.panel-info > div, .panel-heading {
+                text-align: center;
+                background: #FFFFFF;
+            }
+
+            #logo-astro {
+                margin-top: 5%;
+                margin-bottom: 5%;
+                text-align: center;
+            }
+
+            #menu {
+                text-align: center;
+                font-weight: bold;
+                color: rgb(0, 0, 132);
+                margin-bottom: 5%;
+                margin-top: 20px;
+            }
+
+            #menu h2 {
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+
+            #menu a {
+                color: rgb(0, 0, 132);
+                margin-right: 1vw;
+                margin-left: 1vw;
+                text-transform: uppercase;
+            }
+
+
+
+            #menu .separator {
+                background: rgb(0, 0, 132);
+                display: inline-block;
+            }
+
+            @media(min-width: 1151px) {
+                #menu a {
+                    font-size: 1.75vw;
+                }
+
+                .grupo-conteudo-heading-text {
+                    font-size: 2vw;
+                }
+
+                #menu .separator {
+                    height: 1.75vw;
+                    width: 0.2vw;
+                }
+            }
+
+            @media(max-width: 1150px) {
+                #menu a {
+                    font-size: 2.5vw;
+                }
+
+                .grupo-conteudo-heading-text {
+                    font-size: 3vw;
+                }
+
+                #menu .separator {
+                    height: 2.5vw;
+                    width: 0.5vw;
+                }
+
+                .row, .thumbnails {
+                    margin-right:0px;
+                    margin-left: 0px;
+                }
+            }
+
+
+            #conteudo {
+                margin-top: 100px;
+            }
+
+            .jlink:hover {
+                cursor: pointer;
+            }
+
+            #app-conteudo h2 {
+                text-align: center;
+                margin-bottom: 10px;
+                margin-top: 10px;
+            }
+
+            #video-holder {
+                background: rgba(180, 180, 180, 0.5);
+                padding-top: 5%;
+                padding-bottom: 5%;
+                overflow: auto;
+            }
+
+            .grupo-conteudo {
+                margin-top: 2px;
+                overflow: auto;
+                color: #FFFFFF;
+            }
+
+            .grupo-conteudo-0 {
+                background: rgba(0, 0, 132, 0.5);
+            }
+
+            .grupo-conteudo-1 {
+                background: rgba(180, 180, 180, 0.5);
+            }
+
+            .grupo-conteudo-heading {
+                font-weight: bold;
+            }
+
+            .grupo-conteudo-heading-text {
+                text-align: center;
+                text-transform: uppercase;
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+
+            .browser-icon {
+                width: 100px;
+                height: 100px;
+            }
+
+            .browser-icon-holder {
+                display: inline-block;
+                width: 33%;
+            }
+
+        </style>
+
+    </head>
+
+    <body>
+
+        <div class="container-fluid">
+
+            <div class="row-fluid" id="main-wrapper">
+
+                <div class="col-md-8 col-md-offset-2">
+                    <div id="astro-index-jumbo">
+                        <div class="row">
+                            <div id="logo-astro" class="col-md-8 col-md-offset-2">
+                                <img src="imgs/logo_astro.png" width="94%"/>
+                            </div>
+
+                            <!-- MENU -->
+                            <div id="menu" class="col-md-10 col-md-offset-1">
+
+                                <a class="jlink" data-target=".grupo-conteudo:first" data-toggle="scroll">
+                                    Aplicativos
+                                </a>
+                                <div class="separator"></div>
+                                <a class="jlink" data-toggle="modal" data-target="#historico-texto-modal">
+                                    Sobre
+                                </a>
+                                <div class="separator"></div>
+                                <a class="jlink" data-toggle="modal" data-target="#ajuda-texto-modal">
+                                    Dicas de Uso
+                                </a>
+                                <div class="separator"></div>
+                                <a class="jlink" data-toggle="modal" data-target="#creditos-texto-modal">
+                                    Créditos
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                        <div class="hidden" id="no-webgl-msg">
+                            <div class="row">
+                                <div id="menu" class="col-md-10 col-md-offset-1">
+                                    <div>
+                                        <img style='width: 80%;' src='imgs/webgl.jpg'/>
+                                    </div>
+
+                                    <h1>Sem suporte a WebGL!</h1>
+
+                                    <h3>Seu navegador precisa estar com WebGL ativo para ver as aplicações. Abaixo segue uma lista de navegadores suportados com suas respectivas versões.</h3>
+
+                                    <div style='margin-top: 40px;'>
+
+                                        <div class='browser-icon-holder'>
+                                            <img class='browser-icon' src='imgs/ie-icon.png'/>
+                                            <h4>Internet Explorer</h4>
+                                            <h4>11+</h4>
+                                        </div>
+
+                                        <div class='browser-icon-holder'>
+                                            <img class='browser-icon' src='imgs/firefox-icon.png'/>
+                                            <h4>Firefox</h4>
+                                            <h4>31+</h4>
+                                        </div>
+
+                                        <div class='browser-icon-holder'>
+                                            <img class='browser-icon' src='imgs/chrome-icon.png'/>
+                                            <h4>Chrome</h4>
+                                            <h4>36+</h4>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-md-8 col-md-offset-2">
+                    <div id="video-holder">
+                        <div class="col-md-6 col-md-offset-3">
+                            <div class="embed-responsive embed-responsive-16by9">
+                                <iframe class="embed-responsive-item" src="http://www.youtube.com/embed/3DMVVnt175U?rel=0&amp;nologo=1&amp;showinfo=0">
+                                </iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HISTORICO -->
+                <div class="modal fade ui-observacao-horizontal" id="historico-texto-modal" tabindex="-1" role="dialog" aria-labelledby="Histórico" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title">Histórico</h4>
+                            </div>
+
+                            <div class="modal-body" th:inline="text">
+                                <h1>ASTRO(1987-2015)</h1>
+
+                                <p>Em 1987 foi publicado um trabalho na série "Publicação Especial" do Observatório
+                                    Nacional que consistia de um conjunto de subprogramas básicos de astronomia
+                                    (transformação de coordenadas, precessão, nutação, tempo sideral, etc.), para serem
+                                    utilizados por toda comunidade astronômica em seus programas científicos.
+                                    O trabalho teve como objetivo desenvolver, organizar e disponibilizar um conjunto de
+                                    sub-rotinas, de interesse comum às várias áreas da astronomia, escritas na linguagem
+                                    de programação FORTRAN, para auxiliar e minimizar o tempo de pesquisadores e
+                                    alunos.</p>
+
+                                <p>Naquela época o pacote foi desenvolvido com o apoio do Conselho Nacional de Pesquisa
+                                    (CNPq), com a participação do estudante Filipe de Moraes Paiva. Da mesma forma, na atualidade, o
+                                    CNPq, por meio do seu Programa de Capacitação Institucional - PCI, concedeu uma bolsa
+                                    ao estudante Caio Siqueira da Silva para que, entre outros projetos a serem
+                                    desenvolvidos, fosse criada uma nova versão do ASTRO. Portanto, o Observatório
+                                    Nacional além de cumprir o seu papel de capacitar e formar profissionais nas suas áreas
+                                    de atuação, disponibiliza os trabalhos que são desenvolvidos na instituição para toda a
+                                    sociedade.</p>
+
+                                <p>Vinte e oito anos depois este pacote foi redesenhado e disponibilizado, com os mesmos
+                                    objetivos, mas, agora, aberto a toda a sociedade interessada em Astronomia. O propósito
+                                    foi o de atualizar este software da maneira mais adequada a época atual em que grande
+                                    parte da população brasileira tem acesso à Internet. Também torna-lo mais interativo e
+                                    principalmente, mais educativo.</p>
+
+                                <p>A nova versão foi reescrita em C, JAVA e HTML, com visualização em 3D dinâmico e texto
+                                    explicativo com uma linguagem simples. Está disponível na página institucional do
+                                    Observatório Nacional e conta com recursos MOBILE para ser acessada
+                                    como aplicativo web para os diversos dispositivos móveis, que operam com o sistema
+                                    Android ou iOS, criando assim uma moderna ferramenta. Um importante aspecto desta
+                                    nova versão é a sua versatilidade e inovação.</p>
+
+                                <h1>ANTIGO ASTRO</h1>
+
+                                <p>O pacote Astro original foi desenvolvido para ser utilizado em um sistema que possuía
+                                    interface de linha de comando. Sua interface era baseada na impressão de texto no
+                                    console, no formato de opções que eram acessados por leitura de dígitos do teclado.</p>
+
+                                <div class='dialog-image'>
+                                    <img src="imgs/astro-antigo.png" />
+                                    <figcaption>Menu Principal do programa Astro Original</figcaption>
+                                </div>
+
+                                <h1>NOVO ASTRO</h1>
+
+                                <p>O objetivo principal da atualização do ASTRO foi a de tornar suas funcionalidades
+                                    acessíveis a partir de um website, uma biblioteca Javascript e também acessíveis por meio de
+                                    dispositivos móveis que tenham sistema Android ou iOS. Esse tipo de distribuição foi
+                                    escolhido devido ao resultado em 2014 do Centro de Estudos sobre as Tecnologias da
+                                    Informação e da Comunicação (Cetic.br) constatando que exatos 51% da população
+                                    brasileira, 85,9 milhões de pessoas, têm acesso à internet.</p>
+
+                                <p>A partir das rotinas do ASTRO é possível construir outros aplicativos. Disponibilizamos, dentro do pacote, três programas exemplo que determinam o Nascer, Passagem Meridiana e Ocaso do Sol para as coordenadas geográficas do observador. Outro exercício clássico apresentado é a determinação das fases da Lua, com a visualização do nascer e ocaso e a previsão dos eclipses solares e lunares.</p>
+
+                                <p>O Observatório Nacional entende que a educação científica e tecnológica deve ser
+                                    mantida acessível a todos os níveis da sociedade e a todo instante. A popularização da
+                                    ciência e a difusão do conhecimento científico e tecnológico são fatores fundamentais
+                                    para a construção de uma sociedade justa e participativa.</p>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CREDITOS -->
+                <div class="modal fade ui-observacao-horizontal" id="creditos-texto-modal" tabindex="-1" role="dialog" aria-labelledby="Créditos" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title">Créditos</h4>
+                            </div>
+
+                            <div class="modal-body" th:include="creditos :: creditos">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DICAS DE USO -->
+                <div class="modal fade ui-observacao-horizontal" id="ajuda-texto-modal" tabindex="-1" role="dialog" aria-labelledby="Dicas de Uso" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title">Dicas de Uso</h4>
+                            </div>
+
+                            <div class="modal-body">
+
+                                <p>O pacote ASTRO foi desenvolvido com ferramentas modernas para tornar sua
+                                    funcionalidade amigável e intuitiva a partir de um website, uma biblioteca Javascript e também
+                                    acessíveis por meio de dispositivos móveis que tenham sistema Android ou iOS.</p>
+
+                                <p>Um dos principais objetivos desse pacote é o de torná-lo explorável, onde o usuário
+                                    poderá simular e experimentar novos parâmetros para testar seus conhecimentos.</p>
+
+                                <p>Algumas características do programa:</p>
+
+                                <ol>
+                                    <li>Funciona a partir de um website, não sendo necessário fazer download, não ocupando assim espaço no computador do usuário.</li>
+                                    <li>Acessível por meio de dispositivos móveis que tenham sistema Android ou iOS.</li>
+                                    <li>As coordenadas geográficas são capturadas automaticamente do computador ou a partir da entrada dos dados manualmente ou escolhidas a partir de uma lista (busca textual).</li>
+                                    <li>Visualização do fenômeno, evitando assim longas tabelas e listas numéricas.</li>
+                                </ol>
+
+                                <p>Os botões do mouse são fundamentais na manipulação da tela. O seu uso é intuitivo
+                                    e logo o usuário percebe como utiliza-lo dentro do programa.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="app-conteudo" class="col-md-8 col-md-offset-2">
+
+                </div>
+            </div>
+
+            <script th:inline="javascript">
+                /*<![CDATA[*/
+                (function () {
+
+                    var elemAssunto = '<div class="grupo-conteudo">\
+                        <div class="grupo-conteudo-heading">\
+                            <div class="grupo-conteudo-heading-text">%assunto%</div>\
+                        </div>\
+\
+                        <div class="grupo-conteudo-body">\
+                        </div>\
+\
+                    </div>';
+
+                    var elem = '<div class="col-md-4">\
+                                <a href="%url%" class="thumbnail">\
+                                    <img src="imgs/thumbnails/%img%.png" class="img-rounded" alt="..."/>\
+                                    <div class="label-thumbnail">\
+                                        %nome%\
+                                    </div>\
+                                </a>\
+                            </div>';
+
+                    if (ON_DAED.WEBGL_SUPPORT) {
+
+                        var c = 0;
+                        $.ajax({
+                            dataType: "json",
+                            url: 'lib/on-daed-js/conteudo-index.json',
+                            success: function (data) {
+                                for (var i in data) {
+                                    $("#app-conteudo").append(elemAssunto.replace('%assunto%', i));
+                                    $('#app-conteudo').find('.grupo-conteudo:last').addClass('grupo-conteudo-' + (c++ % 2));
+                                    for (var j = 0; j < data[i].length; j++) {
+                                        $('#app-conteudo').find('.grupo-conteudo:last').children('.grupo-conteudo-body').append(
+                                                elem
+                                                .replace('%nome%', data[i][j].nome)
+                                                .replace('%url%', data[i][j].url)
+                                                .replace('%img%', data[i][j].url)
+                                                );
+                                    }
+                                }
+                            }
+                        });
+
+                        $('[data-toggle="scroll"]').bind('click', function (event) {
+                            $('body, html').animate({scrollTop: $($(event.target).attr('data-target')).offset().top}, '500', 'swing');
+                        });
+
+                    } else {
+                        $('.jlink[data-target=".grupo-conteudo:first"]').remove();
+                        $('#video-holder').remove();
+                        $('#menu .separator:first').remove();
+                        $('#link-aplicacoes').remove();
+                        $('iframe').remove();
+                        $('#no-webgl-msg').removeClass('hidden');
+                    }
+
+                })();
+                /*]]>*/
+            </script>
+
+        </div>
+    </body>
+
+</html>

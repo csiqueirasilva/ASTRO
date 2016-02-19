@@ -1,0 +1,508 @@
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="UTF-8">
+
+        <title>Astro - ${tituloPagina}</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="description" content="">
+        <meta name="author" content="Observatório Nacional">
+
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery-ui.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/bootstrap-datepicker.js"></script>
+        <script src="js/locales/bootstrap-datepicker.pt-BR.js"></script>
+        <script src="js/anglepicker.js"></script>
+        <script src="lib/on-daed-js/geral.js"></script>
+
+        <link href="css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="css/bootstrap-responsive.css" rel="stylesheet"/>
+
+        <link href="css/anglepicker.css" rel="stylesheet"/>
+        <link href="css/datepicker3.css" rel="stylesheet"/>
+        <link href="css/jquery-ui.structure.min.css" rel="stylesheet"/>
+        <link href="css/jquery-ui.theme.min.css" rel="stylesheet"/>
+
+        <link href="http://fonts.googleapis.com/css?family=Syncopate" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Abel" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Pontano+Sans" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Oxygen" rel="stylesheet" type="text/css">
+
+        <style>
+            #astro-index-jumbo {
+                background-image: url(imgs/jumbobg.jpg);
+            }
+
+            #unidade-zoom-btn-group, #terra-timescale-btn-group {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+            }
+
+            #resultados-input {
+                max-height: 400px;
+                overflow: auto;
+            }
+
+            .fill {
+                height: 100%;
+            }
+
+            .margin-top-2 {
+                margin-top: 2%;
+            }
+
+            .conteudo-destaque {
+                margin-top: 4%;
+                margin-bottom: 4%;
+            }
+
+            .texto-explicativo p {
+                text-align: justify;
+            }
+
+            .campo-conteudo {
+                text-align: center;
+                padding: 1%;
+            }
+
+            .campo-de-input {
+                padding-top: 4%;
+            }
+
+            .input-centralizado {
+                text-align: center;
+            }
+
+            .titulo-widget {
+                margin-top: 0%;
+                margin-bottom: 0%;
+            }
+
+            .jlink:hover {
+                cursor: pointer;
+            }
+
+            .input-hora {
+                width: 26%;
+                margin-left: 2%;
+                margin-right: 2%;
+                display: inline;
+            }
+
+            #campo-de-observacao {
+                margin-top: 10px;
+                height: 400px;
+                margin-bottom: 10px;
+                position: relative;
+            }
+
+            .celula-angulo {
+                margin-top: 10px;
+            }
+
+            .hover-label-text {
+                text-align: center;
+                font-weight: bold;
+                text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+            }
+
+            #logo-astro {
+                width: 24px;
+            }
+
+            #sticky-footer {
+                height: 50px;
+                background: #000000;
+                width: 100%;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+            }
+
+            html, body {
+                height: 100%;
+            }
+
+            #wrap {
+                min-height: 100%;
+                height: auto;
+                margin: 0 auto -60px;
+                padding: 0 0 60px;
+            }
+
+            #footer {
+                height: 60px;
+                background-color: #000000;
+                color: #F0F0F0;
+            }
+
+            #astro-header-principal .navbar-nav > li > a {
+                color: #F0F0F0;
+            }
+
+            #astro-header-principal .navbar-nav > li > a:hover {
+                color: #428bca;
+            }
+
+            #footer-info {
+                text-align: center;
+            }
+
+            @media (max-width: 767px) {
+                #footer {
+                    margin-left: -20px;
+                    margin-right: -20px;
+                }
+            }
+
+            #terra-props-btn-group {
+                position: absolute;
+                top: 89%;
+                left: 1%;
+                width: 100%;
+            }
+
+        </style>
+
+    </head>
+    <body>
+
+        <script>
+
+            function preencherDados(data) {
+                var div = document.createElement("div");
+
+                for (var key in data) {
+                    var ele = document.createElement("h3");
+                    ele.innerHTML = key.toUpperCase() + ": " + data[key];
+                    div.appendChild(ele);
+                }
+
+                $("#campo-de-observacao")
+                        .empty()
+                        .html(div);
+            }
+
+            function parseAllData() {
+                var sendData = {};
+
+                $('.entrada-coordenadas:visible').find('.data-source-coordenada').each(function (k, v) {
+                    var val = parseFloat($(v).val());
+                    var name = $(v).attr('name');
+                    if (!$(v).hasClass('nao-converter-radiano')) {
+                        val *= Math.PI / 180;
+                    }
+                    sendData[name] = val;
+                });
+
+                return sendData;
+            }
+
+            function tempoSideralLoadInput(target, value, ts) {
+                var elemHora = $(target + "-hora");
+                var elemMinuto = $(target + "-min");
+                var elemSegundo = $(target + "-sec");
+                var elemSinal = $(target + "-sinal");
+
+                if (elemSinal.length > 0) {
+                    if (value < 0) {
+                        elemSinal.html('-');
+                        value = -value;
+                    } else {
+                        elemSinal.html('+');
+                    }
+                }
+
+                var tempoSideral = ON_DAED.tempoSideral(value * Math.PI / 180, !ts);
+
+                var split = tempoSideral.split(" ");
+
+                elemHora.val(split[0].replace("h", "").replace("º", ""));
+                elemMinuto.val(split[1].replace("'", "").replace("m", ""));
+                elemSegundo.val(split[2].replace("\"", "").replace("s", ""));
+
+                elemHora.trigger('blur');
+            }
+
+            function disableBodyScroll(query) {
+                /* src: http://stackoverflow.com/questions/7915882/disabling-mouse-scrolling */
+                $(query).hover(function () {
+                    $('body').css('overflow', 'hidden');
+                }, function () {
+                    $('body').css('overflow', 'auto');
+                });
+            }
+
+            function addAnglepicker(element, target) {
+                element.anglepicker({
+                    clockwise: false,
+                    change: function (e, ui) {
+                        var angle = ui.value;
+                        var valorFinal = ((parseFloat(target.attr("max")) - parseFloat(target.attr("min"))) * (angle / 360));
+
+                        if (valorFinal > (parseFloat(target.attr("max")))) {
+                            valorFinal = valorFinal - parseFloat(target.attr("max")) + parseFloat(target.attr("min"));
+                        }
+
+                        target.val(valorFinal.toFixed(2));
+                    }, value: 0
+                });
+
+
+                function blurAngleInput() {
+                    var valor = parseFloat(target.val());
+                    var escala = 360 / (Math.abs(parseFloat(target.attr("max"))) + Math.abs(parseFloat(target.attr("min"))));
+                    valor *= escala;
+                    element.anglepicker("value", valor);
+                }
+
+                target.bind('blur', blurAngleInput);
+            }
+
+            function addTempoSideralAnglepicker(element, target, ts) {
+                var elemHora = $(target + "-hora");
+                var elemMinuto = $(target + "-min");
+                var elemSegundo = $(target + "-sec");
+                var elemHidden = $(target + "-hidden");
+                var elemSinal = $(target + "-sinal");
+
+                if (ts) {
+                    $(elemHidden).addClass("nao-converter-radiano");
+                }
+
+                element.anglepicker({
+                    clockwise: false,
+                    change: function (e, ui) {
+                        var angle;
+
+                        if (ts) {
+                            angle = ui.value * Math.PI / 180;
+                            elemHidden.val(ui.value / 15);
+
+                        } else {
+                            angle = ui.value;
+                            var valorFinal = ((parseFloat(elemHidden.attr("max")) - parseFloat(elemHidden.attr("min"))) * (angle / 360));
+
+                            if (valorFinal > (parseFloat(elemHidden.attr("max")))) {
+                                valorFinal = valorFinal - parseFloat(elemHidden.attr("max")) + parseFloat(elemHidden.attr("min"));
+                            }
+
+                            elemHidden.val(valorFinal.toFixed(14));
+
+                            angle = valorFinal * Math.PI / 180;
+                        }
+
+                        if (elemSinal.length > 0) {
+                            if (angle < 0) {
+                                angle *= -1;
+                                elemSinal.html('-');
+                            } else {
+                                elemSinal.html('+');
+                            }
+                        }
+
+                        var split = ON_DAED.tempoSideral(angle, !ts).split(' ');
+                        elemHora.val(split[0].replace("h", "").replace("º", ""));
+                        elemMinuto.val(split[1].replace("'", "").replace("m", ""));
+                        elemSegundo.val(split[2].replace("\"", "").replace("s", ""));
+
+                    }, value: 0
+                });
+
+                function blurTempoSideralTextField() {
+
+                    var h = elemHora.val().match(/^\d+$/g) === null ? "00" : elemHora.val();
+                    var m = elemMinuto.val().match(/^\d+$/g) === null ? "00" : elemMinuto.val();
+                    var s = elemSegundo.val().match(/^\d+$/g) === null ? "00" : elemSegundo.val();
+
+                    elemHora.val(h);
+                    elemMinuto.val(m);
+                    elemSegundo.val(s);
+
+                    var tempoSideral = ON_DAED.parseTempoSideral(h, m, s);
+
+                    if (elemSinal.length > 0) {
+                        if (elemSinal.html() === "-") {
+                            tempoSideral *= -1;
+                        }
+                    }
+
+                    var val;
+
+                    if (!ts) {
+                        var max = parseFloat(elemHidden.attr('max'));
+
+                        if (tempoSideral > max) {
+                            tempoSideral = max;
+                            elemHora.val(max);
+                            elemMinuto.val("00");
+                            elemSegundo.val("00");
+                        }
+
+                        if (+elemHidden.attr("max") === -elemHidden.attr("min")) {
+                            var v = parseInt(elemHidden.attr("max"));
+                            tempoSideral *= 180 / v;
+                        } else {
+                            var v = parseInt(elemHidden.attr("max"));
+                            tempoSideral *= 360 / v;
+                        }
+
+                        val = tempoSideral;
+                    } else {
+                        val = tempoSideral;
+                        tempoSideral *= 15;
+                    }
+
+                    elemHidden.val(val);
+
+                    element.anglepicker("value", tempoSideral);
+                }
+
+                elemHora.bind('blur', blurTempoSideralTextField);
+                elemMinuto.bind('blur', blurTempoSideralTextField);
+                elemSegundo.bind('blur', blurTempoSideralTextField);
+
+                if (elemSinal.length > 0) {
+                    elemSinal.click(function () {
+                        if ($(this).html() === "+") {
+                            $(this).html("-");
+                        } else {
+                            $(this).html("+");
+                        }
+                        blurTempoSideralTextField();
+                    });
+                }
+
+            }
+        </script>
+
+        <div id="wrap">
+
+            <nav id="header" class="navbar navbar-inverse navbar-static-top" role="navigation">
+                <div class="container-fluid">
+
+                    <div class="navbar-header">
+                        <a class="navbar-brand" href="/ASTRO">
+                            <img id="logo-astro" alt="Astro" src="imgs/logo-astro.png">
+                        </a>
+
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#astro-header-principal">
+                            <span class="sr-only">Alternar navegação</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                    </div>
+
+                    <!-- Collect the nav links, forms, and other content for toggling -->
+                    <div class="collapse navbar-collapse" id="astro-header-principal">
+                        <ul class="nav navbar-nav">
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Calendários <span class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="data-juliana">Data Juliana</a></li>
+                                    <li><a href="calendario-gregoriano">Calendário Gregoriano</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="precessao">Precessão</a></li>
+                                    <li><a href="nutacao">Nutação</a></li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Coordenadas <span class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="coordenadas-horizontais">Coordenadas Horizontais</a></li>
+                                    <li><a href="coordenadas-equatoriais">Coordenadas Equatoriais</a></li>
+                                    <li><a href="coordenadas-horarias">Coordenadas Horárias</a></li>
+                                    <li><a href="coordenadas-eclipticas">Coordenadas Eclípticas</a></li>
+                                    <li><a href="coordenadas-galacticas">Coordenadas Galácticas</a></li>
+                                    <li><a href="coordenadas-supergalacticas">Coordenadas Supergalácticas</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="distancia-zenital">Distância Zenital</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="tempo-sideral">Tempo Sideral</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="ecliptica">Eclíptica</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="equacao-de-kepler">Equação de Kepler</a></li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Unidades <span class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="quilometro">Quilômetro</a></li>
+                                    <li><a href="unidade-astronomica">Unidade Astronômica</a></li>
+                                    <li><a href="parsec">Parsec</a></li>
+                                    <!--                                    <li class="divider"></li>
+                                                                        <li><a href="segundo-de-arco">Segundo de Arco</a></li>-->
+                                </ul>
+                            </li>
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li>
+                                <a href="/ASTRO/docs">
+                                    <img id="logo-astro" alt="Astro" src="imgs/logo-api.png">
+                                </a>
+                            </li>
+                        </ul>
+                    </div><!-- /.navbar-collapse -->
+                </div>
+            </nav>
+
+            <div class="container-fluid">
+
+                <div class="row-fluid">
+
+                    <c:choose>
+                        <c:when test="${conteudo == 'docs'}">
+                            <jsp:include page="conteudo/swagger.jsp" />
+                        </c:when>
+                        <c:when test="${conteudo == 'index'}">
+                            <div class="col-md-12">
+                                <div id="astro-index-jumbo" class="jumbotron">	        
+                                    <h1>Conheça o Astro</h1>  
+                                    <p>Um conjunto de ferramentas de Astronomia</p>  
+                                    <p>    
+                                        <a class="btn btn-primary btn-lg" role="button">Conheça mais</a>  
+                                    </p>         
+                                </div>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="campo-conteudo col-md-6">
+                                <jsp:include page="descricoes/${conteudo}.jsp" />
+                            </div>
+                            <div class="campo-conteudo col-md-6">
+                                <jsp:include page="ferramentas/${conteudo}.jsp" />
+                            </div>
+
+                        </c:otherwise>
+                    </c:choose>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="footer">
+            <div class="container-fluid">
+                <div id="footer-info">
+                    <div>Observatório Nacional - Todos os direitos reservados</div>
+                    <div>R. Gen. José Cristino, 77 - São Cristóvão, Rio de Janeiro - RJ, 20921-400 - (21) 3504-9100</div>
+                    <div><a href="http://www.on.br/">http://www.on.br/</a></div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

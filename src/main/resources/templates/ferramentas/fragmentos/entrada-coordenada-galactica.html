@@ -1,0 +1,65 @@
+<div class="row-fluid entrada-coordenadas" id="GALACTIC">
+
+    <div class="row-fluid margin-top-2">
+
+        <div class="col-md-12 celula-angulo">
+            <div id="coordenada-galactica-latitude">
+            </div>
+
+            <div class="row-fluid">
+                <div class="col-md-12">
+                    <label>Latitude Galáctica</label>
+
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button id="input-entrada-galactica-latitude-sinal" class="btn btn-info" type="button">+</button>
+                        </span>
+                        <input value="0" id="input-entrada-galactica-latitude-hora" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">º</span>
+                        <input value="0" id="input-entrada-galactica-latitude-min" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">'</span>
+                        <input value="0" id="input-entrada-galactica-latitude-sec" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">"</span>
+                        <input name="latitude" type="hidden" class="data-source-coordenada" id="input-entrada-galactica-latitude-hidden" value="0" min="-90" max="90" />
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-12 celula-angulo">
+            <div id="coordenada-galactica-longitude">
+            </div>
+
+            <div class="row-fluid">
+                <div class="col-md-12">
+                    <label>Longitude Galáctica</label>
+
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button id="input-entrada-galactica-longitude-sinal" class="btn btn-info" type="button">+</button>
+                        </span>
+                        <input value="0" id="input-entrada-galactica-longitude-hora" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">º</span>
+                        <input value="0" id="input-entrada-galactica-longitude-min" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">'</span>
+                        <input value="0" id="input-entrada-galactica-longitude-sec" class="form-control input-centralizado jlink input-small" type="number" min="0" />
+                        <span class="input-group-addon">"</span>
+                        <input name="longitude" type="hidden" class="data-source-coordenada" id="input-entrada-galactica-longitude-hidden" value="0" min="-180" max="180" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    ON_DAED.numberInputMinMax('.input-numerico');
+    ON_DAED.addTempoSideralAnglepicker($('#coordenada-galactica-latitude'), '#input-entrada-galactica-latitude');
+    ON_DAED.addTempoSideralAnglepicker($('#coordenada-galactica-longitude'), '#input-entrada-galactica-longitude');
+    /*]]>*/
+</script>

@@ -1,0 +1,234 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="UTF-8">
+
+        <title>Astro - Posição Solar</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="description" content="">
+        <meta name="author" content="Observatório Nacional">
+
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery-ui.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/bootstrap-datepicker.js"></script>
+        <script src="js/locales/bootstrap-datepicker.pt-BR.js"></script>
+        <script src="js/anglepicker.js"></script>
+        <script src="lib/on-daed-js/geral.js"></script>
+        <script src="lib/on-daed-js/vsop87.min.js"></script>
+        <script src="lib/on-daed-js/astro.js"></script>
+
+        <script src="js/three.min.js"></script>
+        <script src="js/MTLLoader.js"></script>
+        <script src="js/OBJMTLLoader.js"></script>
+        <script src="js/OrbitControls.js"></script>
+        <script src="js/stats.min.js"></script>
+        <script src="js/tween.min.js"></script>
+        <script src="js/ThreeHelper.js"></script>
+        <script src="lib/on-daed-js/MathHelper.js"></script>
+        <script src="lib/on-daed-js/3D.js"></script>
+
+        <link href="css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="css/bootstrap-responsive.css" rel="stylesheet"/>
+
+        <link href="css/anglepicker.css" rel="stylesheet"/>
+        <link href="css/datepicker3.css" rel="stylesheet"/>
+        <link href="css/jquery-ui.structure.min.css" rel="stylesheet"/>
+        <link href="css/jquery-ui.theme.min.css" rel="stylesheet"/>
+
+<!--        <link href="http://fonts.googleapis.com/css?family=Syncopate" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Abel" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Pontano+Sans" rel="stylesheet" type="text/css">
+        <link href="http://fonts.googleapis.com/css?family=Oxygen" rel="stylesheet" type="text/css">-->
+
+        <style>
+            
+            .ui-observacao-horizontal {
+                position: absolute; 
+                top: 0; bottom: 0; left: 0; right: 0;
+                overflow: auto;
+                padding-bottom: 5%;
+                height: 100%;
+                padding: 1%;
+                background: rgba(0, 127, 192, 0.5);
+                z-index: 1000;
+            }
+
+            body {
+                overflow: hidden;
+            }
+
+            .jlink:hover {
+                cursor: pointer;
+            }
+
+            #main-div {
+                height: 100%;
+            }
+
+            .hover-label-text {
+                text-align: center;
+                font-weight: bold;
+                text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+            }
+
+            html, body {
+                height: 100%;
+            }
+
+            .top-buffer { 
+                margin-top: 20px; 
+            }
+
+            #dia-mes-ano-row .input-cell, #hora-minuto-segundo-row .input-cell {
+                width: 33.3%;
+            }
+
+            .label-row-coords {
+                margin-bottom: 20px;
+            }
+
+            @media (max-width: 767px) {
+                body {
+                    margin-left: -20px;
+                    margin-right: -20px;
+                }
+            }
+
+            #coords-holder {
+                position: absolute;
+                top: 0; bottom: 0; left: 0; right: 0;
+                overflow: auto;
+                padding-bottom: 5%;
+            }
+
+        </style>
+
+    </head>
+    <body>
+
+        <div id="buffer-form-observacao-horizontal" style="display: none;">
+
+            <div id="ui-observacao-horizontal-esquerda" class="col-md-3 bg-primary ui-observacao-horizontal">
+                <div id="coords-holder" class="top-buffer">
+                    <div id="terra-ui-coords" class="col-md-12 img-rounded">
+                        <div class="col-md-12 label-row-coords">
+                            <a class="btn btn-info" href="#">
+                                <i class="glyphicon glyphicon-star"></i> Terra</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ui-observacao-horizontal-direita" class="col-md-3 col-md-offset-9 bg-primary ui-observacao-horizontal">
+                <div id="ui-observacao-jd" class="row-fluid">
+                    <div id="input-groups">
+
+                        <div class="col-md-12">
+                            <h2>Longitude Leste</h2>
+                        </div>
+                        <div class="col-md-12">
+                            <input value="0" id="input-longitude" class="form-control geo-coords-input" type="number" />
+                        </div>
+
+                        <div class="col-md-12">
+                            <h2>Latitude</h2>
+                        </div>
+                        <div class="col-md-12">
+                            <input value="0" id="input-latitude" class="form-control geo-coords-input" type="number" />
+                        </div>
+
+                        <div class="col-md-12">
+                            <h2>Data UTC</h2>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="input-group input-group-lg" id="dia-mes-ano-row">
+                                <input type="number" class="form-control input-cell" value="0" />
+                                <input type="number" class="form-control input-cell" value="0" />
+                                <input type="number" class="form-control input-cell" value="0" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <h2>Horario UTC</h2>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="input-group input-group-lg" id="hora-minuto-segundo-row">
+                                <input type="number" class="form-control input-cell" value="0" />
+                                <input type="number" class="form-control input-cell" value="0" />
+                                <input type="number" class="form-control input-cell" value="0" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <h2>Fuso</h2>
+                        </div>
+                        <div class="col-md-12">
+                            <input value="0" type="number" class="form-control" id="fuso" placeholder="fuso" />
+                        </div>
+
+                        <div class="col-md-12">
+                            <h2>Data Juliana:</h2>
+                        </div>
+                        <div class="col-md-12">
+                            <input value="0" id="input-data-juliana" class="form-control" type="number" />
+                        </div>                        
+                    </div>
+                    <div id="fases-da-lua">
+                        <div class="col-md-12">
+                            <h2>Fases da Lua</h2>
+                        </div>
+                        <div id="fase-lua-atual-holder" class="col-md-12">
+                            <span>Atual: </span><span id="fase-lua-atual"></span>
+                        </div>
+                        <div id="proximas-fases-lua" class="col-md-12">
+                        </div>
+                    </div>
+                    <div id="transito-solar">
+                        <div class="col-md-12">
+                            <h2>Transito Solar (N M O)</h2>
+                        </div>
+                        <div id="nascer-sol" class="col-md-4">
+                        </div>
+                        <div id="passagem-meridiana-sol" class="col-md-4">
+                        </div>            
+                        <div id="ocaso-sol" class="col-md-4">
+                        </div>                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="main-div">
+        </div>
+
+        <script>
+            (function () {
+
+                if (ON_DAED["WEBGL_SUPPORT"]) {
+//                    var posicaoAparente;
+                    var controls;
+
+                    ON_DAED["3D"].create(function (scene, camera) {
+                        posicaoAparente = ON_DAED["3D"].PosicaoSistemaSolar(scene, camera, $('#main-div'));
+                    }, function (cameraControl, renderer, scene, camera, stats, clock) {
+                        posicaoAparente.control()
+                                .update(clock.getDelta());
+                        ON_DAED["3D"].update();
+                        posicaoAparente.updateRosaDosVentos();
+                        ThreeHelper.updateText(camera, $('#main-div')[0]);
+                        TWEEN.update();
+                        renderer.render(scene, camera);
+                    }, document.getElementById('main-div'));
+
+                } else {
+                    document.write("SEM SUPORTE A WEBGL");
+                }
+            })();
+        </script>
+
+    </body>
+</html>

@@ -1,0 +1,591 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="UTF-8">
+
+        <title>Astro - Posição Solar</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="description" content="">
+        <meta name="author" content="Observatório Nacional">
+
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery-ui.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/bootstrap-datepicker.js"></script>
+        <script src="js/locales/bootstrap-datepicker.pt-BR.js"></script>
+        <script src="js/anglepicker.js"></script>
+        <script src="lib/on-daed-js/geral.js"></script>
+        <script src="lib/on-daed-js/vsop87.min.js"></script>
+        <script src="lib/on-daed-js/astro.js"></script>
+        <script src="js/typeahead.min.js"></script>
+
+        <script src="js/three.min.js"></script>
+        <script src="js/MTLLoader.js"></script>
+        <script src="js/OBJMTLLoader.js"></script>
+        <script src="js/OrbitControls.js"></script>
+        <script src="js/stats.min.js"></script>
+        <script src="js/tween.min.js"></script>
+        <script src="js/ThreeHelper.js"></script>
+        <script src="lib/on-daed-js/MathHelper.js"></script>
+        <script src="lib/on-daed-js/3D.js"></script>
+
+        <link href="css/bootstrap.min.css" rel="stylesheet"/>
+        <link href="css/bootstrap-responsive.css" rel="stylesheet"/>
+
+        <link href="css/anglepicker.css" rel="stylesheet"/>
+        <link href="css/datepicker3.css" rel="stylesheet"/>
+        <link href="css/jquery-ui.structure.min.css" rel="stylesheet"/>
+        <link href="css/jquery-ui.theme.min.css" rel="stylesheet"/>
+
+        <!--        <link href="http://fonts.googleapis.com/css?family=Syncopate" rel="stylesheet" type="text/css">
+                <link href="http://fonts.googleapis.com/css?family=Abel" rel="stylesheet" type="text/css">
+                <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet" type="text/css">
+                <link href="http://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+                <link href="http://fonts.googleapis.com/css?family=Pontano+Sans" rel="stylesheet" type="text/css">
+                <link href="http://fonts.googleapis.com/css?family=Oxygen" rel="stylesheet" type="text/css">-->
+
+        <style>
+
+            #info-btn {
+                top: 1%;
+                right: 10px;
+            }
+
+            #credits-btn {
+                top: 1%;
+                right: 44px;
+            }
+
+            #btn-abrir-form {
+                top: 1%;
+                left: 1%;
+            }
+
+            #parent-atualizacao-automatica {
+                top: 46px;
+                left: 1%;
+                color: #FFFFFF;
+            }
+
+            #parent-exibir-resultados {
+                top: 76px;
+                left: 1%;
+                color: #FFFFFF;
+            }
+
+            .ui-observacao-horizontal {
+                position: absolute; 
+            }
+
+            body {
+                overflow: hidden;
+            }
+
+            .jlink:hover {
+                cursor: pointer;
+            }
+
+            #main-div {
+                height: 100%;
+            }
+
+            .hover-label-text {
+                text-align: center;
+                font-weight: bold;
+                text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+            }
+
+            html, body {
+                height: 100%;
+            }
+
+            .top-buffer { 
+                margin-top: 20px; 
+            }
+
+            .label-row-coords {
+                margin-bottom: 20px;
+            }
+
+            @media (max-width: 767px) {
+                body {
+                    margin-left: -20px;
+                    margin-right: -20px;
+                }
+            }
+
+            #coords-holder {
+                position: absolute;
+                top: 0; bottom: 0; left: 0; right: 0;
+                overflow: auto;
+                padding-bottom: 5%;
+            }
+
+            #slider-passagem {
+                position: absolute;
+                bottom: 1%;
+                left: 1%;
+                padding: 10px;
+                text-align: justify;
+                width: 156px;
+            }
+
+            #label-dados {
+                position: absolute;
+                bottom: 1%;
+                left: 1%;
+                padding: 10px;
+                text-align: justify;
+                width: 370px;
+            }
+
+            #sol-posicao-slider {
+                position: absolute;
+                left: 10%;
+            }
+
+            nav {
+                width: 100%;
+            }
+
+            #info-btn i, #credits-btn i {
+                font-size: 2em;
+            }
+
+            .celula-angulo {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            .input-hora {
+                width: 26%;
+                margin-left: 2%;
+                margin-right: 2%;
+                display: inline;
+            }
+
+            #dia-mes-ano-row, #hora-minuto-segundo-row {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            #brasil-logo {
+                position: absolute;
+                top: 0;
+                margin-right: -112px;
+                right: 30%;
+                padding: 10px;
+                background: #FFFFFF;
+            }
+
+            .elemento-ui {
+                color: #FFFFFF;
+            }
+
+            .label-resultado {
+                display: inline-block;
+                width: 140px;
+            }
+
+            #label-cidade-form {
+                padding: 10px;
+                margin-top: 20px;
+                margin-bottom: 20px;
+                font-weight: bold;
+            }
+
+            #label-cidade-form:before {
+                padding: 10px;
+                content: "Local escolhido:";
+            }
+
+            .modal-body {
+                text-align: justify;
+            }
+            
+        </style>
+
+    </head>
+    <body>
+        <button type="button" id="btn-abrir-form" class="btn btn-primary btn-lg ui-observacao-horizontal" data-toggle="modal" data-target="#data-form">
+            Alterar Local e Data
+        </button>
+
+        <div id="parent-atualizacao-automatica" class="checkbox ui-observacao-horizontal">
+            <label>
+                <input type="checkbox" id="atualizacao-automatica"> Atualizacao Automatica
+            </label>
+        </div>
+
+        <div id="parent-exibir-resultados" class="checkbox ui-observacao-horizontal">
+            <label>
+                <input type="checkbox" id="exibir-resultados" checked='checked'> Resultados
+            </label>
+        </div>
+
+        <a id="info-btn" class="ui-observacao-horizontal jlink" target="_blank" data-toggle="modal" data-target="#informacao-texto-modal">
+            <i class="glyphicon glyphicon-question-sign"></i>
+        </a>
+
+        <a id="credits-btn" class="ui-observacao-horizontal jlink" target="_blank" data-toggle="modal" data-target="#creditos-texto-modal">
+            <i class="glyphicon glyphicon-info-sign"></i>
+        </a>
+
+        <!--        <div id="brasil-logo" class="ui-observacao-horizontal">
+                    <a href="http://www.brasil.gov.br">
+                        <img src="imgs/mcti-brasil.jpg" />
+                    </a>
+                </div>-->
+
+        <div class="modal fade ui-observacao-horizontal" id="creditos-texto-modal" tabindex="-1" role="dialog" aria-labelledby="Créditos" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Créditos</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <h4>Desenvolvimento do Software</h4>
+                        <div>Carlos Henrique Veiga e Caio Siqueira da Silva</div>
+
+                        <br />
+
+                        <div>Endereço eletrônico (daed@on.br)</div>
+
+                        <br />
+
+                        <div>Endereço do Observatório Nacional</div>
+                        <div>Rua General José Cristino, 77 - São Cristóvão</div>
+                        <div>Rio de Janeiro - CEP: 20921-400</div>
+                        <div>Tel(PABX): (21) 3504-9100 <a href="http://www.on.br">www.on.br</a></div>
+
+                        <br />
+
+                        <p>Serão extremamente valiosas todas as sugestões para que este trabalho alcance seus
+                            objetivos.</p>
+
+
+                        <div style="float: left; width: 20%;">
+                            <a href="http://www.on.br/site_daed">
+                                <img height="100px" src="imgs/logo-DAED.png" />
+                            </a>
+                        </div>
+
+                        <div style="float: left; width: 80%; padding-top: 28px;">
+                            <div>Produzido pela Divisão de Atividades Educacionais</div>
+                            <div>© 2015 Todos os direitos reservados ao Observatório Nacional</div>
+                        </div>
+
+                        <div style="clear: both;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade ui-observacao-horizontal" id="informacao-texto-modal" tabindex="-1" role="dialog" aria-labelledby="Introdução" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Introdução</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <p>A partir das rotinas do pacote ASTRO é possível construir vários aplicativos. Um exemplo
+                            clássico é a determinação do Nascer, Passagem Meridiana e Ocaso do Sol para as
+                            coordenadas geográficas do observador. Um aplicativo genuinamente institucional,
+                            desenvolvido com ferramentas modernas para tornar sua funcionalidade amigável e
+                            intuitiva.</p>
+
+                        <p>O diferencial deste programa em relação a outros é:</p>
+
+                        <p>1) Funciona a partir de um website, não sendo necessário fazer download, não
+                            ocupando assim espaço no computador do usuário.</p>
+
+                        <p>2) Acessível por meio de dispositivos móveis que tenham sistema Android ou iOS.</p>
+
+                        <p>3) As coordenadas geográficas são capturadas a partir da entrada dos dados
+                            manualmente ou escolhidas a partir de uma lista (busca textual).</p>
+
+                        <p>4) Visualização do fenômeno, evitando assim longas tabelas e listas numéricas.</p>
+
+                        <p>É importante registrar que a grande motivação para a criação deste programa é que ele
+                            foi desenvolvido por um estudante, bolsista do Programa de Capacitação Institucional –
+                            PCI/CNPq. Assim, o Observatório Nacional além de cumprir o seu papel de capacitar e
+                            formar profissionais nas suas áreas de atuação, disponibiliza os trabalhos que são
+                            desenvolvidos na instituição para toda a sociedade.</p>
+
+                        <h4>Dicas de Uso</h4>
+
+                        <p>1) Com o botão esquerdo do mouse mantido pressionado é possível realizar
+                            movimentos de rotação do programa.</p>
+
+                        <p>2) Para mover o plano do horizonte, sobre o qual está o observador, manter o botão
+                            direito do mouse pressionado e arraste.</p>
+
+                        <p>3) Para aproximar ou afastar a imagem, basta girar o botão de rolagem do mouse ou manter
+                            pressionado este botão e arrastar verticalmente.</p>
+
+                        <h4>Saiba mais em:</h4>
+
+                        <div>
+                            <a href="http://pt.wikipedia.org/wiki/Sol" target="_blank">http://pt.wikipedia.org/wiki/Sol</a>
+                        </div>
+                        <div>
+                            <a href="http://pt.wikipedia.org/wiki/Crep%C3%BAsculo" target="_blank">http://pt.wikipedia.org/wiki/Crep%C3%BAsculo</a>
+                        </div>
+                        <div>
+                            <a href="http://pt.wikipedia.org/wiki/Nascer_do_Sol" target="_blank">http://pt.wikipedia.org/wiki/Nascer_do_Sol</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade ui-observacao-horizontal" id="cidade-form" tabindex="-1" role="dialog" aria-labelledby="Localizar Cidade" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Localizar Cidade</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <label id="busca-cidade-feedback"></label>
+                        <input type="text" data-provide="typeahead" autocomplete="off" class="form-control" id="busca-cidade-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade ui-observacao-horizontal" id="data-form" tabindex="-1" role="dialog" aria-labelledby="Data/Hora" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Data/Hora</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <div>
+                            <button type="button" id="btn-cidade-form" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#cidade-form">
+                                Escolher Local
+                            </button>
+
+                            <div id="label-cidade-form">OBSERVATORIO NACIONAL</div>
+
+                            <div class="celula-angulo">
+                                <div id="coordenada-longitude-local">
+                                </div>
+
+                                <div class="row-fluid">
+                                    <div class="col-md-12">
+                                        <label>Longitude Local (Leste Positivo)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-btn">
+                                                <button id="input-entrada-longitude-local-sinal" class="btn btn-info" type="button">+</button>
+                                            </span>
+                                            <input value="0" id="input-entrada-longitude-local-hora" class="input-longitude form-control input-centralizado jlink input-small" type="number" min="0" />
+                                            <span class="input-group-addon">º</span>
+                                            <input value="0" id="input-entrada-longitude-local-min" class="input-longitude form-control input-centralizado jlink input-small" type="number" min="0" />
+                                            <span class="input-group-addon">'</span>
+                                            <input value="0" id="input-entrada-longitude-local-sec" class="input-longitude form-control input-centralizado jlink input-small" type="number" min="0" />
+                                            <span class="input-group-addon">"</span>
+                                            <input name="longitudeLocal" type="hidden" class="data-source-coordenada geo-coords-input" id="input-entrada-longitude-local-hidden" value="0" min="-180" max="180" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="celula-angulo">
+                                <div id="coordenada-latitude-local">
+                                </div>
+
+                                <div class="row-fluid">
+                                    <div class="col-md-12">
+                                        <label>Latitude Local (Norte Positivo)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-btn">
+                                                <button id="input-entrada-latitude-local-sinal" class="btn btn-info" type="button">+</button>
+                                            </span>
+                                            <input value="0" id="input-entrada-latitude-local-hora" class="input-latitude form-control input-centralizado jlink input-small" type="number" min="0" />
+                                            <span class="input-group-addon">º</span>
+                                            <input value="0" id="input-entrada-latitude-local-min" class="input-latitude form-control input-centralizado jlink input-small" type="number" min="0" />
+                                            <span class="input-group-addon">'</span>
+                                            <input value="0" id="input-entrada-latitude-local-sec" class="input-latitude form-control input-centralizado jlink input-small" type="number" min="0" />
+                                            <span class="input-group-addon">"</span>
+                                            <input name="latitudeLocal" type="hidden" class="data-source-coordenada geo-coords-input" id="input-entrada-latitude-local-hidden" value="0" min="-90" max="90" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div id="dia-mes-ano-row">
+                            <div>
+                                <label class="control-label">Dia (DD/MM/AAAA)</label>
+                            </div>
+                            <input type="number" placeholder="DD" class="input-hora form-control" value="0" />
+                            <input type="number" placeholder="MM" class="input-hora form-control" value="0" />
+                            <input type="number" placeholder="AAAA" class="input-hora form-control" value="0" />
+                        </div>
+
+
+                        <div id="hora-minuto-segundo-row">
+                            <div>
+                                <label class="control-label">Hora (HH:MM:SS)</label>
+                            </div>
+                            <input type="number" placeholder="HH" class="input-hora form-control" value="0" />
+                            <input type="number" placeholder="MM" class="input-hora form-control" value="0" />
+                            <input type="number" placeholder="SS" class="input-hora form-control" value="0" />
+                        </div>
+
+                        <div>
+                            <label class="control-label">Fuso Horario</label>
+                            <input value="0" type="number" class="form-control" id="fuso" placeholder="fuso" />
+                        </div>
+
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" id="input-horario-verao"> Horario de Verao
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="label-dados" class="img-rounded elemento-ui ui-observacao-horizontal">
+            <div><span id="label-data"></span> às <span id="label-hora"></span></div>
+            <div><div class='label-resultado'>Altura do Sol</div><span id="label-altura"></span></div>
+            <div id='row-label-resultado-latitude'><div class='label-resultado'>Latitude: </div><span id="label-latitude"></span></div>
+            <div id='row-label-resultado-longitude'><div class='label-resultado'>Longitude: </div><span id="label-longitude"></span></div>
+            <div id='row-label-resultado-cidade'><div class='label-resultado'>Local: </div><span id="label-cidade">OBSERVATORIO NACIONAL</span></div>
+            <div><div class='label-resultado'>Nascer: </div><span id="nascer-sol"></span></div>
+            <div><div class='label-resultado'>Passagem Meridiana: </div><span id="passagem-meridiana-sol"></span></div>
+            <div><div class='label-resultado'>Ocaso: </div><span id="ocaso-sol"></span></div>
+        </div>
+
+        <input value="0" id="input-data-juliana" class="form-control" type="hidden" />
+
+        <div id="main-div">
+        </div>
+
+        <script>
+            (function () {
+                $.getJSON('lib/on-daed-js/CID-ALL.json', function (data) {
+
+                    $('#cidade-form').on('show.bs.modal', function () {
+                        $('#busca-cidade-input').val('');
+                        $('#data-form').modal('hide');
+                        $('#busca-cidade-feedback').html("Digite a cidade");
+                    });
+
+                    $('#cidade-form').on('hide.bs.modal', function () {
+                        $('#data-form').modal('show');
+                    });
+
+                    $('#exibir-resultados').click(function () {
+                        if ($(this).is(':checked')) {
+                            $('#label-dados').show();
+                        } else {
+                            $('#label-dados').hide();
+                        }
+                    });
+
+                    var cidades = [];
+
+                    for (var i in data) {
+                        var estado = data[i];
+                        for (var j = 0; j < estado.length; j++) {
+                            cidades.push({
+                                name: i + ' - ' + data[i][j].c,
+                                l: parseFloat(data[i][j].l),
+                                b: parseFloat(data[i][j].b)
+                            });
+                        }
+                    }
+
+                    var buscaCidadeInput = $('#busca-cidade-input');
+
+                    buscaCidadeInput.on('keyup', function () {
+                        window.setTimeout(function () {
+                            if ($('ul.typeahead li:visible').length === 0 && buscaCidadeInput.val()) {
+                                $('#busca-cidade-feedback').html("Nenhuma cidade foi localizada");
+                            } else if (!buscaCidadeInput.val()) {
+                                $('#busca-cidade-feedback').html("Digite a cidade");
+                            } else if ($('ul.typeahead li:visible').length !== 0) {
+                                $('#busca-cidade-feedback').html("Escolha a cidade");
+                            } else {
+                                $('#busca-cidade-feedback').empty();
+                            }
+                        }, 10);
+                    });
+
+                    buscaCidadeInput.typeahead({source: cidades,
+                        autoSelect: true});
+
+                    function labelCidade(nome) {
+                        $('#label-cidade').html(nome);
+                        $('#label-cidade-form').html(nome);
+                        $('#label-cidade-form').show();
+                        $('#row-label-resultado-cidade').show();
+                        $('#row-label-resultado-latitude').hide();
+                        $('#row-label-resultado-longitude').hide();
+                    }
+
+                    buscaCidadeInput.change(function () {
+                        var current = buscaCidadeInput.typeahead("getActive");
+                        if (current) {
+                            // Some item from your model is active!
+                            if (current.name === buscaCidadeInput.val().toUpperCase()) {
+                                // This means the exact match is found. Use toLowerCase() if you want case insensitive match.
+                                posicaoAparente.updateGeoCoords(current.l, current.b);
+                                labelCidade(current.name);
+                                $('#cidade-form').modal('hide');
+                            } else {
+
+                            }
+                        } else {
+                            // new value
+                        }
+                    });
+
+                    ON_DAED.addTempoSideralAnglepicker($('#coordenada-longitude-local'), '#input-entrada-longitude-local');
+                    ON_DAED.addTempoSideralAnglepicker($('#coordenada-latitude-local'), '#input-entrada-latitude-local');
+
+                    if (ON_DAED["WEBGL_SUPPORT"]) {
+                        //                    var posicaoAparente;
+                        var controls;
+
+                        ON_DAED["3D"].create(function (scene, camera) {
+                            posicaoAparente = ON_DAED["3D"].PosicaoSol(scene, camera, $('#main-div'));
+                        }, function (cameraControl, renderer, scene, camera, stats, clock) {
+                            posicaoAparente.control()
+                                    .update(clock.getDelta());
+                            ON_DAED["3D"].update();
+                            posicaoAparente.updateRosaDosVentos();
+                            ThreeHelper.updateText(camera, $('#main-div')[0]);
+                            TWEEN.update();
+                            renderer.render(scene, camera);
+                        }, document.getElementById('main-div'));
+
+                    } else {
+                        $(document).ready(function () {
+                            $('body').empty();
+                            $('body').html('<h1>SEM SUPORTE A WEBGL</h1><h1>VISITE: <a>https://get.webgl.org/</a></h1>');
+                        });
+                    }
+
+                });
+            })();
+        </script>
+
+    </body>
+</html>

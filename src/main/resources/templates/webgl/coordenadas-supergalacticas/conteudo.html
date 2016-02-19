@@ -1,0 +1,166 @@
+<script src='lib/on-daed-js/3D/SistemaSolar.js'>
+</script>
+
+<div id="campo-de-observacao" class="row-fluid">
+</div>
+
+<div th:include="ferramentas/fragmentos/entrada-coordenadas-esfericas">
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    (function () {
+
+        var baseDeDadosGalaxias;
+
+        $.ajax({
+            dataType: "json",
+            url: 'lib/on-daed-js/galaxias.json',
+            success: function (data) {
+                baseDeDadosGalaxias = data;
+
+                $('#escolha-coordenadas').data('to', ON_DAED.ASTRO.CoordinateType.SUPERGALACTIC).val("SUPERGALACTIC").find("option[value='SUPERGALACTIC']").html("Entrar coordenadas Supergalácticas");
+
+                var galaxias;
+
+                window.setTransformacaoOps = function () {
+                    var ops = {};
+                    var julian = ON_DAED.ASTRO.getJulianFromUnix(new Date().getTime());
+                    ops.obliquity = ON_DAED.ASTRO.getEclipticObliquity(julian).obliquityRadian;
+                    return ops;
+                };
+
+                window.showCoordenadas = function (coords) {
+                    galaxias.coordenadasSupergalacticas(coords.longitude, coords.latitude);
+                };
+
+                ON_DAED["3D"].create(function (scene, camera) {
+                    galaxias = ON_DAED["3D"].SistemaSolar(scene, camera, {
+                        planoSupergalactico: true,
+                        galaxias: baseDeDadosGalaxias,
+                        clickCallback: function (data) {
+                            $('#escolha-coordenadas').val("SUPERGALACTIC");
+                            $('#coordenada-supergalactica-latitude').anglepicker("value", data.B * 2);
+                            $('#coordenada-supergalactica-longitude').anglepicker("value", data.L);
+                            $('#enviar-formulario-obter-coordenadas').click();
+                            $('body').data('adicionarResultado')(data.nome);
+                        }
+                    });
+                    galaxias.addControlePlanos($('#campo-de-observacao'));
+                }, function (cameraControl, renderer, scene, camera, stats, clock) {
+                    cameraControl.update(clock.getDelta());
+
+                    if ($('#campo-de-observacao canvas').is(':hover')) {
+                        cameraControl.enabled = true;
+                    } else {
+                        cameraControl.enabled = false;
+                    }
+
+                    ON_DAED["3D"].update();
+                    ThreeHelper.updateText(camera, $('#campo-de-observacao')[0]);
+                    TWEEN.update();
+
+                    renderer.clear();
+                    renderer.render(scene, camera);
+                    renderer.clearDepth();
+                    renderer.render(galaxias.cenaInformacao, camera);
+                }, document.getElementById('campo-de-observacao'),
+                        function (camera, renderer, scene, stats) {
+                            var control = new THREE.OrbitControls(camera);
+
+                            var mouse = new THREE.Vector2();
+                            var intersected;
+
+                            var element = renderer.domElement;
+
+                            // MOUSE
+                            function onDocumentMouseMove(event) {
+                                var x = event.clientX - parseInt($(element).offset().left);
+                                var y = event.clientY - parseInt($(element).offset().top);
+
+                                mouse.x = (x / element.offsetWidth) * 2 - 1;
+                                mouse.y = -(y / element.offsetHeight) * 2 + 1;
+
+                                var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+                                vector.unproject(camera);
+                                var raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
+                                var intersections = raycaster.intersectObjects(ON_DAED["3D"].objects, true);
+
+                                if (intersections.length > 0) {
+                                    if (intersected !== intersections[ 0 ].object) {
+                                        if (intersected) {
+                                            if (intersected.mout instanceof Function) {
+                                                intersected.mout(event, intersected);
+                                            }
+                                        }
+
+                                        $('body').css('cursor', 'auto');
+                                    }
+
+                                    intersected = intersections[ 0 ].object;
+                                    $('body').css('cursor', 'pointer');
+
+                                    if (intersected.mover instanceof Function) {
+                                        intersected.mover(event, intersected);
+                                    }
+                                } else if (intersected) {
+                                    if (intersected.mout instanceof Function) {
+                                        intersected.mout(event, intersected);
+                                    }
+                                    $('body').css('cursor', 'auto');
+                                    intersected = null;
+                                } else {
+                                    $('body').css('cursor', 'auto');
+                                }
+                            }
+
+                            $('#campo-de-observacao').bind('mousemove', onDocumentMouseMove);
+
+                            function onMouseOut(event) {
+                                if (('.qtip:visible').length > 0) {
+                                    $('.qtip').qtip('hide');
+                                }
+
+                                $('body').css('cursor', 'auto');
+                            }
+
+                            $('#campo-de-observacao').bind('mouseout', onMouseOut);
+
+                            function onClick(event) {
+                                if (intersected && intersected.mclick instanceof Function) {
+                                    intersected.mclick(event, intersected);
+                                }
+                            }
+
+                            $('#campo-de-observacao').bind('click', onClick);
+
+                            renderer.autoClear = false;
+
+                            control.noPan = false;
+                            control.noZoom = false;
+                            return control;
+                        });
+
+                $('#escolha-coordenadas').change(function () {
+                    var value = $('#escolha-coordenadas').val();
+                    $('.entrada-coordenadas').hide();
+                    $('#' + value).show();
+
+                    if (value === "HORIZONTAL") {
+                        $('#input-data-local').show();
+                        $('#coordenada_latitude_local').parent().show();
+                        $('#coordenada_longitude_local').parent().show();
+                    } else {
+                        $('#input-data-local').hide();
+                        $('#coordenada_latitude_local').parent().hide();
+                        $('#coordenada_longitude_local').parent().hide();
+                    }
+
+                }).trigger('change');
+
+            }
+        });
+
+    })();
+    /*]]>*/
+</script>

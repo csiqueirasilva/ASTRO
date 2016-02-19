@@ -1,0 +1,101 @@
+<script src="js/three.min.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/stats.min.js"></script>
+<script src="js/tween.min.js"></script>
+<script src="js/ThreeHelper.js"></script>
+<script src="js/MathHelper.js"></script>
+<script src="js/daed/3D.js"></script>
+
+<h1 class="titulo-widget">Visualizar Precessão</h1>
+
+<div id="campo-de-observacao" class="row-fluid">
+</div>
+
+<div class="row-fluid margin-top-2">
+    <div class="col-md-12">
+        <form>
+            <div class="form-group">
+                <div class="row-fluid">
+                    <div class="margin-top-2 col-md-12">
+
+                        <jsp:include page="fragmentos/entrada-coordenada-equatorial.jsp" />
+
+                        <div class="row-fluid margin-top-2">
+                            <div class="col-md-12 margin-top-2">
+                                <button type="button" class="btn btn-success form-control" id="enviar-formulario-obter-coordenadas">Visualizar</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    (function () {
+
+        $('#coordenada-equatorial-tempo-sideral').parent().remove();
+        $('#coordenada_latitude_local').parent().remove();
+        $('#coordenada_longitude_local').parent().remove();
+
+        $('#enviar-formulario-obter-coordenadas').click(function () {
+
+            var declinacao;
+            var ascensaoReta;
+
+            ascensaoReta = (Math.PI / 180) * 15 * parseFloat($('#input-entrada-equatorial-ar-hidden').val());
+            declinacao = (Math.PI / 180) * parseFloat($('#input-entrada-equatorial-declinacao-hidden').val());
+
+            if (ON_DAED["WEBGL_SUPPORT"]) {
+                terra.coordenadasEquatoriais(ascensaoReta, declinacao);
+            } else {
+                preencherDados({
+                    ascensaoReta: ascensaoReta,
+                    declinacao: declinacao
+                });
+            }
+        });
+
+        var terra;
+
+        ON_DAED["3D"].create(function (scene, camera) {
+            var raioPlaneta = 63.71;
+            terra = ON_DAED["3D"].ObservacaoTerra(scene, camera, raioPlaneta);
+        }, function (cameraControl, renderer, scene, camera, stats, clock) {
+
+            if ($('#campo-de-observacao canvas').is(':hover')) {
+                cameraControl.enabled = true;
+                cameraControl.update(clock.getDelta());
+            } else {
+                cameraControl.enabled = false;
+            }
+
+            ON_DAED["3D"].update();
+            ThreeHelper.updateText(camera, $('#campo-de-observacao')[0]);
+            TWEEN.update();
+            renderer.render(scene, camera);
+        }, document.getElementById('campo-de-observacao'),
+                function (camera, renderer, scene, stats) {
+                    return new THREE.OrbitControls(camera);
+                });
+
+        var extAscensaoReta = parseFloat('${param.ascensaoReta}');
+        var extDeclinacao = parseFloat('${param.declinacao}');
+
+        if (!isNaN(extDeclinacao) && !isNaN(extAscensaoReta)) {
+            $(document).ready(function () {
+                tempoSideralLoadInput('#input-entrada-equatorial-ar', extAscensaoReta * 15, true);
+                tempoSideralLoadInput('#input-entrada-equatorial-declinacao', extDeclinacao);
+                
+                $('#enviar-formulario-obter-coordenadas').trigger('click');
+            });
+        }
+
+        disableBodyScroll('#campo-de-observacao');
+        
+    })();
+</script>

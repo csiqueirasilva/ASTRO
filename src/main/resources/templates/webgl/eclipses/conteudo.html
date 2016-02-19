@@ -1,0 +1,148 @@
+<div th:replace="ferramentas/fragmentos/entrada-plataforma-observacao">
+</div>
+
+<script src='lib/on-daed-js/3D/PosicaoSol.js'>
+</script>
+
+<script src='lib/on-daed-js/3D/PosicaoLua.js'>
+</script>
+
+<script src='lib/on-daed-js/3D/PosicaoEclipse.js'>
+</script>
+
+<div id="label-dados" class="img-rounded elemento-ui ui-observacao-horizontal">
+    <div><i id="ver-fase-atual-lua" class="glyphicon glyphicon-eye-open lua-ligado jlink"></i></div>
+    <div><span id="label-data"></span> às <span id="label-hora"></span> TU</div>
+    <div id='row-label-graus'><div class='label-resultado'>Alinhamento do Sol/Lua</div><span id="label-distancia">0</span> &deg;</div>
+    <div id="dados-eclipse-solar">
+        <div id="row-solar-tipo-eclipse"><div class='label-resultado'>Tipo Eclipse</div><span class="label-dado"></span></div>
+        <div id="row-solar-horario-maximo"><div class='label-resultado'>Melhor Alinhamento</div><span class="label-dado"></span> TU</div>
+        <div id="row-solar-raio-sombra"><div class='label-resultado'>Raio do Cone de Sombra </div><span class="label-dado"></span> km</div>
+    </div>
+    <div id="dados-eclipse-lunar">
+        <div id="row-lunar-tipo-eclipse"><div class='label-resultado'>Tipo Eclipse</div><span class="label-dado"></span></div>
+        <div id="row-lunar-previsao-duracao"><div class='label-resultado'>Duração</div><span class="label-dado"></span></div>
+        <div id="row-lunar-contato-penumbra"><div class='label-resultado'>Contato Penumbra</div><span class="label-dado"></span> TU</div>
+        <div id="row-lunar-contato-umbra"><div class='label-resultado'>Contato Umbra</div><span class="label-dado"></span> TU</div>
+        <div id="row-lunar-fase-total"><div class='label-resultado'>Fase Total</div><span class="label-dado"></span> TU</div>
+        <div id="row-lunar-horario-maximo"><div class='label-resultado'>Melhor Alinhamento</div><span class="label-dado"></span> TU</div>
+    </div>
+</div>
+
+<div id="buscar-eclipses" class="btn-group" role="group">
+    <button id="buscar-eclipse-solar" type="button" class="btn btn-primary">Eclipse Solar</button>
+    <button id="buscar-eclipse-lunar" type="button" class="btn btn-primary">Eclipse Lunar</button>
+</div>
+
+<button type="button" id="cancelar-busca-eclipse" class="btn btn-danger btn-lg ui-observacao-horizontal">
+    Cancelar busca <span id="tipo-busca-eclipse"></span>
+</button>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    (function () {
+        
+        $('#fuso').val(0);
+        $('#fuso').hide();
+        
+        $('#fuso').parent().hide();
+        
+        $('#input-horario-verao').attr('checked', false);
+
+        $('#input-horario-verao').parents('.checkbox').hide();
+        
+        $('#dados-eclipse-lunar').hide();
+        $('#dados-eclipse-solar').hide();
+
+        $('#cancelar-busca-eclipse').hide();
+
+        var pEclipse;
+
+        $('#cancelar-busca-eclipse').click(function () {
+            pEclipse.cancelarRequestEclipse();
+            $('#cancelar-busca-eclipse').hide();
+        });
+
+        $('#buscar-eclipse-solar').click(function () {
+            $('#dados-eclipse-lunar').hide();
+            $('#dados-eclipse-solar').hide();
+            $('#btn-abrir-form').prop('disabled', true);
+            pEclipse.requestEclipseSolar();
+            $(this).parent().hide();
+            $('#tipo-busca-eclipse').html('Eclipse Solar');
+            $('#cancelar-busca-eclipse').show();
+        });
+
+        $('#buscar-eclipse-lunar').click(function () {
+            $('#dados-eclipse-lunar').hide();
+            $('#dados-eclipse-solar').hide();
+            $('#btn-abrir-form').prop('disabled', true);
+            pEclipse.requestEclipseLunar();
+            $(this).parent().hide();
+            $('#tipo-busca-eclipse').html('Eclipse Lunar');
+            $('#cancelar-busca-eclipse').show();
+        });
+
+        var it = setInterval(function () {
+            if (posicaoAparente) {
+                var pSol = ON_DAED['3D'].PosicaoSol(posicaoAparente);
+                var pLua = ON_DAED['3D'].PosicaoLua(posicaoAparente);
+
+                //pLua.cameraLua();
+
+                pEclipse = ON_DAED['3D'].PosicaoEclipse(posicaoAparente, pLua);
+
+                pEclipse.addRequestUpdateWorker();
+                clearInterval(it);
+
+                pSol.setEscala(0.425);
+                pLua.setEscala(0.425);
+
+                $('#load-modal').data('beforeReady').push(function() {
+                    posicaoAparente.esconderElementosEstaticos();
+                });
+
+                window.setTimeout(function () {
+                    $('#atualizacao-automatica').trigger('click');
+                    $('#atualizacao-automatica').parent().remove();
+                    $('#passagem-do-tempo').remove();
+
+                    pEclipse.setDate(ON_DAED.ASTRO.getJulianFromUnix(new Date().getTime()));
+                }, 50);
+
+                $('.modal').on('show.bs.modal', function () {
+                    posicaoAparente.control().enabled = false;
+                });
+
+                $('.modal').on('hide.bs.modal', function () {
+                    if (!pLua.getCameraLua()) {
+                        posicaoAparente.control().enabled = true;
+                    }
+                });
+
+                $('#btn-abrir-form').html('Alterar Data');
+                $('#btn-cidade-form').hide();
+                $('#label-cidade-form').hide();
+                $('#coordenada-latitude-local').parent().hide();
+                $('#coordenada-longitude-local').parent().hide();
+
+                $('#ver-fase-atual-lua').bind('click', function () {
+                    var ativoClass = 'glyphicon-eye-close lua-desligado';
+                    var inativoClass = 'glyphicon-eye-open lua-ligado';
+
+                    $(this).toggleClass(ativoClass);
+                    $(this).toggleClass(inativoClass);
+
+                    if ($(this).hasClass(ativoClass)) {
+                        pLua.cameraLua();
+                    } else {
+                        pLua.cameraNormal();
+                    }
+
+                    posicaoAparente.requestUpdateWorker(parseFloat($('#input-data-juliana').val()));
+                });
+            }
+        }, 100);
+    })();
+    /*]]>*/
+</script>

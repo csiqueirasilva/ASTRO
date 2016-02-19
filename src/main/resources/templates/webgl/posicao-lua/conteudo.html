@@ -1,0 +1,57 @@
+<div th:replace="ferramentas/fragmentos/entrada-plataforma-observacao">
+</div>
+
+<script src='lib/on-daed-js/3D/PosicaoSol.js'>
+</script>
+
+<script src='lib/on-daed-js/3D/PosicaoLua.js'>
+</script>
+
+<div id="label-dados" class="img-rounded elemento-ui ui-observacao-horizontal">
+    <div><i id="ver-fase-atual-lua" class="glyphicon glyphicon-eye-open lua-ligado jlink"></i></div>
+    <div><span id="label-data"></span> às <span id="label-hora"></span></div>
+    <div id='row-label-resultado-latitude'><div class='label-resultado'>Latitude </div><span id="label-latitude"></span></div>
+    <div id='row-label-resultado-longitude'><div class='label-resultado'>Longitude </div><span id="label-longitude"></span></div>
+    <div id='row-label-resultado-cidade'><div class='label-resultado'>Local </div><span id="label-cidade">OBSERVATORIO NACIONAL</span></div>
+    <div id='row-label-resultado-atual-lua'><div class='label-resultado'>Atualmente </div><span id="fase-lua-atual"></span></div>
+    <div>Próximas Fases da Lua</div>
+    <div id="proximas-fases-lua">
+    </div>
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    (function () {
+
+        var pLua;
+
+        var it = setInterval(function () {
+            if (posicaoAparente) {
+                var pSol = ON_DAED['3D'].PosicaoSol(posicaoAparente);
+                pLua = ON_DAED['3D'].PosicaoLua(posicaoAparente);
+
+                pLua.addRequestUpdateWorker();
+                pLua.setUICallbacks();
+                posicaoAparente.addPlataformaObservacao();
+                clearInterval(it);
+            }
+        }, 100);
+
+        $('#ver-fase-atual-lua').bind('click', function () {
+            var ativoClass = 'glyphicon-eye-close lua-desligado';
+            var inativoClass = 'glyphicon-eye-open lua-ligado';
+
+            $(this).toggleClass(ativoClass);
+            $(this).toggleClass(inativoClass);
+
+            if ($(this).hasClass(ativoClass)) {
+                pLua.cameraLua();
+            } else {
+                pLua.cameraNormal();
+            }
+
+            posicaoAparente.requestUpdateWorker(parseFloat($('#input-data-juliana').val()));
+        });
+    })();
+    /*]]>*/
+</script>

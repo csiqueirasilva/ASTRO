@@ -1,0 +1,72 @@
+<script src="lib/on-daed-js/3D/ObservacaoTerra.js">
+</script>
+
+<div id="campo-de-observacao" class="row-fluid">
+</div>
+
+<div th:include="ferramentas/fragmentos/entrada-coordenadas-esfericas">
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    (function () {
+        $('#escolha-coordenadas').data('to', ON_DAED.ASTRO.CoordinateType.ECLIPTIC).val("ECLIPTIC").find("option[value='ECLIPTIC']").html("Entrar coordenadas Eclípticas");
+
+        var terra;
+        var control;
+
+        window.setTransformacaoOps = function() {
+            var ops = {};
+            ops.obliquity = terra.valorObliquidadeEcliptica();
+            return ops;
+        };
+
+        window.showCoordenadas = function (coords) {
+            terra.coordenadasEclipticas(coords.longitude, coords.latitude, terra.valorObliquidadeEcliptica());
+        };
+
+        ON_DAED["3D"].create(function (scene, camera) {
+            var raioPlaneta = 63.71;
+            terra = ON_DAED["3D"].ObservacaoTerra(scene, camera, raioPlaneta, control);
+        }, function (cameraControl, renderer, scene, camera, stats, clock) {
+
+            if ($('#campo-de-observacao canvas').is(':hover')) {
+                cameraControl.enabled = true;
+                cameraControl.update(clock.getDelta());
+            } else {
+                cameraControl.enabled = false;
+            }
+
+            ON_DAED["3D"].update();
+            ThreeHelper.updateText(camera, $('#campo-de-observacao')[0]);
+            TWEEN.update();
+            renderer.render(scene, camera);
+        }, document.getElementById('campo-de-observacao'),
+                function (camera, renderer, scene, stats) {
+                    control = new THREE.OrbitControls(camera);
+                    ON_DAED["3D"].setMouseOverPossible('#campo-de-observacao', renderer, camera);
+                    return control;
+                });
+
+        $('#escolha-coordenadas').change(function () {
+            var value = $('#escolha-coordenadas').val();
+            $('.entrada-coordenadas').hide();
+            $('#' + value).show();
+            
+            if(value === "HORIZONTAL") {
+                $('#input-data-local').show();
+                $('#coordenada_latitude_local').parent().show();
+                $('#coordenada_longitude_local').parent().show();
+            } else {
+                $('#input-data-local').hide();
+                $('#coordenada_latitude_local').parent().hide();
+                $('#coordenada_longitude_local').parent().hide();
+            }
+            
+        }).trigger('change');
+       
+    })();
+    
+    /*]]>*/
+</script>

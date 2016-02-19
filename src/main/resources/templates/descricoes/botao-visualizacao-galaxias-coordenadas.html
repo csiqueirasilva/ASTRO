@@ -1,0 +1,20 @@
+<div th:fragment='texto(botaoLabel, explicacaoInserirCoordenadas, tipoPlanoCoordenada)'>
+
+    <h3>Botões de Tela</h3>
+    
+    <div class="btn-exemplo-ajuda">
+        <button type="button" class="btn btn-primary" th:text='${botaoLabel}'>
+            Label
+        </button>
+    </div>
+
+    <p th:text='${explicacaoInserirCoordenadas}'>Texto explicativo</p>
+
+    <div th:include='descricoes/botao-visualizacao-galaxias :: texto(${tipoPlanoCoordenada})'>
+    </div>
+
+    <h3>Resultados</h3>
+
+    <p>Os resultados são mostrados no canto superior esquerdo da tela.</p>
+
+</div>
