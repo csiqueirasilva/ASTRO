@@ -120,11 +120,11 @@
                         <p>VS é a Variação Secular (taxa anual de variação)</p>
 
                         <p>D é a declinação em graus (leste positivo)</p>
-                        <p>I é a inclinação em graus (sul positivo)</p>
+                        <p>I é a inclinação em graus (norte positivo)</p>
                         <p>H é a intensidade horizontal em nT</p>
                         <p>X é a componente norte em nT</p>
                         <p>Y é a componente leste em nT</p>
-                        <p>Z é a componente vertical em nT (sul positivo)</p>
+                        <p>Z é a componente vertical em nT (norte positivo)</p>
                         <p>F é a intensidade total em nT</p>
 
                         <p>O valor das componentes da Intensidade é dado em nT (nano Tesla). O Tesla (símbolo T) é a unidade usada no
@@ -412,7 +412,7 @@
 
                 $('#igrf-resultados').empty();
 
-                var colat = parseFloat($('#igrf-latitude-hidden').val()) + 90;
+                var colat = -parseFloat($('#igrf-latitude-hidden').val()) + 90;
                 var elong = parseFloat($('#igrf-longitude-hidden').val());
 
                 if (elong < 0) {
