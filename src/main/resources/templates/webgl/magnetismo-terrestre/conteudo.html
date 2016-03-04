@@ -8,6 +8,95 @@
 
 <script src="js/simplify.js"></script>
 
+<div class="modal fade ui-observacao-horizontal" id="cidade-form" tabindex="-1" role="dialog" aria-labelledby="Localizar Cidade" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Localizar Cidade</h4>
+            </div>
+
+            <div class="modal-body">
+                <label id="busca-cidade-feedback"></label>
+                <input type="text" data-provide="typeahead" autocomplete="off" class="form-control" id="busca-cidade-input"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade ui-observacao-horizontal" id="info-magnetica-local" tabindex="-1" role="dialog" aria-labelledby="Informações Magnéticas" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Dados Magnéticos por Local</h4>
+            </div>
+
+            <div class="modal-body">
+
+                <button type="button" id="btn-cidade-form" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#cidade-form">
+                    Escolher Local
+                </button>
+
+                <div id="label-cidade-form" style="display: none;"></div>
+
+                <div class='igrf-divisao'>
+
+                    <div class="celula-angulo">
+                        <div id="igrf-latitude">
+                        </div>
+
+                        <div class="row-fluid">
+                            <div class="col-md-12">
+                                <label>Latitude</label>
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <button id="igrf-latitude-sinal" class="btn btn-info" type="button">+</button>
+                                    </span>
+                                    <input value="0" id="igrf-latitude-hora" class="form-control input-centralizado jlink input-small input-numerico" min="0" type="number" />
+                                    <span class="input-group-addon">º</span>
+                                    <input value="0" id="igrf-latitude-min" class="form-control input-centralizado jlink input-small input-numerico" min="0" max="59" type="number" />
+                                    <span class="input-group-addon">'</span>
+                                    <input value="0" id="igrf-latitude-sec" class="form-control input-centralizado jlink input-small input-numerico" min="0" max="59" type="number" />
+                                    <span class="input-group-addon">"</span>
+                                    <input name="latitude" type="hidden" class="data-source-coordenada" id="igrf-latitude-hidden" value="0" min="-90" max="90" />
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="celula-angulo">
+                        <div id="igrf-longitude">
+                        </div>
+
+                        <div class="row-fluid">
+                            <div class="col-md-12">
+                                <label>Longitude</label>
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <button id="igrf-longitude-sinal" class="btn btn-info" type="button">+</button>
+                                    </span>
+                                    <input value="0" id="igrf-longitude-hora" class="form-control input-centralizado jlink input-small input-numerico" min="0" type="number" />
+                                    <span class="input-group-addon">º</span>
+                                    <input value="0" id="igrf-longitude-min" class="form-control input-centralizado jlink input-small input-numerico" min="0" max="59" type="number" />
+                                    <span class="input-group-addon">'</span>
+                                    <input value="0" id="igrf-longitude-sec" class="form-control input-centralizado jlink input-small input-numerico" min="0" max="59" type="number" />
+                                    <span class="input-group-addon">"</span>
+                                    <input name="longitude" type="hidden" class="data-source-coordenada" id="igrf-longitude-hidden" value="0" min="-180" max="180" />
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <button class="btn btn-lg btn-primary" id="fechar-modal-geo-local">Confirmar</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 <a id="export-mapa" class="btn btn-primary disabled form-magnetico-input">Salvar imagem</a>
 
 <div id="mostrar-resultados" class="jlink" style="display: none;">
@@ -31,7 +120,7 @@
 
 </div>
 
-<div id="resultado-magnetico" style="display: none;" class="box-mapa-magnetico">
+<div id="resultado-magnetico" style="display: none;" class="box-mapa-magnetico jlink" data-toggle="modal" data-target="#info-magnetica-local">
 </div>
 
 <canvas id="gera-textura" style="display: none;"></canvas>
@@ -39,1302 +128,1429 @@
 <img id="export-rodape" src="imgs/magnetismo-terrestre-rodape.png" style="display: none;" />
 
 <script th:inline="javascript">
-    /*<![CDATA[*/
+	/*<![CDATA[*/
 
-    (function () {
+	$.getJSON('lib/on-daed-js/CID-ALL.json', function (data) {
 
-        $('#esconder-resultados').click(function () {
-            $('.box-mapa-magnetico').hide(0, function () {
-                $('#mostrar-resultados').show();
+		ON_DAED.numberInputMinMax('.input-numerico');
+
+		ON_DAED.addTempoSideralAnglepicker($('#igrf-latitude'), '#igrf-latitude');
+		ON_DAED.addTempoSideralAnglepicker($('#igrf-longitude'), '#igrf-longitude');
+
+		$('#cidade-form').on('show.bs.modal', function () {
+			$('#busca-cidade-input').val('');
+			$('#info-magnetica-local').modal('hide');
+			$('#busca-cidade-feedback').html("Digite a cidade");
+		});
+
+		$('#cidade-form').on('hidden.bs.modal', function () {
+			$('#info-magnetica-local').modal('show');
+		});
+
+		var cidades = [];
+
+		for (var i in data) {
+			var estado = data[i];
+			for (var j = 0; j < estado.length; j++) {
+				cidades.push({
+					name: i + ' - ' + data[i][j].c,
+					l: parseFloat(data[i][j].l),
+					b: parseFloat(data[i][j].b)
+				});
+			}
+		}
+
+		var buscaCidadeInput = $('#busca-cidade-input');
+
+		buscaCidadeInput.on('keyup', function () {
+			window.setTimeout(function () {
+				if ($('ul.typeahead li:visible').length === 0 && buscaCidadeInput.val()) {
+					$('#busca-cidade-feedback').html("Nenhuma cidade foi localizada");
+				} else if (!buscaCidadeInput.val()) {
+					$('#busca-cidade-feedback').html("Digite a cidade");
+				} else if ($('ul.typeahead li:visible').length !== 0) {
+					$('#busca-cidade-feedback').html("Escolha a cidade");
+				} else {
+					$('#busca-cidade-feedback').empty();
+				}
+			}, 10);
+		});
+
+		buscaCidadeInput.typeahead({source: cidades,
+			autoSelect: true});
+
+		function labelCidade(nome) {
+			$('#label-cidade').html(nome);
+			$('#label-cidade-form').html(nome);
+			$('#label-cidade-form').show();
+		}
+
+		buscaCidadeInput.change(function () {
+			var current = buscaCidadeInput.typeahead("getActive");
+			if (current) {
+				// Some item from your model is active!
+				if (current.name === buscaCidadeInput.val().toUpperCase()) {
+					$('#igrf-longitude').anglepicker('value', current.l, true);
+					$('#igrf-latitude').anglepicker('value', current.b * 2, true);
+					labelCidade(current.name);
+					$('#cidade-form').modal('hide');
+				} else {
+				}
+			} else {
+				// new value
+			}
+		});
+
+            $('#igrf-latitude-hidden').change(function () {
+				$('#label-cidade-form').empty();
+                $('#label-cidade-form').hide();
             });
-        });
 
-        $('#mostrar-resultados').click(function () {
-            $('#mostrar-resultados').hide(0, function () {
-                $('#entrada-magnetica').show();
-                if (marcador !== null) {
-                    $('#resultado-magnetico').show();
-                }
+            $('#igrf-longitude-hidden').change(function () {
+				$('#label-cidade-form').empty();
+                $('#label-cidade-form').hide();
             });
-        });
-
-        function getHiddenDate(id) {
-
-            id = id || '#dataju-datepicker-de-local';
-            var split = $(id).val().split("/");
-            var dt = new Date(split[2], split[1] - 1, split[0], 0, 0, 0, 0, 0);
-            var ano = parseInt(split[2]) + (ON_DAED.diaDoAno(dt) / 365.25);
-            return ano;
-        }
-
-        var date = new Date();
-        $('#dataju-datepicker-de-local')
-                .val(date.getUTCDate() + '/' + (date.getUTCMonth() < 9 ? '0' + (date.getUTCMonth() + 1) : date.getUTCMonth() + 1) + '/' + date.getUTCFullYear())
-                .datepicker({
-                    orientation: "top",
-                    format: 'dd/mm/yyyy',
-                    language: 'pt-BR',
-                    autoclose: true,
-                    startDate: "01/01/1900",
-                    endDate: "31/12/2020"
-                }).on('changeDate',
-                function (ev) {
-                    entradaData = getHiddenDate();
-                    alteraDados(entradaData,
-                            latInicial,
-                            latFinal,
-                            lonInicial,
-                            lonFinal
-                            );
-                    redraw();
-                });
-        var data;
-        var minZoom = 1;
-        var maxZoom = 8;
-        var incrLatitude = 1;
-        var incrLongitude = 1;
-        var latInicial = 90;
-        var latFinal = -90;
-        var lonInicial = -180;
-        var lonFinal = 180;
-        var entradaData = 2020.0;
-        var valorMax,
-                valorMin;
-        var xs, ys;
-
-        $('#tipo-mapa-magnetico').on('change', function () {
-
-            alteraDados(entradaData,
-                    latInicial,
-                    latFinal,
-                    lonInicial,
-                    lonFinal
-                    );
-
-            redraw();
-        });
-
-        function alteraDados(date, latitudeInicial, latitudeFinal,
-                longitudeInicial, longitudeFinal) {
-
-            data = [];
-            valorMax = -Infinity;
-            valorMin = Infinity;
-            var valor = $('#tipo-mapa-magnetico').val();
-            for (var i = longitudeInicial; i <= longitudeFinal; i = i + incrLongitude) {
-
-                data.push([]);
-                for (var j = latitudeFinal; j <= latitudeInicial; j = j + incrLatitude) {
-                    var colat = 90 - j;
-                    var elong = (i + 360) % 360;
-                    var alt = 0;
-                    var p = ON_DAED['GEO'].obterDadosMagneticos(date, alt, colat, elong);
-                    var v = p[valor];
-                    if (v > valorMax) {
-                        valorMax = v;
-                    } else if (v < valorMin) {
-                        valorMin = v;
-                    }
-
-                    data[data.length - 1].push(v);
-                }
-            }
-
-            xs = d3.range(0, data.length);
-            ys = d3.range(0, data[0].length);
-        }
-
-        // Valores iniciais
-        alteraDados(entradaData,
-                latInicial,
-                latFinal,
-                lonInicial,
-                lonFinal
-                );
-        var c = new Conrec;
-        var zoomBehavior = d3.behavior.zoom();
-        var svg = d3.select("#canvas-wrapper").append("svg")
-                .attr("width", "100%")
-                .attr("height", "100%")
-                .attr("id", "mapa-terra")
-                .append("g")
-                .call(zoomBehavior
-                        .scaleExtent([minZoom, maxZoom])
-                        .on("zoom", zoom));
-        function zoom() {
-            var translate = d3.event.translate;
-            var scale = d3.event.scale;
-            var width = scale * window.innerWidth;
-            var height = scale * window.innerHeight;
-            translate[0] = (window.innerWidth - translate[0]) > width ?
-                    (window.innerWidth - width) : (translate[0] > 0 ? 0 : translate[0]);
-            translate[1] = (window.innerHeight - translate[1]) > height ?
-                    (window.innerHeight - height) : (translate[1] > 0 ? 0 : translate[1]);
-            zoomBehavior.translate(translate);
-            svg.attr("transform", "translate(" + translate + ")scale(" + d3.event.scale + ")");
-            redraw();
-        }
-
-        function showResultBox() {
-
-            if (lastColat !== null && lastElong !== null) {
-                var colat = lastColat;
-                var elong = lastElong;
-
-                var date = getHiddenDate();
-                var alt = 0;
-                var result = ON_DAED['GEO'].obterDadosMagneticos(date, alt, colat, elong);
-                var rad = Math.PI / 180;
-                var txt = '<label>Mouse / Toque</label><div class="igrf-divisao">';
-                txt += "<div style='display: inline-block;'>Latitude: " + ON_DAED.tempoSideral((90 - colat) * rad, true) + "</div><div style='clear: both;'></div>";
-                txt += "<div style='display: inline-block;'>Longitude: " + ON_DAED.tempoSideral((elong > 180 ? elong - 360 : elong) * rad, true) + "</div>";
-
-                var tipoPlot = $('#tipo-mapa-magnetico').val();
-
-                if (tipoPlot === "declinacao") {
-                    txt += "<div>Declinação: " + ON_DAED.tempoSideral(result.declinacao * rad, true) + "</div>";
-                } else if (tipoPlot === "variacaoDeclinacao") {
-                    txt += "<div>Variação Secular da Declinação: " + Math.round(result.variacaoDeclinacao) + " min/ano</div>";
-                } else if (tipoPlot === "inclinacao") {
-                    txt += "<div>Inclinação: " + ON_DAED.tempoSideral(result.inclinacao * rad, true) + "</div>";
-                } else if (tipoPlot === "variacaoInclinacao") {
-                    txt += "<div>Variação Secular da Inclinação: " + Math.round(result.variacaoInclinacao) + " min/ano</div>";
-                } else if (tipoPlot === "intensidade") {
-                    txt += "<div>Intensidade Horizontal: " + Math.round(result.H) + " nT</div>";
-                    txt += "<div class='no-mobile'>Intensidade</div>";
-                    txt += "<div class='no-mobile'>X = " + Math.round(result.valoresCampo.x) + " nT</div>";
-                    txt += "<div class='no-mobile'>Y = " + Math.round(result.valoresCampo.y) + " nT</div>";
-                    txt += "<div class='no-mobile'>Z = " + Math.round(result.valoresCampo.z) + " nT</div>";
-                    txt += "<div>Componente Total = " + Math.round(result.intensidade) + " nT</div>";
-                } else /* variacaoIntensidade */ {
-                    txt += "<div>Variação Secular da Intensidade Horizontal: " + Math.round(result.DH) + " nT/ano</div>";
-                    txt += "<div class='no-mobile'>Variação Secular da Intensidade</div>";
-                    txt += "<div class='no-mobile'>X = " + Math.round(result.variacaoSecular.x) + " nT/ano</div>";
-                    txt += "<div class='no-mobile'>Y = " + Math.round(result.variacaoSecular.y) + " nT/ano</div>";
-                    txt += "<div class='no-mobile'>Z = " + Math.round(result.variacaoSecular.z) + " nT/ano</div>";
-                    txt += "<div>Componente Total = " + Math.round(result.variacaoIntensidade) + " nT/ano</div>";
-                }
-
-                txt += "</div>";
-
-                $('#resultado-magnetico').html(txt);
-
-                if ($('#esconder-resultados').is(':visible')) {
-                    $('#resultado-magnetico').show();
-                }
-
-            }
-        }
-
-
-        var bgImg = svg.append('svg:image');
-
-        var marcador = null;
-
-        var lineFunction = d3.svg.line()
-
-                .x(function (d) {
-                    return d.x;
-                })
-
-                .y(function (d) {
-                    return d.y;
-                })
-
-                .interpolate("linear");
-
-        function recriarMarcador() {
-            if (marcador !== null) {
-                criarMarcador(
-                        marcador.attr("mydata:cx"),
-                        marcador.attr("mydata:cy"),
-                        marcador.attr("mydata:arc")
-                        );
-            }
-        }
-
-        function criarMarcador(mX, mY, mArc) {
-            var valor = $('#tipo-mapa-magnetico').val();
-            if (valor === "declinacao" || valor === "variacaoDeclinacao") {
-                criarMarcadorDeclinacao(mX, mY, mArc);
-            } else {
-                criarMarcadorPadrao(mX, mY, mArc);
-            }
-        }
-
-        function criarMarcadorPadrao(mX, mY, mArc) {
-            $('#export-mapa').removeClass('disabled');
-
-            marcador = svg
-                    .append('g')
-                    .attr("transform", "translate(" + mX + "," + mY + ")")
-                    .attr("mydata:cx", mX)
-                    .attr("mydata:cy", mY)
-                    .attr("mydata:arc", mArc);
-
-            var R = obterRaioMarcador();
-
-            var compassFullSize = (27.5 / 4) * R;
-
-            marcador.append('svg:image')
-                    .attr('xlink:href', 'imgs/map-marker.png')
-                    .attr('width', compassFullSize)
-                    .attr('height', compassFullSize)
-                    .attr('x', -compassFullSize / 2)
-                    .attr('y', -compassFullSize / 2);
-        }
-
-        function criarMarcadorDeclinacao(mX, mY, mArc) {
-
-            $('#export-mapa').removeClass('disabled');
-
-            marcador = svg
-                    .append('g')
-                    .attr("transform", "translate(" + mX + "," + mY + ")")
-                    .attr("mydata:cx", mX)
-                    .attr("mydata:cy", mY)
-                    .attr("mydata:arc", mArc);
-
-            var R = obterRaioMarcador();
-
-            var anguloDeclinacao = -mArc * (Math.PI / 180);
-
-            var arc = d3.svg.arc()
-                    .innerRadius(R * 2.65)
-                    .outerRadius(R * 2.7)
-                    .startAngle(0) //converting from degs to radians
-                    .endAngle(anguloDeclinacao);
-
-            marcador
-                    .append("path")
-                    .attr("d", arc)
-                    .attr("fill", "red");
-
-            var compassFullSize = (27.5 / 4) * R;
-
-            marcador.append('svg:image')
-                    .attr('xlink:href', 'imgs/compass.png')
-                    .attr('width', compassFullSize)
-                    .attr('height', compassFullSize)
-                    .attr('x', -compassFullSize / 2)
-                    .attr('y', -compassFullSize / 2);
-
-            marcador
-                    .append('svg:image')
-                    .attr('xlink:href', 'imgs/compass-arrow.png')
-                    .attr('width', compassFullSize)
-                    .attr('height', compassFullSize)
-                    .attr("transform", "translate(" + -compassFullSize / 2 + "," + -compassFullSize / 2 + ") rotate(" + -mArc + "," + compassFullSize / 2 + "," + compassFullSize / 2 + ")");
-
-            var nodeTexto = marcador
-                    .append("g");
-
-            nodeTexto.append("circle")
-                    .attr("r", R)
-                    .attr("fill", "green");
-
-            var textoAngulo = (Math.round(mArc * 10) / 10) + "°";
-
-            nodeTexto.append("text")
-                    .text(textoAngulo)
-                    .attr("fill", "white")
-                    .style("font-size", function (d) {
-                        return (Math.min(2 * R, (2 * R) / this.getComputedTextLength() * 10)) + "px";
-                    })
-                    .attr("dx", function (d) {
-                        return (textoAngulo.length / 7) * -1.5 + "em";
-                    })
-                    .attr("dy", ".37em");
-
-        }
-
-        function obterRaioMarcador() {
-            return (maxZoom / zoomBehavior.scale()) * 4;
-        }
-
-        function addMarcadorMapa(d) {
-
-            if (!$('#tipo-mapa-magnetico').is(':disabled')) {
-
-                if (marcador !== null) {
-                    marcador.remove();
-                }
-
-                var coordinates = [0, 0];
-
-                coordinates = d3.mouse(this) || d3.touch(this);
-
-                lastClientX = d3.mouse(document.body)[0];
-                lastClientY = d3.mouse(document.body)[1];
-
-                eventoInteracao(d, coordinates);
-
-                var x = coordinates[0];
-                var y = coordinates[1];
-                var colat = (y / window.innerHeight) * 180;
-                var elong = (180 + (x / window.innerWidth) * 360) % 360;
-
-                var date = getHiddenDate();
-                var alt = 0;
-
-                var result = ON_DAED['GEO'].obterDadosMagneticos(date, alt, colat, elong);
-
-                criarMarcador(coordinates[0], coordinates[1], result.declinacao);
-
-            }
-
-        }
-
-        var lastColat = null;
-        var lastElong = null;
-
-        var lastClientX = null;
-        var lastClientY = null;
-
-        function eventoInteracao(d, coordinates) {
-            var x = coordinates[0];
-            var y = coordinates[1];
-            lastColat = (y / window.innerHeight) * 180;
-            lastElong = (180 + (x / window.innerWidth) * 360) % 360;
-            showResultBox();
-        }
-
-        bgImg
-                .attr('xlink:href', 'lib/on-daed-js/imgs/texturas/terra/map.jpg')
-                .attr("preserveAspectRatio", "none")
-                .attr("x", 0)
-                .attr("y", 0);
-        svg
-                .on('touch', addMarcadorMapa)
-                .on('click', addMarcadorMapa)
-                .on('custommouse', function () {
-                    customMousePosition = d3.mouse(this);
-                    customMouseLock = false;
-                });
-
-        var customMousePosition = null;
-        var customMouseLock = false;
-
-        function triggerCustomMouse(x, y) {
-            customMouseLock = true;
-            var mousedownEvent = document.createEvent("MouseEvent");
-            mousedownEvent.initMouseEvent(
-                    "custommouse", true, true, window, 0,
-                    0, 0, x, y,
-                    false, false, false, false,
-                    0, null);
-
-            svg[0][0].dispatchEvent(mousedownEvent);
-
-            while (customMouseLock)
-                ;
-
-            return customMousePosition;
-        }
-
-        window.redraw = function (updateImage) {
-
-            var width = window.innerWidth;
-            var height = window.innerHeight;
-
-            var x = d3.scale.linear().range([0, width + 3]).domain([0, data.length]);
-            var y = d3.scale.linear().range([height, -3]).domain([0, data[0].length]);
-
-            if (updateImage) {
-                bgImg
-                        .attr("width", width)
-                        .attr("height", height);
-            }
-
-            var divisaoIsolinhas = 75;
-
-            var tipoPlot = $('#tipo-mapa-magnetico').val();
-            if (tipoPlot === "variacaoDeclinacao") {
-                divisaoIsolinhas = 1000;
-            } else if (tipoPlot === "declinacao") {
-                divisaoIsolinhas = 110;
-            }
-
-            zs = d3.range(valorMin, valorMax, (valorMax - valorMin) / divisaoIsolinhas);
-            c.contour(data, 0, xs.length - 1, 0, ys.length - 1, xs, ys, zs.length, zs);
-            svg.selectAll("path").remove();
-
-            if (marcador !== null) {
-                marcador.remove();
-            }
-
-            var isolines = c.contourList();
-            // simplificar isolinhas
-            for (var i = 0; i < isolines.length; i++) {
-                var k = isolines[i].k;
-                var level = isolines[i].level;
-                isolines[i] = simplify(isolines[i], 0.1);
-                isolines[i].k = k;
-                isolines[i].level = level;
-            }
-
-            svg.selectAll("path")
-                    .data(isolines)
-                    .enter().append("path")
-                    .attr("id", function (d, i) {
-                        return "path_" + i;
-                    })
-                    .style("fill", "transparent")
-                    .style("stroke", "black")
-                    .attr("d", d3.svg.line()
-                            .x(function (d) {
-                                return x(d.x);
-                            })
-                            .y(function (d) {
-                                return y(d.y);
-                            })
-                            );
-
-            if (marcador !== null) {
-                criarMarcador(
-                        marcador.attr("mydata:cx"),
-                        marcador.attr("mydata:cy"),
-                        marcador.attr("mydata:arc")
-                        );
-            }
-
-            showResultBox();
-        };
-
-        redraw(true);
-
-        function fillTextCanvas(ctx, sizeX, sizeY) {
-
-            var colat = lastColat;
-            var elong = lastElong;
-
-            var date = getHiddenDate();
-
-            var formatDate = $('#dataju-datepicker-de-local').val();
 
-            var alt = 0;
-            var result = ON_DAED['GEO'].obterDadosMagneticos(date, alt, colat, elong);
-            var rad = Math.PI / 180;
+		(function () {
+
+			$('#esconder-resultados').click(function () {
+				$('.box-mapa-magnetico').hide(0, function () {
+					$('#mostrar-resultados').show();
+				});
+			});
+
+			$('#mostrar-resultados').click(function () {
+				$('#mostrar-resultados').hide(0, function () {
+					$('#entrada-magnetica').show();
+					if (marcador !== null) {
+						$('#resultado-magnetico').show();
+					}
+				});
+			});
+
+			function getHiddenDate(id) {
+
+				id = id || '#dataju-datepicker-de-local';
+				var split = $(id).val().split("/");
+				var dt = new Date(split[2], split[1] - 1, split[0], 0, 0, 0, 0, 0);
+				var ano = parseInt(split[2]) + (ON_DAED.diaDoAno(dt) / 365.25);
+				return ano;
+			}
+
+			var date = new Date();
+			$('#dataju-datepicker-de-local')
+				.val(date.getUTCDate() + '/' + (date.getUTCMonth() < 9 ? '0' + (date.getUTCMonth() + 1) : date.getUTCMonth() + 1) + '/' + date.getUTCFullYear())
+				.datepicker({
+					orientation: "top",
+					format: 'dd/mm/yyyy',
+					language: 'pt-BR',
+					autoclose: true,
+					startDate: "01/01/1900",
+					endDate: "31/12/2020"
+				}).on('changeDate',
+				function (ev) {
+					entradaData = getHiddenDate();
+					alteraDados(entradaData,
+						latInicial,
+						latFinal,
+						lonInicial,
+						lonFinal
+						);
+					redraw();
+				});
+			var data;
+			var minZoom = 1;
+			var maxZoom = 8;
+			var incrLatitude = 1;
+			var incrLongitude = 1;
+			var latInicial = 90;
+			var latFinal = -90;
+			var lonInicial = -180;
+			var lonFinal = 180;
+			var entradaData = 2020.0;
+			var valorMax,
+				valorMin;
+			var xs, ys;
+
+			$('#tipo-mapa-magnetico').on('change', function () {
+
+				alteraDados(entradaData,
+					latInicial,
+					latFinal,
+					lonInicial,
+					lonFinal
+					);
+
+				redraw();
+			});
+
+			function alteraDados(date, latitudeInicial, latitudeFinal,
+				longitudeInicial, longitudeFinal) {
+
+				data = [];
+				valorMax = -Infinity;
+				valorMin = Infinity;
+				var valor = $('#tipo-mapa-magnetico').val();
+				for (var i = longitudeInicial; i <= longitudeFinal; i = i + incrLongitude) {
+
+					data.push([]);
+					for (var j = latitudeFinal; j <= latitudeInicial; j = j + incrLatitude) {
+						var colat = 90 - j;
+						var elong = (i + 360) % 360;
+						var alt = 0;
+						var p = ON_DAED['GEO'].obterDadosMagneticos(date, alt, colat, elong);
+						var v = p[valor];
+						if (v > valorMax) {
+							valorMax = v;
+						} else if (v < valorMin) {
+							valorMin = v;
+						}
+
+						data[data.length - 1].push(v);
+					}
+				}
+
+				xs = d3.range(0, data.length);
+				ys = d3.range(0, data[0].length);
+			}
+
+			// Valores iniciais
+			alteraDados(entradaData,
+				latInicial,
+				latFinal,
+				lonInicial,
+				lonFinal
+				);
+
+			var c = new Conrec;
+			var zoomBehavior = d3.behavior.zoom();
+			var svg = d3.select("#canvas-wrapper").append("svg")
+				.attr("width", "100%")
+				.attr("height", "100%")
+				.attr("id", "mapa-terra")
+				.append("g")
+				.call(zoomBehavior
+					.scaleExtent([minZoom, maxZoom])
+					.on("zoom", zoom));
+
+			$('#fechar-modal-geo-local').click(function () {
+				var latitude = (Math.abs(parseFloat($('#igrf-latitude-hidden').val()) - 90) / 180) * window.innerHeight;
+				var longitude = ((parseFloat($('#igrf-longitude-hidden').val()) + 180) / 360) * window.innerWidth;
+
+				addMarcadorMapa(null, [longitude, latitude]);
+			
+				zoomBehavior.translate([0,0]).scale(1);
+				svg.attr("transform", "translate(0,0)scale(1)");
+				redraw();
+				
+				$('#info-magnetica-local').modal('hide');
+			});
+
+			function zoom() {
+				var translate = d3.event.translate;
+				var scale = d3.event.scale;
+				var width = scale * window.innerWidth;
+				var height = scale * window.innerHeight;
+				translate[0] = (window.innerWidth - translate[0]) > width ?
+					(window.innerWidth - width) : (translate[0] > 0 ? 0 : translate[0]);
+				translate[1] = (window.innerHeight - translate[1]) > height ?
+					(window.innerHeight - height) : (translate[1] > 0 ? 0 : translate[1]);
+				zoomBehavior.translate(translate);
+				svg.attr("transform", "translate(" + translate + ")scale(" + d3.event.scale + ")");
+				redraw();
+			}
+
+			function showResultBox() {
+
+				if (lastColat !== null && lastElong !== null) {
+					var colat = lastColat;
+					var elong = lastElong;
+
+					var date = getHiddenDate();
+					var alt = 0;
+					var result = ON_DAED['GEO'].obterDadosMagneticos(date, alt, colat, elong);
+					var rad = Math.PI / 180;
+					var txt = '<label>Mouse / Toque</label><div class="igrf-divisao">';
+					txt += "<div style='display: inline-block;'>Latitude: " + ON_DAED.tempoSideral((90 - colat) * rad, true) + "</div><div style='clear: both;'></div>";
+					txt += "<div style='display: inline-block;'>Longitude: " + ON_DAED.tempoSideral((elong > 180 ? elong - 360 : elong) * rad, true) + "</div>";
+
+					var tipoPlot = $('#tipo-mapa-magnetico').val();
+
+					if (tipoPlot === "declinacao") {
+						txt += "<div>Declinação: " + ON_DAED.tempoSideral(result.declinacao * rad, true) + "</div>";
+					} else if (tipoPlot === "variacaoDeclinacao") {
+						txt += "<div>Variação Secular da Declinação: " + Math.round(result.variacaoDeclinacao) + " min/ano</div>";
+					} else if (tipoPlot === "inclinacao") {
+						txt += "<div>Inclinação: " + ON_DAED.tempoSideral(result.inclinacao * rad, true) + "</div>";
+					} else if (tipoPlot === "variacaoInclinacao") {
+						txt += "<div>Variação Secular da Inclinação: " + Math.round(result.variacaoInclinacao) + " min/ano</div>";
+					} else if (tipoPlot === "intensidade") {
+						txt += "<div>Intensidade Horizontal: " + Math.round(result.H) + " nT</div>";
+						txt += "<div class='no-mobile'>Intensidade</div>";
+						txt += "<div class='no-mobile'>X = " + Math.round(result.valoresCampo.x) + " nT</div>";
+						txt += "<div class='no-mobile'>Y = " + Math.round(result.valoresCampo.y) + " nT</div>";
+						txt += "<div class='no-mobile'>Z = " + Math.round(result.valoresCampo.z) + " nT</div>";
+						txt += "<div>Componente Total = " + Math.round(result.intensidade) + " nT</div>";
+					} else /* variacaoIntensidade */ {
+						txt += "<div>Variação Secular da Intensidade Horizontal: " + Math.round(result.DH) + " nT/ano</div>";
+						txt += "<div class='no-mobile'>Variação Secular da Intensidade</div>";
+						txt += "<div class='no-mobile'>X = " + Math.round(result.variacaoSecular.x) + " nT/ano</div>";
+						txt += "<div class='no-mobile'>Y = " + Math.round(result.variacaoSecular.y) + " nT/ano</div>";
+						txt += "<div class='no-mobile'>Z = " + Math.round(result.variacaoSecular.z) + " nT/ano</div>";
+						txt += "<div>Componente Total = " + Math.round(result.variacaoIntensidade) + " nT/ano</div>";
+					}
+
+					if($('#label-cidade-form').html() !== '') {
+						var nomeLocal = $('#label-cidade-form').html();
+						txt += '<div id="local-resultado-magnetico">' + nomeLocal + '</div>';
+					}
+
+					txt += "</div>";
+
+					$('#resultado-magnetico').html(txt);
+
+					if ($('#esconder-resultados').is(':visible')) {
+						$('#resultado-magnetico').show();
+					}
+
+				}
+			}
+
+
+			var bgImg = svg.append('svg:image');
+
+			var marcador = null;
+
+			var lineFunction = d3.svg.line()
+
+				.x(function (d) {
+					return d.x;
+				})
+
+				.y(function (d) {
+					return d.y;
+				})
+
+				.interpolate("linear");
+
+			function recriarMarcador() {
+				if (marcador !== null) {
+					criarMarcador(
+						marcador.attr("mydata:cx"),
+						marcador.attr("mydata:cy"),
+						marcador.attr("mydata:arc")
+						);
+				}
+			}
+
+			function criarMarcador(mX, mY, mArc) {
+				var valor = $('#tipo-mapa-magnetico').val();
+				if (valor === "declinacao" || valor === "variacaoDeclinacao") {
+					criarMarcadorDeclinacao(mX, mY, mArc);
+				} else {
+					criarMarcadorPadrao(mX, mY, mArc);
+				}
+			}
+
+			function criarMarcadorPadrao(mX, mY, mArc) {
+				$('#export-mapa').removeClass('disabled');
+
+				marcador = svg
+					.append('g')
+					.attr("transform", "translate(" + mX + "," + mY + ")")
+					.attr("mydata:cx", mX)
+					.attr("mydata:cy", mY)
+					.attr("mydata:arc", mArc);
+
+				var R = obterRaioMarcador();
+
+				var compassFullSize = (27.5 / 4) * R;
+
+				marcador.append('svg:image')
+					.attr('xlink:href', 'imgs/map-marker.png')
+					.attr('width', compassFullSize)
+					.attr('height', compassFullSize)
+					.attr('x', -compassFullSize / 2)
+					.attr('y', -compassFullSize / 2);
+			}
+
+			function criarMarcadorDeclinacao(mX, mY, mArc) {
+
+				$('#export-mapa').removeClass('disabled');
+
+				marcador = svg
+					.append('g')
+					.attr("transform", "translate(" + mX + "," + mY + ")")
+					.attr("mydata:cx", mX)
+					.attr("mydata:cy", mY)
+					.attr("mydata:arc", mArc);
+
+				var R = obterRaioMarcador();
+
+				var anguloDeclinacao = -mArc * (Math.PI / 180);
+
+				var arc = d3.svg.arc()
+					.innerRadius(R * 2.65)
+					.outerRadius(R * 2.7)
+					.startAngle(0) //converting from degs to radians
+					.endAngle(anguloDeclinacao);
+
+				marcador
+					.append("path")
+					.attr("d", arc)
+					.attr("fill", "red");
+
+				var compassFullSize = (27.5 / 4) * R;
+
+				marcador.append('svg:image')
+					.attr('xlink:href', 'imgs/compass.png')
+					.attr('width', compassFullSize)
+					.attr('height', compassFullSize)
+					.attr('x', -compassFullSize / 2)
+					.attr('y', -compassFullSize / 2);
+
+				marcador
+					.append('svg:image')
+					.attr('xlink:href', 'imgs/compass-arrow.png')
+					.attr('width', compassFullSize)
+					.attr('height', compassFullSize)
+					.attr("transform", "translate(" + -compassFullSize / 2 + "," + -compassFullSize / 2 + ") rotate(" + -mArc + "," + compassFullSize / 2 + "," + compassFullSize / 2 + ")");
+
+				var nodeTexto = marcador
+					.append("g");
+
+				nodeTexto.append("circle")
+					.attr("r", R)
+					.attr("fill", "green");
+
+				var textoAngulo = (Math.round(mArc * 10) / 10) + "°";
+
+				nodeTexto.append("text")
+					.text(textoAngulo)
+					.attr("fill", "white")
+					.style("font-size", function (d) {
+						return (Math.min(2 * R, (2 * R) / this.getComputedTextLength() * 10)) + "px";
+					})
+					.attr("dx", function (d) {
+						return (textoAngulo.length / 7) * -1.5 + "em";
+					})
+					.attr("dy", ".37em");
+
+			}
+
+			function obterRaioMarcador() {
+				return (maxZoom / zoomBehavior.scale()) * 4;
+			}
+
+			function addMarcadorMapa(d, input) {
+
+				if (!$('#tipo-mapa-magnetico').is(':disabled')) {
+
+					if(d !== null) {
+						$('#label-cidade-form').empty();
+						$('#label-cidade-form').hide();
+					}
+
+					if (marcador !== null) {
+						marcador.remove();
+					}
+
+					var coordinates = [0, 0];
+
+					if(!input) {
+						coordinates = d3.mouse(this) || d3.touch(this);
+
+						lastClientX = d3.mouse(document.body)[0];
+						lastClientY = d3.mouse(document.body)[1];
+					} else {
+						lastClientX = coordinates[0] = input[0];
+						lastClientY = coordinates[1] = input[1];
+					}
+
+					eventoInteracao(d, coordinates);
+
+					var x = coordinates[0];
+					var y = coordinates[1];
+					var colat = (y / window.innerHeight) * 180;
+					var elong = (180 + (x / window.innerWidth) * 360) % 360;
+
+					var date = getHiddenDate();
+					var alt = 0;
+
+					var result = ON_DAED['GEO'].obterDadosMagneticos(date, alt, colat, elong);
+
+					criarMarcador(coordinates[0], coordinates[1], result.declinacao);
+
+				}
+
+			}
+
+			var lastColat = null;
+			var lastElong = null;
+
+			var lastClientX = null;
+			var lastClientY = null;
+
+			function eventoInteracao(d, coordinates) {
+				var x = coordinates[0];
+				var y = coordinates[1];
+				lastColat = (y / window.innerHeight) * 180;
+				lastElong = (180 + (x / window.innerWidth) * 360) % 360;
+				showResultBox();
+			}
+
+			bgImg
+				.attr('xlink:href', 'lib/on-daed-js/imgs/texturas/terra/map.jpg')
+				.attr("preserveAspectRatio", "none")
+				.attr("x", 0)
+				.attr("y", 0);
+			svg
+				.on('touch', addMarcadorMapa)
+				.on('click', addMarcadorMapa)
+				.on('custommouse', function () {
+					customMousePosition = d3.mouse(this);
+					customMouseLock = false;
+				});
+
+			var customMousePosition = null;
+			var customMouseLock = false;
+
+			function triggerCustomMouse(x, y) {
+				customMouseLock = true;
+				var mousedownEvent = document.createEvent("MouseEvent");
+				mousedownEvent.initMouseEvent(
+					"custommouse", true, true, window, 0,
+					0, 0, x, y,
+					false, false, false, false,
+					0, null);
+
+				svg[0][0].dispatchEvent(mousedownEvent);
+
+				while (customMouseLock)
+					;
+
+				return customMousePosition;
+			}
+
+			window.redraw = function (updateImage, dontShowResultBox) {
+
+				var width = window.innerWidth;
+				var height = window.innerHeight;
+
+				var x = d3.scale.linear().range([0, width + 3]).domain([0, data.length]);
+				var y = d3.scale.linear().range([height, -3]).domain([0, data[0].length]);
+
+				if (updateImage) {
+					bgImg
+						.attr("width", width)
+						.attr("height", height);
+				}
+
+				var divisaoIsolinhas = 75;
+
+				var tipoPlot = $('#tipo-mapa-magnetico').val();
+				if (tipoPlot === "variacaoDeclinacao") {
+					divisaoIsolinhas = 1000;
+				} else if (tipoPlot === "declinacao") {
+					divisaoIsolinhas = 110;
+				}
+
+				zs = d3.range(valorMin, valorMax, (valorMax - valorMin) / divisaoIsolinhas);
+				c.contour(data, 0, xs.length - 1, 0, ys.length - 1, xs, ys, zs.length, zs);
+				svg.selectAll("path").remove();
+
+				if (marcador !== null) {
+					marcador.remove();
+				}
+
+				var isolines = c.contourList();
+				// simplificar isolinhas
+				for (var i = 0; i < isolines.length; i++) {
+					var k = isolines[i].k;
+					var level = isolines[i].level;
+					isolines[i] = simplify(isolines[i], 0.1);
+					isolines[i].k = k;
+					isolines[i].level = level;
+				}
+
+				svg.selectAll("path")
+					.data(isolines)
+					.enter().append("path")
+					.attr("id", function (d, i) {
+						return "path_" + i;
+					})
+					.style("fill", "transparent")
+					.style("stroke", "black")
+					.attr("d", d3.svg.line()
+						.x(function (d) {
+							return x(d.x);
+						})
+						.y(function (d) {
+							return y(d.y);
+						})
+						);
+
+				if (marcador !== null) {
+					criarMarcador(
+						marcador.attr("mydata:cx"),
+						marcador.attr("mydata:cy"),
+						marcador.attr("mydata:arc")
+						);
+				}
+
+				if(!dontShowResultBox) {
+					showResultBox();
+				}
+			};
+
+			redraw(true);
+
+			function fillTextCanvas(ctx, sizeX, sizeY) {
+
+				var colat = lastColat;
+				var elong = lastElong;
+
+				var date = getHiddenDate();
+
+				var formatDate = $('#dataju-datepicker-de-local').val();
+
+				var alt = 0;
+				var result = ON_DAED['GEO'].obterDadosMagneticos(date, alt, colat, elong);
+				var rad = Math.PI / 180;
+
+				var metrics = null;
+				var fontHeight = (sizeY * 0.0225);
+
+				var tipoPlot = $('#tipo-mapa-magnetico').val();
+
+				ctx.font = "bold " + fontHeight + "px Verdana";
+				ctx.fillStyle = "#000000";
+
+				var txt = null;
+
+				if (tipoPlot === "declinacao") {
+					txt = "E DECLINAÇÃO";
+				} else if (tipoPlot === "variacaoDeclinacao") {
+					txt = "A VARIAÇÃO SECULAR DE DECLINAÇÃO";
+				} else if (tipoPlot === "intensidade") {
+					txt = "E INTENSIDADE";
+				} else if (tipoPlot === "variacaoIntensidade") {
+					txt = "A VARIAÇÃO SECULAR DE INTENSIDADE";
+				} else if (tipoPlot === "inclinacao") {
+					txt = "E INCLINAÇÃO";
+				} else if (tipoPlot === "variacaoInclinacao") {
+					txt = "A VARIAÇÃO SECULAR DE INCLINAÇÃO";
+				}
+
+				txt = "MAPA D" + txt;
+
+				metrics = ctx.measureText(txt);
+				ctx.fillText(txt, sizeX * 0.5 - metrics.width * 0.5, sizeY * 0.0675 - (fontHeight / 2) * 0.875);
+
+				fontHeight = (sizeY * 0.015);
+				ctx.font = fontHeight + "px Verdana";
+
+				txt = "DATA " + formatDate;
+				metrics = ctx.measureText(txt);
+
+				ctx.fillText(txt, sizeX * 0.5 - metrics.width * 0.5, sizeY * 0.1 - (fontHeight / 2) * 0.875);
+
+				var rowIt = 0;
+
+				var alignXInfo = sizeX * 0.1;
+
+				function fillRow(t, bold, idx) {
+
+					var n = idx;
+
+					if (n === undefined) {
+						n = rowIt++;
+					}
+
+					// box info labels
+					fontHeight = (sizeY * 0.0125);
+					ctx.font = (bold ? ("bold ") : "") + fontHeight + "px Verdana";
+					txt = t;
+
+					function row(y) {
+						return sizeY * 0.475 + y * (fontHeight / 2) * 2.36;
+					}
+
+					ctx.fillText(txt, alignXInfo, row(n));
+				}
+
+				function fillLabeledRow(label, content) {
+
+					alignXInfo = col1;
+
+					fillRow(label, true);
+
+					alignXInfo = col1 + ctx.measureText(txt).width;
+
+					fillRow(content, false, rowIt - 1);
+				}
+
+				var col1 = sizeX * 0.1;
+				var col2 = sizeX * 0.275;
+
+				if($('#local-resultado-magnetico').is(':visible')) {
+					fillRow("Local: ", true);
+					
+					alignXInfo = col1 + ctx.measureText(txt).width;
+					
+					fillRow($('#local-resultado-magnetico').html(), false, rowIt - 1);
+					
+					alignXInfo = col1;
+					rowIt++;
+				}
 
-            var metrics = null;
-            var fontHeight = (sizeY * 0.0225);
+				fillRow("Latitude: ", true);
 
-            var tipoPlot = $('#tipo-mapa-magnetico').val();
+				alignXInfo = col1 + ctx.measureText(txt).width;
 
-            ctx.font = "bold " + fontHeight + "px Verdana";
-            ctx.fillStyle = "#000000";
+				fillRow(ON_DAED.tempoSideral((90 - colat) * rad, true).replace("&#186;", "°"), false, rowIt - 1);
 
-            var txt = null;
+				alignXInfo = col1;
 
-            if (tipoPlot === "declinacao") {
-                txt = "E DECLINAÇÃO";
-            } else if (tipoPlot === "variacaoDeclinacao") {
-                txt = "A VARIAÇÃO SECULAR DE DECLINAÇÃO";
-            } else if (tipoPlot === "intensidade") {
-                txt = "E INTENSIDADE";
-            } else if (tipoPlot === "variacaoIntensidade") {
-                txt = "A VARIAÇÃO SECULAR DE INTENSIDADE";
-            } else if (tipoPlot === "inclinacao") {
-                txt = "E INCLINAÇÃO";
-            } else if (tipoPlot === "variacaoInclinacao") {
-                txt = "A VARIAÇÃO SECULAR DE INCLINAÇÃO";
-            }
+				fillRow("Longitude: ", true);
 
-            txt = "MAPA D" + txt;
+				alignXInfo = col1 + ctx.measureText(txt).width;
 
-            metrics = ctx.measureText(txt);
-            ctx.fillText(txt, sizeX * 0.5 - metrics.width * 0.5, sizeY * 0.0675 - (fontHeight / 2) * 0.875);
+				fillRow(ON_DAED.tempoSideral((elong > 180 ? elong - 360 : elong) * rad, true).replace("&#186;", "°"), false, rowIt - 1);
 
-            fontHeight = (sizeY * 0.015);
-            ctx.font = fontHeight + "px Verdana";
+				rowIt++;
 
-            txt = "DATA " + formatDate;
-            metrics = ctx.measureText(txt);
+				if (tipoPlot === "declinacao" || tipoPlot === "variacaoDeclinacao") {
 
-            ctx.fillText(txt, sizeX * 0.5 - metrics.width * 0.5, sizeY * 0.1 - (fontHeight / 2) * 0.875);
+					alignXInfo = col1;
 
-            var rowIt = 0;
+					fillRow("Declinação: ", true);
 
-            var alignXInfo = sizeX * 0.1;
+					alignXInfo = col1 + ctx.measureText(txt).width;
 
-            function fillRow(t, bold, idx) {
+					fillRow(ON_DAED.tempoSideral(result.declinacao * rad, true).replace("&#186;", "°") + " (" + Math.round(result.variacaoDeclinacao) + "'/ano)", false, rowIt - 1);
 
-                var n = idx;
+					ctx.strokeStyle = "#000000";
+					ctx.strokeRect(sizeX * 0.65, sizeY * 0.4675, sizeX * 0.25, sizeX * 0.25);
 
-                if (n === undefined) {
-                    n = rowIt++;
-                }
+					fontHeight = (sizeY * 0.02);
+					ctx.font = "bold " + fontHeight + "px Verdana";
 
-                // box info labels
-                fontHeight = (sizeY * 0.0125);
-                ctx.font = (bold ? ("bold ") : "") + fontHeight + "px Verdana";
-                txt = t;
+					txt = "DECLINAÇÃO";
+					metrics = ctx.measureText(txt);
+					ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5);
 
-                function row(y) {
-                    return sizeY * 0.475 + y * (fontHeight / 2) * 2.36;
-                }
+					txt = Math.round(result.declinacao * 100) / 100 + "°";
+					metrics = ctx.measureText(txt);
+					ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5 + sizeX * 0.195 - (fontHeight / 2) * 1.125);
 
-                ctx.fillText(txt, alignXInfo, row(n));
-            }
+					var midX = sizeX * 0.775;
+					var midY = sizeY * 0.4675 + sizeX * 0.125;
 
-            function fillLabeledRow(label, content) {
+					ctx.lineWidth = 2;
+					ctx.strokeStyle = 'black';
+					ctx.beginPath();
 
-                alignXInfo = col1;
+					var R = sizeX * 0.025;
 
-                fillRow(label, true);
+					var offsetAngle = 270;
 
-                alignXInfo = col1 + ctx.measureText(txt).width;
+					var angle = (offsetAngle - result.declinacao) % 360;
 
-                fillRow(content, false, rowIt - 1);
-            }
+					var counterClockwise = true;
 
-            var col1 = sizeX * 0.1;
-            var col2 = sizeX * 0.275;
+					if (result.declinacao < 0) {
+						counterClockwise = false;
+					}
 
-            fillRow("Latitude: ", true);
+					ctx.setLineDash([]);
 
-            alignXInfo = col1 + ctx.measureText(txt).width;
+					ctx.arc(midX, midY, R * 1.5, offsetAngle * rad, angle * rad, counterClockwise);
+					ctx.stroke();
 
-            fillRow(ON_DAED.tempoSideral((90 - colat) * rad, true).replace("&#186;", "°"), false, rowIt - 1);
+					ctx.lineWidth = 1;
 
-            alignXInfo = col1;
+					ctx.beginPath();
+					ctx.moveTo(midX, midY - R * 2);
+					ctx.lineTo(midX, midY + R * 2);
+					ctx.stroke();
 
-            fillRow("Longitude: ", true);
+					ctx.beginPath();
+					ctx.moveTo(midX - R * 2, midY);
+					ctx.lineTo(midX + R * 2, midY);
+					ctx.stroke();
 
-            alignXInfo = col1 + ctx.measureText(txt).width;
+					var fontOffset = 2.4;
 
-            fillRow(ON_DAED.tempoSideral((elong > 180 ? elong - 360 : elong) * rad, true).replace("&#186;", "°"), false, rowIt - 1);
+					fontHeight = (sizeY * 0.01);
+					ctx.font = "bold " + fontHeight + "px Verdana";
 
-            rowIt++;
+					txt = "N";
+					metrics = ctx.measureText(txt);
 
-            if (tipoPlot === "declinacao" || tipoPlot === "variacaoDeclinacao") {
+					ctx.fillText(txt, midX - metrics.width * 0.5, midY - R * fontOffset + (fontHeight / 2) * 0.875);
 
-                alignXInfo = col1;
+					txt = "S";
+					metrics = ctx.measureText(txt);
 
-                fillRow("Declinação: ", true);
+					ctx.fillText(txt, midX - metrics.width * 0.5, midY + R * fontOffset + (fontHeight / 2) * 0.875);
 
-                alignXInfo = col1 + ctx.measureText(txt).width;
+					txt = "L";
+					metrics = ctx.measureText(txt);
 
-                fillRow(ON_DAED.tempoSideral(result.declinacao * rad, true).replace("&#186;", "°") + " (" + Math.round(result.variacaoDeclinacao) + "'/ano)", false, rowIt - 1);
+					ctx.fillText(txt, midX + R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
 
-                ctx.strokeStyle = "#000000";
-                ctx.strokeRect(sizeX * 0.65, sizeY * 0.4675, sizeX * 0.25, sizeX * 0.25);
+					txt = "O";
+					metrics = ctx.measureText(txt);
 
-                fontHeight = (sizeY * 0.02);
-                ctx.font = "bold " + fontHeight + "px Verdana";
+					ctx.fillText(txt, midX - R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
 
-                txt = "DECLINAÇÃO";
-                metrics = ctx.measureText(txt);
-                ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5);
+					// compass stroke
+					ctx.strokeStyle = 'red';
 
-                txt = Math.round(result.declinacao * 100) / 100 + "°";
-                metrics = ctx.measureText(txt);
-                ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5 + sizeX * 0.195 - (fontHeight / 2) * 1.125);
+					ctx.beginPath();
+					ctx.moveTo(midX, midY);
+					ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad), midY + (R * 1.75) * Math.sin(angle * rad));
+					ctx.stroke();
 
-                var midX = sizeX * 0.775;
-                var midY = sizeY * 0.4675 + sizeX * 0.125;
+					ctx.strokeStyle = 'blue';
+					ctx.beginPath();
+					ctx.moveTo(midX, midY);
+					ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad + Math.PI), midY + (R * 1.75) * Math.sin(angle * rad + Math.PI));
+					ctx.stroke();
 
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = 'black';
-                ctx.beginPath();
+					fontHeight = (sizeY * 0.02);
+					ctx.font = "bold " + fontHeight + "px Verdana";
 
-                var R = sizeX * 0.025;
+				} else if (tipoPlot === "inclinacao" || tipoPlot === "variacaoInclinacao") {
 
-                var offsetAngle = 270;
+					alignXInfo = col1;
 
-                var angle = (offsetAngle - result.declinacao) % 360;
+					fillRow("Inclinação: ", true);
 
-                var counterClockwise = true;
+					alignXInfo = col1 + ctx.measureText(txt).width;
 
-                if (result.declinacao < 0) {
-                    counterClockwise = false;
-                }
+					fillRow(ON_DAED.tempoSideral(result.inclinacao * rad, true).replace("&#186;", "°") + " (" + Math.round(result.variacaoInclinacao) + "'/ano)", false, rowIt - 1);
 
-                ctx.setLineDash([]);
+					ctx.strokeStyle = "#000000";
+					ctx.strokeRect(sizeX * 0.65, sizeY * 0.4675, sizeX * 0.25, sizeX * 0.25);
 
-                ctx.arc(midX, midY, R * 1.5, offsetAngle * rad, angle * rad, counterClockwise);
-                ctx.stroke();
+					fontHeight = (sizeY * 0.02);
+					ctx.font = "bold " + fontHeight + "px Verdana";
 
-                ctx.lineWidth = 1;
+					txt = "INCLINAÇÃO";
+					metrics = ctx.measureText(txt);
+					ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5);
 
-                ctx.beginPath();
-                ctx.moveTo(midX, midY - R * 2);
-                ctx.lineTo(midX, midY + R * 2);
-                ctx.stroke();
+					txt = Math.round(result.inclinacao * 100) / 100 + "°";
+					metrics = ctx.measureText(txt);
+					ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5 + sizeX * 0.195 - (fontHeight / 2) * 1.125);
 
-                ctx.beginPath();
-                ctx.moveTo(midX - R * 2, midY);
-                ctx.lineTo(midX + R * 2, midY);
-                ctx.stroke();
+					var midX = sizeX * 0.775;
+					var midY = sizeY * 0.4675 + sizeX * 0.125;
 
-                var fontOffset = 2.4;
+					ctx.lineWidth = 2;
+					ctx.strokeStyle = 'black';
+					ctx.beginPath();
 
-                fontHeight = (sizeY * 0.01);
-                ctx.font = "bold " + fontHeight + "px Verdana";
+					R = sizeX * 0.025;
 
-                txt = "N";
-                metrics = ctx.measureText(txt);
+					offsetAngle = 0;
 
-                ctx.fillText(txt, midX - metrics.width * 0.5, midY - R * fontOffset + (fontHeight / 2) * 0.875);
+					angle = (offsetAngle - result.inclinacao) % 360;
 
-                txt = "S";
-                metrics = ctx.measureText(txt);
+					counterClockwise = true;
 
-                ctx.fillText(txt, midX - metrics.width * 0.5, midY + R * fontOffset + (fontHeight / 2) * 0.875);
+					if (result.inclinacao < 0) {
+						counterClockwise = false;
+					}
 
-                txt = "L";
-                metrics = ctx.measureText(txt);
+					ctx.setLineDash([]);
 
-                ctx.fillText(txt, midX + R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
+					ctx.arc(midX, midY, R * 1.5, offsetAngle * rad, angle * rad, counterClockwise);
+					ctx.stroke();
 
-                txt = "O";
-                metrics = ctx.measureText(txt);
+					ctx.lineWidth = 1;
 
-                ctx.fillText(txt, midX - R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
+					ctx.beginPath();
+					ctx.moveTo(midX - R * 2, midY);
+					ctx.lineTo(midX + R * 2, midY);
+					ctx.stroke();
 
-                // compass stroke
-                ctx.strokeStyle = 'red';
+					// compass stroke
+					ctx.strokeStyle = 'red';
 
-                ctx.beginPath();
-                ctx.moveTo(midX, midY);
-                ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad), midY + (R * 1.75) * Math.sin(angle * rad));
-                ctx.stroke();
+					ctx.beginPath();
+					ctx.moveTo(midX, midY);
+					ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad), midY + (R * 1.75) * Math.sin(angle * rad));
+					ctx.stroke();
 
-                ctx.strokeStyle = 'blue';
-                ctx.beginPath();
-                ctx.moveTo(midX, midY);
-                ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad + Math.PI), midY + (R * 1.75) * Math.sin(angle * rad + Math.PI));
-                ctx.stroke();
+					ctx.strokeStyle = 'blue';
+					ctx.beginPath();
+					ctx.moveTo(midX, midY);
+					ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad + Math.PI), midY + (R * 1.75) * Math.sin(angle * rad + Math.PI));
+					ctx.stroke();
 
-                fontHeight = (sizeY * 0.02);
-                ctx.font = "bold " + fontHeight + "px Verdana";
+					fontHeight = (sizeY * 0.01);
+					ctx.font = "bold " + fontHeight + "px Verdana";
 
-            } else if (tipoPlot === "inclinacao" || tipoPlot === "variacaoInclinacao") {
+					var fontOffset = 2.4;
 
-                alignXInfo = col1;
+					txt = "N";
+					metrics = ctx.measureText(txt);
 
-                fillRow("Inclinação: ", true);
+					ctx.fillText(txt, midX + R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
 
-                alignXInfo = col1 + ctx.measureText(txt).width;
+					txt = "S";
+					metrics = ctx.measureText(txt);
 
-                fillRow(ON_DAED.tempoSideral(result.inclinacao * rad, true).replace("&#186;", "°") + " (" + Math.round(result.variacaoInclinacao) + "'/ano)", false, rowIt - 1);
+					ctx.fillText(txt, midX - R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
 
-                ctx.strokeStyle = "#000000";
-                ctx.strokeRect(sizeX * 0.65, sizeY * 0.4675, sizeX * 0.25, sizeX * 0.25);
+				} else /* Casos de Intensidade */ {
+					fillLabeledRow("Intensidade Horizontal: ", Math.round(result.H) + " nT (" + Math.round(result.DH) + " nT/ano)");
 
-                fontHeight = (sizeY * 0.02);
-                ctx.font = "bold " + fontHeight + "px Verdana";
+					rowIt++;
 
-                txt = "INCLINAÇÃO";
-                metrics = ctx.measureText(txt);
-                ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5);
+					fillLabeledRow("Intensidade: ", Math.round(result.intensidade) + " nT (" + Math.round(result.variacaoIntensidade) + " nT/ano)");
 
-                txt = Math.round(result.inclinacao * 100) / 100 + "°";
-                metrics = ctx.measureText(txt);
-                ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5 + sizeX * 0.195 - (fontHeight / 2) * 1.125);
+					rowIt++;
 
-                var midX = sizeX * 0.775;
-                var midY = sizeY * 0.4675 + sizeX * 0.125;
+					alignXInfo = col1;
 
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = 'black';
-                ctx.beginPath();
+					fillRow("Componentes Vetoriais da Intensidade", true);
 
-                R = sizeX * 0.025;
+					rowIt++;
 
-                offsetAngle = 0;
+					fillLabeledRow("Componente X: ", Math.round(result.valoresCampo.x) + " nT (" + Math.round(result.variacaoSecular.x) + " nT/ano)");
+					fillLabeledRow("Componente Y: ", Math.round(result.valoresCampo.y) + " nT (" + Math.round(result.variacaoSecular.y) + " nT/ano)");
+					fillLabeledRow("Componente Z: ", Math.round(result.valoresCampo.z) + " nT (" + Math.round(result.variacaoSecular.z) + " nT/ano)");
+				}
 
-                angle = (offsetAngle - result.inclinacao) % 360;
+			}
 
-                counterClockwise = true;
+			function fillTextCanvasOriginal(ctx, sizeX, sizeY) {
 
-                if (result.inclinacao < 0) {
-                    counterClockwise = false;
-                }
+				var colat = lastColat;
+				var elong = lastElong;
 
-                ctx.setLineDash([]);
+				var date = getHiddenDate();
 
-                ctx.arc(midX, midY, R * 1.5, offsetAngle * rad, angle * rad, counterClockwise);
-                ctx.stroke();
+				var formatDate = $('#dataju-datepicker-de-local').val();
 
-                ctx.lineWidth = 1;
+				var alt = 0;
+				var result = ON_DAED['GEO'].obterDadosMagneticos(date, alt, colat, elong);
+				var rad = Math.PI / 180;
 
-                ctx.beginPath();
-                ctx.moveTo(midX - R * 2, midY);
-                ctx.lineTo(midX + R * 2, midY);
-                ctx.stroke();
+				var metrics = null;
+				var fontHeight = (sizeY * 0.0225);
 
-                // compass stroke
-                ctx.strokeStyle = 'red';
+				var tipoPlot = $('#tipo-mapa-magnetico').val();
 
-                ctx.beginPath();
-                ctx.moveTo(midX, midY);
-                ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad), midY + (R * 1.75) * Math.sin(angle * rad));
-                ctx.stroke();
+				ctx.font = "bold " + fontHeight + "px Verdana";
+				ctx.fillStyle = "#000000";
 
-                ctx.strokeStyle = 'blue';
-                ctx.beginPath();
-                ctx.moveTo(midX, midY);
-                ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad + Math.PI), midY + (R * 1.75) * Math.sin(angle * rad + Math.PI));
-                ctx.stroke();
+				var txt = null;
 
-                fontHeight = (sizeY * 0.01);
-                ctx.font = "bold " + fontHeight + "px Verdana";
+				if (tipoPlot === "declinacao") {
+					txt = "DECLINAÇÃO";
+				} else if (tipoPlot === "variacaoDeclinacao") {
+					txt = "VARIAÇÃO SECULAR DE DECLINAÇÃO";
+				} else if (tipoPlot === "intensidade") {
+					txt = "INTENSIDADE";
+				} else if (tipoPlot === "variacaoIntensidade") {
+					txt = "VARIAÇÃO SECULAR DE INTENSIDADE";
+				} else if (tipoPlot === "inclinacao") {
+					txt = "INCLINAÇÃO";
+				} else if (tipoPlot === "variacaoInclinacao") {
+					txt = "VARIAÇÃO SECULAR DE INCLINAÇÃO";
+				}
 
-                var fontOffset = 2.4;
+				txt = "MAPA DE " + txt;
 
-                txt = "N";
-                metrics = ctx.measureText(txt);
+				metrics = ctx.measureText(txt);
+				ctx.fillText(txt, sizeX * 0.5 - metrics.width * 0.5, sizeY * 0.0675 - (fontHeight / 2) * 0.875);
 
-                ctx.fillText(txt, midX + R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
+				fontHeight = (sizeY * 0.015);
+				ctx.font = fontHeight + "px Verdana";
 
-                txt = "S";
-                metrics = ctx.measureText(txt);
+				txt = "DATA " + formatDate;
+				metrics = ctx.measureText(txt);
 
-                ctx.fillText(txt, midX - R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
+				ctx.fillText(txt, sizeX * 0.5 - metrics.width * 0.5, sizeY * 0.1 - (fontHeight / 2) * 0.875);
 
-            } else /* Casos de Intensidade */ {
-                fillLabeledRow("Intensidade Horizontal: ", Math.round(result.H) + " nT (" + Math.round(result.DH) + " nT/ano)");
+				var rowIt = 0;
 
-                rowIt++;
+				var alignXInfo = sizeX * 0.1;
 
-                fillLabeledRow("Intensidade: ", Math.round(result.intensidade) + " nT (" + Math.round(result.variacaoIntensidade) + " nT/ano)");
+				function fillRow(t, bold, idx) {
 
-                rowIt++;
+					var n = idx;
 
-                alignXInfo = col1;
+					if (n === undefined) {
+						n = rowIt++;
+					}
 
-                fillRow("Componentes Vetoriais da Intensidade", true);
+					// box info labels
+					fontHeight = (sizeY * 0.0125);
+					ctx.font = (bold ? ("bold ") : "") + fontHeight + "px Verdana";
+					txt = t;
 
-                rowIt++;
+					function row(y) {
+						return sizeY * 0.475 + y * (fontHeight / 2) * 2.36;
+					}
 
-                fillLabeledRow("Componente X: ", Math.round(result.valoresCampo.x) + " nT (" + Math.round(result.variacaoSecular.x) + " nT/ano)");
-                fillLabeledRow("Componente Y: ", Math.round(result.valoresCampo.y) + " nT (" + Math.round(result.variacaoSecular.y) + " nT/ano)");
-                fillLabeledRow("Componente Z: ", Math.round(result.valoresCampo.z) + " nT (" + Math.round(result.variacaoSecular.z) + " nT/ano)");
-            }
+					ctx.fillText(txt, alignXInfo, row(n));
+				}
 
-        }
+				var col1 = sizeX * 0.1;
+				var col2 = sizeX * 0.275;
 
-        function fillTextCanvasOriginal(ctx, sizeX, sizeY) {
+				fillRow("Latitude", true);
+				fillRow(ON_DAED.tempoSideral((90 - colat) * rad, true).replace("&#186;", "°"));
 
-            var colat = lastColat;
-            var elong = lastElong;
+				alignXInfo = col2;
 
-            var date = getHiddenDate();
+				fillRow("Longitude", true, rowIt - 2);
+				fillRow(ON_DAED.tempoSideral((elong > 180 ? elong - 360 : elong) * rad, true).replace("&#186;", "°"), false, rowIt - 1);
 
-            var formatDate = $('#dataju-datepicker-de-local').val();
+				rowIt++;
 
-            var alt = 0;
-            var result = ON_DAED['GEO'].obterDadosMagneticos(date, alt, colat, elong);
-            var rad = Math.PI / 180;
+				alignXInfo = col1;
 
-            var metrics = null;
-            var fontHeight = (sizeY * 0.0225);
+				fillRow("Declinação", true);
+				fillRow(ON_DAED.tempoSideral(result.declinacao * rad, true).replace("&#186;", "°"));
 
-            var tipoPlot = $('#tipo-mapa-magnetico').val();
+				alignXInfo = col2;
 
-            ctx.font = "bold " + fontHeight + "px Verdana";
-            ctx.fillStyle = "#000000";
+				fillRow("Variação Secular da Declinação", true, rowIt - 2);
+				fillRow(Math.round(result.variacaoDeclinacao) + " min/ano", false, rowIt - 1);
 
-            var txt = null;
+				rowIt++;
 
-            if (tipoPlot === "declinacao") {
-                txt = "DECLINAÇÃO";
-            } else if (tipoPlot === "variacaoDeclinacao") {
-                txt = "VARIAÇÃO SECULAR DE DECLINAÇÃO";
-            } else if (tipoPlot === "intensidade") {
-                txt = "INTENSIDADE";
-            } else if (tipoPlot === "variacaoIntensidade") {
-                txt = "VARIAÇÃO SECULAR DE INTENSIDADE";
-            } else if (tipoPlot === "inclinacao") {
-                txt = "INCLINAÇÃO";
-            } else if (tipoPlot === "variacaoInclinacao") {
-                txt = "VARIAÇÃO SECULAR DE INCLINAÇÃO";
-            }
+				alignXInfo = col1;
 
-            txt = "MAPA DE " + txt;
+				fillRow("Inclinação", true);
+				fillRow(ON_DAED.tempoSideral(result.inclinacao * rad, true).replace("&#186;", "°"));
 
-            metrics = ctx.measureText(txt);
-            ctx.fillText(txt, sizeX * 0.5 - metrics.width * 0.5, sizeY * 0.0675 - (fontHeight / 2) * 0.875);
+				alignXInfo = col2;
 
-            fontHeight = (sizeY * 0.015);
-            ctx.font = fontHeight + "px Verdana";
+				fillRow("Variação Secular da Inclinação", true, rowIt - 2);
+				fillRow(Math.round(result.variacaoInclinacao) + " min/ano", false, rowIt - 1);
 
-            txt = "DATA " + formatDate;
-            metrics = ctx.measureText(txt);
+				rowIt++;
 
-            ctx.fillText(txt, sizeX * 0.5 - metrics.width * 0.5, sizeY * 0.1 - (fontHeight / 2) * 0.875);
+				alignXInfo = col1;
 
-            var rowIt = 0;
+				fillRow("Intensidade Horizontal", true);
+				fillRow(Math.round(result.H) + " nT");
 
-            var alignXInfo = sizeX * 0.1;
+				fillRow("Variação Secular da Intensidade Horizontal", true);
+				fillRow(Math.round(result.DH) + " nT/ano");
 
-            function fillRow(t, bold, idx) {
+				rowIt++;
 
-                var n = idx;
+				fillRow("Intensidade", true);
+				fillRow(Math.round(result.intensidade) + " nT");
 
-                if (n === undefined) {
-                    n = rowIt++;
-                }
+				alignXInfo = col2;
 
-                // box info labels
-                fontHeight = (sizeY * 0.0125);
-                ctx.font = (bold ? ("bold ") : "") + fontHeight + "px Verdana";
-                txt = t;
+				fillRow("Variação Secular da Intensidade", true, rowIt - 2);
+				fillRow(Math.round(result.variacaoIntensidade) + " nT/ano", false, rowIt - 1);
 
-                function row(y) {
-                    return sizeY * 0.475 + y * (fontHeight / 2) * 2.36;
-                }
+				rowIt++;
 
-                ctx.fillText(txt, alignXInfo, row(n));
-            }
+				alignXInfo = col1;
 
-            var col1 = sizeX * 0.1;
-            var col2 = sizeX * 0.275;
+				fillRow("Componentes Vetoriais da Intensidade", true);
 
-            fillRow("Latitude", true);
-            fillRow(ON_DAED.tempoSideral((90 - colat) * rad, true).replace("&#186;", "°"));
+				rowIt++;
 
-            alignXInfo = col2;
+				fillRow("Componente X", true);
+				fillRow(Math.round(result.valoresCampo.x) + " nT");
+				fillRow("Componente Y", true);
+				fillRow(Math.round(result.valoresCampo.y) + " nT");
+				fillRow("Componente Z", true);
+				fillRow(Math.round(result.valoresCampo.z) + " nT");
 
-            fillRow("Longitude", true, rowIt - 2);
-            fillRow(ON_DAED.tempoSideral((elong > 180 ? elong - 360 : elong) * rad, true).replace("&#186;", "°"), false, rowIt - 1);
+				alignXInfo = col2;
 
-            rowIt++;
+				fillRow("Variação Secular do Componente X", true, rowIt - 6);
+				fillRow(Math.round(result.variacaoSecular.x) + " nT/ano", false, rowIt - 5);
+				fillRow("Variação Secular do Componente Y", true, rowIt - 4);
+				fillRow(Math.round(result.variacaoSecular.y) + " nT/ano", false, rowIt - 3);
+				fillRow("Variação Secular do Componente Z", true, rowIt - 2);
+				fillRow(Math.round(result.variacaoSecular.z) + " nT/ano", false, rowIt - 1);
 
-            alignXInfo = col1;
+				ctx.strokeStyle = "#000000";
+				ctx.strokeRect(sizeX * 0.65, sizeY * 0.4675, sizeX * 0.25, sizeX * 0.25);
 
-            fillRow("Declinação", true);
-            fillRow(ON_DAED.tempoSideral(result.declinacao * rad, true).replace("&#186;", "°"));
+				ctx.strokeRect(sizeX * 0.65, sizeY * 0.4675 + sizeX * 0.275, sizeX * 0.25, sizeX * 0.25);
 
-            alignXInfo = col2;
+				fontHeight = (sizeY * 0.02);
+				ctx.font = "bold " + fontHeight + "px Verdana";
 
-            fillRow("Variação Secular da Declinação", true, rowIt - 2);
-            fillRow(Math.round(result.variacaoDeclinacao) + " min/ano", false, rowIt - 1);
+				//INCLINAÇÃO DECLINAÇÃO
 
-            rowIt++;
+				txt = "DECLINAÇÃO";
+				metrics = ctx.measureText(txt);
+				ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5);
 
-            alignXInfo = col1;
+				txt = Math.round(result.declinacao * 100) / 100 + "°";
+				metrics = ctx.measureText(txt);
+				ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5 + sizeX * 0.195 - (fontHeight / 2) * 1.125);
 
-            fillRow("Inclinação", true);
-            fillRow(ON_DAED.tempoSideral(result.inclinacao * rad, true).replace("&#186;", "°"));
+				var midX = sizeX * 0.775;
+				var midY = sizeY * 0.4675 + sizeX * 0.125;
 
-            alignXInfo = col2;
+				ctx.lineWidth = 2;
+				ctx.strokeStyle = 'black';
+				ctx.beginPath();
 
-            fillRow("Variação Secular da Inclinação", true, rowIt - 2);
-            fillRow(Math.round(result.variacaoInclinacao) + " min/ano", false, rowIt - 1);
+				var R = sizeX * 0.025;
 
-            rowIt++;
+				var offsetAngle = 270;
 
-            alignXInfo = col1;
+				var angle = (offsetAngle - result.declinacao) % 360;
 
-            fillRow("Intensidade Horizontal", true);
-            fillRow(Math.round(result.H) + " nT");
+				var counterClockwise = true;
 
-            fillRow("Variação Secular da Intensidade Horizontal", true);
-            fillRow(Math.round(result.DH) + " nT/ano");
+				if (result.declinacao < 0) {
+					counterClockwise = false;
+				}
 
-            rowIt++;
+				ctx.setLineDash([]);
 
-            fillRow("Intensidade", true);
-            fillRow(Math.round(result.intensidade) + " nT");
+				ctx.arc(midX, midY, R * 1.5, offsetAngle * rad, angle * rad, counterClockwise);
+				ctx.stroke();
 
-            alignXInfo = col2;
+				ctx.lineWidth = 1;
 
-            fillRow("Variação Secular da Intensidade", true, rowIt - 2);
-            fillRow(Math.round(result.variacaoIntensidade) + " nT/ano", false, rowIt - 1);
+				ctx.beginPath();
+				ctx.moveTo(midX, midY - R * 2);
+				ctx.lineTo(midX, midY + R * 2);
+				ctx.stroke();
 
-            rowIt++;
+				ctx.beginPath();
+				ctx.moveTo(midX - R * 2, midY);
+				ctx.lineTo(midX + R * 2, midY);
+				ctx.stroke();
 
-            alignXInfo = col1;
+				var fontOffset = 2.4;
 
-            fillRow("Componentes Vetoriais da Intensidade", true);
+				fontHeight = (sizeY * 0.01);
+				ctx.font = "bold " + fontHeight + "px Verdana";
 
-            rowIt++;
+				txt = "N";
+				metrics = ctx.measureText(txt);
 
-            fillRow("Componente X", true);
-            fillRow(Math.round(result.valoresCampo.x) + " nT");
-            fillRow("Componente Y", true);
-            fillRow(Math.round(result.valoresCampo.y) + " nT");
-            fillRow("Componente Z", true);
-            fillRow(Math.round(result.valoresCampo.z) + " nT");
+				ctx.fillText(txt, midX - metrics.width * 0.5, midY - R * fontOffset + (fontHeight / 2) * 0.875);
 
-            alignXInfo = col2;
+				txt = "S";
+				metrics = ctx.measureText(txt);
 
-            fillRow("Variação Secular do Componente X", true, rowIt - 6);
-            fillRow(Math.round(result.variacaoSecular.x) + " nT/ano", false, rowIt - 5);
-            fillRow("Variação Secular do Componente Y", true, rowIt - 4);
-            fillRow(Math.round(result.variacaoSecular.y) + " nT/ano", false, rowIt - 3);
-            fillRow("Variação Secular do Componente Z", true, rowIt - 2);
-            fillRow(Math.round(result.variacaoSecular.z) + " nT/ano", false, rowIt - 1);
+				ctx.fillText(txt, midX - metrics.width * 0.5, midY + R * fontOffset + (fontHeight / 2) * 0.875);
 
-            ctx.strokeStyle = "#000000";
-            ctx.strokeRect(sizeX * 0.65, sizeY * 0.4675, sizeX * 0.25, sizeX * 0.25);
+				txt = "L";
+				metrics = ctx.measureText(txt);
 
-            ctx.strokeRect(sizeX * 0.65, sizeY * 0.4675 + sizeX * 0.275, sizeX * 0.25, sizeX * 0.25);
+				ctx.fillText(txt, midX + R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
 
-            fontHeight = (sizeY * 0.02);
-            ctx.font = "bold " + fontHeight + "px Verdana";
+				txt = "O";
+				metrics = ctx.measureText(txt);
 
-            //INCLINAÇÃO DECLINAÇÃO
+				ctx.fillText(txt, midX - R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
 
-            txt = "DECLINAÇÃO";
-            metrics = ctx.measureText(txt);
-            ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5);
+				// compass stroke
+				ctx.strokeStyle = 'red';
 
-            txt = Math.round(result.declinacao * 100) / 100 + "°";
-            metrics = ctx.measureText(txt);
-            ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5 + sizeX * 0.195 - (fontHeight / 2) * 1.125);
+				ctx.beginPath();
+				ctx.moveTo(midX, midY);
+				ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad), midY + (R * 1.75) * Math.sin(angle * rad));
+				ctx.stroke();
 
-            var midX = sizeX * 0.775;
-            var midY = sizeY * 0.4675 + sizeX * 0.125;
+				ctx.strokeStyle = 'blue';
+				ctx.beginPath();
+				ctx.moveTo(midX, midY);
+				ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad + Math.PI), midY + (R * 1.75) * Math.sin(angle * rad + Math.PI));
+				ctx.stroke();
 
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = 'black';
-            ctx.beginPath();
+				fontHeight = (sizeY * 0.02);
+				ctx.font = "bold " + fontHeight + "px Verdana";
 
-            var R = sizeX * 0.025;
+				txt = "INCLINAÇÃO";
+				metrics = ctx.measureText(txt);
+				ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5 + sizeX * 0.275);
 
-            var offsetAngle = 270;
+				txt = Math.round(result.inclinacao * 100) / 100 + "°";
+				metrics = ctx.measureText(txt);
+				ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5 + sizeX * 0.195 - (fontHeight / 2) * 1.125 + +sizeX * 0.275);
 
-            var angle = (offsetAngle - result.declinacao) % 360;
+				midX = sizeX * 0.775;
+				midY = sizeY * 0.4675 + sizeX * 0.125 + sizeX * 0.275;
 
-            var counterClockwise = true;
+				ctx.lineWidth = 2;
+				ctx.strokeStyle = 'black';
+				ctx.beginPath();
 
-            if (result.declinacao < 0) {
-                counterClockwise = false;
-            }
+				R = sizeX * 0.025;
 
-            ctx.setLineDash([]);
+				offsetAngle = 0;
 
-            ctx.arc(midX, midY, R * 1.5, offsetAngle * rad, angle * rad, counterClockwise);
-            ctx.stroke();
+				angle = (offsetAngle - result.inclinacao) % 360;
 
-            ctx.lineWidth = 1;
+				counterClockwise = true;
 
-            ctx.beginPath();
-            ctx.moveTo(midX, midY - R * 2);
-            ctx.lineTo(midX, midY + R * 2);
-            ctx.stroke();
+				if (result.inclinacao < 0) {
+					counterClockwise = false;
+				}
 
-            ctx.beginPath();
-            ctx.moveTo(midX - R * 2, midY);
-            ctx.lineTo(midX + R * 2, midY);
-            ctx.stroke();
+				ctx.setLineDash([]);
 
-            var fontOffset = 2.4;
+				ctx.arc(midX, midY, R * 1.5, offsetAngle * rad, angle * rad, counterClockwise);
+				ctx.stroke();
 
-            fontHeight = (sizeY * 0.01);
-            ctx.font = "bold " + fontHeight + "px Verdana";
+				ctx.lineWidth = 1;
 
-            txt = "N";
-            metrics = ctx.measureText(txt);
+				ctx.beginPath();
+				ctx.moveTo(midX - R * 2, midY);
+				ctx.lineTo(midX + R * 2, midY);
+				ctx.stroke();
 
-            ctx.fillText(txt, midX - metrics.width * 0.5, midY - R * fontOffset + (fontHeight / 2) * 0.875);
+				// compass stroke
+				ctx.strokeStyle = 'red';
 
-            txt = "S";
-            metrics = ctx.measureText(txt);
+				ctx.beginPath();
+				ctx.moveTo(midX, midY);
+				ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad), midY + (R * 1.75) * Math.sin(angle * rad));
+				ctx.stroke();
 
-            ctx.fillText(txt, midX - metrics.width * 0.5, midY + R * fontOffset + (fontHeight / 2) * 0.875);
+				ctx.strokeStyle = 'blue';
+				ctx.beginPath();
+				ctx.moveTo(midX, midY);
+				ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad + Math.PI), midY + (R * 1.75) * Math.sin(angle * rad + Math.PI));
+				ctx.stroke();
 
-            txt = "L";
-            metrics = ctx.measureText(txt);
+				fontHeight = (sizeY * 0.01);
+				ctx.font = "bold " + fontHeight + "px Verdana";
 
-            ctx.fillText(txt, midX + R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
+				txt = "N";
+				metrics = ctx.measureText(txt);
 
-            txt = "O";
-            metrics = ctx.measureText(txt);
+				ctx.fillText(txt, midX + R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
 
-            ctx.fillText(txt, midX - R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
+				txt = "S";
+				metrics = ctx.measureText(txt);
 
-            // compass stroke
-            ctx.strokeStyle = 'red';
+				ctx.fillText(txt, midX - R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
+			}
 
-            ctx.beginPath();
-            ctx.moveTo(midX, midY);
-            ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad), midY + (R * 1.75) * Math.sin(angle * rad));
-            ctx.stroke();
+			document
+				.getElementById("export-mapa")
+				.addEventListener('click', function () {
 
-            ctx.strokeStyle = 'blue';
-            ctx.beginPath();
-            ctx.moveTo(midX, midY);
-            ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad + Math.PI), midY + (R * 1.75) * Math.sin(angle * rad + Math.PI));
-            ctx.stroke();
+					marcador.remove();
 
-            fontHeight = (sizeY * 0.02);
-            ctx.font = "bold " + fontHeight + "px Verdana";
+					var btn = this;
+					$('.form-magnetico-input').addClass('disabled').attr('disabled', 'disabled');
+					$('body').css({'cursor': 'wait'});
+					var canvasImg = document.getElementById("gera-textura");
 
-            txt = "INCLINAÇÃO";
-            metrics = ctx.measureText(txt);
-            ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5 + sizeX * 0.275);
+					canvasImg.width = window.innerWidth;
+					canvasImg.height = window.innerHeight;
 
-            txt = Math.round(result.inclinacao * 100) / 100 + "°";
-            metrics = ctx.measureText(txt);
-            ctx.fillText(txt, sizeX * 0.775 - metrics.width * 0.5, sizeY * 0.5 + sizeX * 0.195 - (fontHeight / 2) * 1.125 + +sizeX * 0.275);
+					var canvasExport = document.getElementById("magnetismo-export-img");
 
-            midX = sizeX * 0.775;
-            midY = sizeY * 0.4675 + sizeX * 0.125 + sizeX * 0.275;
+					var ctx = canvasExport.getContext('2d');
 
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = 'black';
-            ctx.beginPath();
+					var rodape = document.getElementById("export-rodape");
 
-            R = sizeX * 0.025;
+					// cria arquivo export
 
-            offsetAngle = 0;
-
-            angle = (offsetAngle - result.inclinacao) % 360;
-
-            counterClockwise = true;
-
-            if (result.inclinacao < 0) {
-                counterClockwise = false;
-            }
-
-            ctx.setLineDash([]);
-
-            ctx.arc(midX, midY, R * 1.5, offsetAngle * rad, angle * rad, counterClockwise);
-            ctx.stroke();
-
-            ctx.lineWidth = 1;
-
-            ctx.beginPath();
-            ctx.moveTo(midX - R * 2, midY);
-            ctx.lineTo(midX + R * 2, midY);
-            ctx.stroke();
-
-            // compass stroke
-            ctx.strokeStyle = 'red';
-
-            ctx.beginPath();
-            ctx.moveTo(midX, midY);
-            ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad), midY + (R * 1.75) * Math.sin(angle * rad));
-            ctx.stroke();
-
-            ctx.strokeStyle = 'blue';
-            ctx.beginPath();
-            ctx.moveTo(midX, midY);
-            ctx.lineTo(midX + (R * 1.75) * Math.cos(angle * rad + Math.PI), midY + (R * 1.75) * Math.sin(angle * rad + Math.PI));
-            ctx.stroke();
-
-            fontHeight = (sizeY * 0.01);
-            ctx.font = "bold " + fontHeight + "px Verdana";
-
-            txt = "N";
-            metrics = ctx.measureText(txt);
-
-            ctx.fillText(txt, midX + R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
-
-            txt = "S";
-            metrics = ctx.measureText(txt);
-
-            ctx.fillText(txt, midX - R * fontOffset - metrics.width * 0.5, midY + (fontHeight / 2) * 0.875);
-        }
-
-        document
-                .getElementById("export-mapa")
-                .addEventListener('click', function () {
-
-                    marcador.remove();
-
-                    var btn = this;
-                    $('.form-magnetico-input').addClass('disabled').attr('disabled', 'disabled');
-                    $('body').css({'cursor': 'wait'});
-                    var canvasImg = document.getElementById("gera-textura");
-
-                    canvasImg.width = window.innerWidth;
-                    canvasImg.height = window.innerHeight;
-
-                    var canvasExport = document.getElementById("magnetismo-export-img");
-
-                    var ctx = canvasExport.getContext('2d');
-
-                    var rodape = document.getElementById("export-rodape");
-
-                    // cria arquivo export
-
-                    ctx.fillStyle = "#ffffff";
-                    ctx.fillRect(0, 0, canvasExport.width, canvasExport.height);
+					ctx.fillStyle = "#ffffff";
+					ctx.fillRect(0, 0, canvasExport.width, canvasExport.height);
 
 					var svgStr = new XMLSerializer().serializeToString(document.getElementById('mapa-terra'));
 
-                    canvg('gera-textura', svgStr, {
-                        renderCallback: function () {
+					canvg('gera-textura', svgStr, {
+						renderCallback: function () {
 
-                            var imageHeight = canvasExport.width * 0.4;
-                            var imageWidth = canvasExport.width * 0.8;
+							var imageHeight = canvasExport.width * 0.4;
+							var imageWidth = canvasExport.width * 0.8;
 
-                            var widthStart = canvasExport.width * 0.5 - imageWidth * 0.5;
-                            var heightStart = canvasExport.width * 0.4 - imageHeight * 0.5;
+							var widthStart = canvasExport.width * 0.5 - imageWidth * 0.5;
+							var heightStart = canvasExport.width * 0.4 - imageHeight * 0.5;
 
-                            ctx.drawImage(canvasImg,
-                                    widthStart,
-                                    heightStart,
-                                    imageWidth,
-                                    imageHeight);
+							ctx.drawImage(canvasImg,
+								widthStart,
+								heightStart,
+								imageWidth,
+								imageHeight);
 
-                            ctx.drawImage(rodape,
-                                    canvasExport.width * 0.5 - rodape.width * 0.5,
-                                    (canvasExport.height * 0.985) - rodape.height);
+							ctx.drawImage(rodape,
+								canvasExport.width * 0.5 - rodape.width * 0.5,
+								(canvasExport.height * 0.985) - rodape.height);
 
-                            var dashSize = canvasExport.width * 0.0025;
+							var dashSize = canvasExport.width * 0.0025;
 
-                            ctx.setLineDash([dashSize, dashSize * 1.5]);
+							ctx.setLineDash([dashSize, dashSize * 1.5]);
 
-                            var fontHeight = (canvasExport.height * 0.01);
+							var fontHeight = (canvasExport.height * 0.01);
 
-                            ctx.font = "bold " + fontHeight + "px Verdana";
-                            ctx.fillStyle = "#000000";
+							ctx.font = "bold " + fontHeight + "px Verdana";
+							ctx.fillStyle = "#000000";
 
-                            var segmentsSize = 12; // n - 2 lines
+							var segmentsSize = 12; // n - 2 lines
 
-                            var leftTopCorner = triggerCustomMouse(0, 0);
-                            var rightBottomCorner = triggerCustomMouse(window.innerWidth, window.innerHeight);
+							var leftTopCorner = triggerCustomMouse(0, 0);
+							var rightBottomCorner = triggerCustomMouse(window.innerWidth, window.innerHeight);
 
-                            var minLatitude = -((leftTopCorner[1] / window.innerHeight) * 180 - 90);
-                            var maxLatitude = -((rightBottomCorner[1] / window.innerHeight) * 180 - 90);
+							var minLatitude = -((leftTopCorner[1] / window.innerHeight) * 180 - 90);
+							var maxLatitude = -((rightBottomCorner[1] / window.innerHeight) * 180 - 90);
 
-                            var minLongitude = (leftTopCorner[0] / window.innerWidth) * 360 - 180;
-                            var maxLongitude = (rightBottomCorner[0] / window.innerWidth) * 360 - 180;
+							var minLongitude = (leftTopCorner[0] / window.innerWidth) * 360 - 180;
+							var maxLongitude = (rightBottomCorner[0] / window.innerWidth) * 360 - 180;
 
-                            var latitudeInterval = (maxLatitude - minLatitude) / segmentsSize;
-                            var longitudeInterval = (maxLongitude - minLongitude) / segmentsSize;
+							var latitudeInterval = (maxLatitude - minLatitude) / segmentsSize;
+							var longitudeInterval = (maxLongitude - minLongitude) / segmentsSize;
 
-                            ctx.lineWidth = 1;
+							ctx.lineWidth = 1;
 
-                            ctx.fillStyle = '#0000FF';
-                            ctx.strokeStyle = "#0000FF";
+							ctx.fillStyle = '#0000FF';
+							ctx.strokeStyle = "#0000FF";
 
-                            // latitude lines
-                            for (var i = 1; i < segmentsSize; i++) {
-                                var x = widthStart + (i / segmentsSize) * imageWidth;
+							// latitude lines
+							for (var i = 1; i < segmentsSize; i++) {
+								var x = widthStart + (i / segmentsSize) * imageWidth;
 
-                                ctx.beginPath();
-                                ctx.moveTo(x, heightStart);
-                                ctx.lineTo(x, heightStart + imageHeight);
-                                ctx.stroke();
+								ctx.beginPath();
+								ctx.moveTo(x, heightStart);
+								ctx.lineTo(x, heightStart + imageHeight);
+								ctx.stroke();
 
-                                var number = Math.round((minLongitude + longitudeInterval * i) * 100) / 100 + "°";
+								var number = Math.round((minLongitude + longitudeInterval * i) * 100) / 100 + "°";
 
-                                var metrics = ctx.measureText(number);
+								var metrics = ctx.measureText(number);
 
-                                // top
-                                ctx.fillText(number, x - metrics.width / 2, heightStart - fontHeight * 0.9);
+								// top
+								ctx.fillText(number, x - metrics.width / 2, heightStart - fontHeight * 0.9);
 
-                                // bottom
-                                ctx.fillText(number, x - metrics.width / 2, heightStart + imageHeight + fontHeight * 1.1);
-                            }
+								// bottom
+								ctx.fillText(number, x - metrics.width / 2, heightStart + imageHeight + fontHeight * 1.1);
+							}
 
-                            ctx.fillStyle = '#FF0000';
-                            ctx.strokeStyle = "#FF0000";
+							ctx.fillStyle = '#FF0000';
+							ctx.strokeStyle = "#FF0000";
 
-                            // longitude lines
-                            for (var i = 1; i < segmentsSize; i++) {
-                                var y = heightStart + (i / segmentsSize) * imageHeight;
+							// longitude lines
+							for (var i = 1; i < segmentsSize; i++) {
+								var y = heightStart + (i / segmentsSize) * imageHeight;
 
-                                ctx.beginPath();
-                                ctx.moveTo(widthStart, y);
-                                ctx.lineTo(widthStart + imageWidth, y);
-                                ctx.stroke();
+								ctx.beginPath();
+								ctx.moveTo(widthStart, y);
+								ctx.lineTo(widthStart + imageWidth, y);
+								ctx.stroke();
 
-                                var number = Math.round((minLatitude + latitudeInterval * i) * 100) / 100 + "°";
+								var number = Math.round((minLatitude + latitudeInterval * i) * 100) / 100 + "°";
 
-                                var metrics = ctx.measureText(number);
+								var metrics = ctx.measureText(number);
 
-                                // left
-                                ctx.fillText(number, canvasExport.width * 0.0625 - metrics.width / 2, y + (fontHeight / 2) * 0.85);
+								// left
+								ctx.fillText(number, canvasExport.width * 0.0625 - metrics.width / 2, y + (fontHeight / 2) * 0.85);
 
-                                // right
-                                ctx.fillText(number, canvasExport.width * 0.9375 - metrics.width / 2, y + (fontHeight / 2) * 0.85);
-                            }
+								// right
+								ctx.fillText(number, canvasExport.width * 0.9375 - metrics.width / 2, y + (fontHeight / 2) * 0.85);
+							}
 
-                            // last data
+							// last data
 
-                            ctx.setLineDash([]);
-                            ctx.lineWidth = 4;
-                            ctx.strokeStyle = "rgba(255,255,255,0.3)";
+							ctx.setLineDash([]);
+							ctx.lineWidth = 4;
+							ctx.strokeStyle = "rgba(255,255,255,0.3)";
 
-                            var longitudeImgX = widthStart + (lastClientX / window.innerWidth) * imageWidth;
+							var longitudeImgX = widthStart + (lastClientX / window.innerWidth) * imageWidth;
 
-                            ctx.beginPath();
-                            ctx.moveTo(longitudeImgX, heightStart);
-                            ctx.lineTo(longitudeImgX, heightStart + imageHeight);
-                            ctx.stroke();
+							ctx.beginPath();
+							ctx.moveTo(longitudeImgX, heightStart);
+							ctx.lineTo(longitudeImgX, heightStart + imageHeight);
+							ctx.stroke();
 
-                            // latitude
-                            var latitudeImgY = heightStart + (lastClientY / window.innerHeight) * imageHeight;
+							// latitude
+							var latitudeImgY = heightStart + (lastClientY / window.innerHeight) * imageHeight;
 
-                            ctx.beginPath();
-                            ctx.moveTo(widthStart, latitudeImgY);
-                            ctx.lineTo(widthStart + imageWidth, latitudeImgY);
-                            ctx.stroke();
+							ctx.beginPath();
+							ctx.moveTo(widthStart, latitudeImgY);
+							ctx.lineTo(widthStart + imageWidth, latitudeImgY);
+							ctx.stroke();
 
-                            fontHeight = (canvasExport.height * 0.016);
+							fontHeight = (canvasExport.height * 0.016);
 
-                            ctx.font = fontHeight + "px Verdana";
+							ctx.font = fontHeight + "px Verdana";
 
-                            ctx.fillStyle = "#000000";
+							ctx.fillStyle = "#000000";
 
-                            var msg = "Os valores entre parênteses se referem a Variação Anual do parâmetro";
+							var msg = "Os valores entre parênteses se referem a Variação Anual do parâmetro";
 
-                            var metrics = ctx.measureText(msg);
+							var metrics = ctx.measureText(msg);
 
-                            ctx.fillText(msg, canvasExport.width * 0.1, canvasExport.height - fontHeight * 8 - rodape.height);
+							ctx.fillText(msg, canvasExport.width * 0.1, canvasExport.height - fontHeight * 8 - rodape.height);
 
-                            msg = "calculado.";
+							msg = "calculado.";
 
-                            metrics = ctx.measureText(msg);
+							metrics = ctx.measureText(msg);
 
-                            ctx.fillText(msg, canvasExport.width * 0.1, canvasExport.height - fontHeight * 7 - rodape.height);
+							ctx.fillText(msg, canvasExport.width * 0.1, canvasExport.height - fontHeight * 7 - rodape.height);
 
-                            msg = "O ponto de interseção do retículo branco no Mapa define, exatamente,";
+							msg = "O ponto de interseção do retículo branco no Mapa define, exatamente,";
 
-                            metrics = ctx.measureText(msg);
+							metrics = ctx.measureText(msg);
 
-                            ctx.fillText(msg, canvasExport.width * 0.1, canvasExport.height - fontHeight * 5 - rodape.height);
+							ctx.fillText(msg, canvasExport.width * 0.1, canvasExport.height - fontHeight * 5 - rodape.height);
 
-                            msg = "o local escolhido pelo usuário para determinação do parâmetro.";
+							msg = "o local escolhido pelo usuário para determinação do parâmetro.";
 
-                            metrics = ctx.measureText(msg);
+							metrics = ctx.measureText(msg);
 
-                            ctx.fillText(msg, canvasExport.width * 0.1, canvasExport.height - fontHeight * 4 - rodape.height);
+							ctx.fillText(msg, canvasExport.width * 0.1, canvasExport.height - fontHeight * 4 - rodape.height);
 
-                            ctx.font = "bold " + fontHeight + "px Verdana";
+							ctx.font = "bold " + fontHeight + "px Verdana";
 
-                            msg = "GERADO NO SITE http://www.on.br/";
+							msg = "GERADO NO SITE http://www.on.br/";
 
-                            metrics = ctx.measureText(msg);
+							metrics = ctx.measureText(msg);
 
-                            ctx.fillText(msg, canvasExport.width * 0.5 - metrics.width * 0.5, canvasExport.height - fontHeight * 1.333 - rodape.height);
+							ctx.fillText(msg, canvasExport.width * 0.5 - metrics.width * 0.5, canvasExport.height - fontHeight * 1.333 - rodape.height);
 
-                            fillTextCanvas(ctx, canvasExport.width, canvasExport.height);
+							fillTextCanvas(ctx, canvasExport.width, canvasExport.height);
 
-                            canvasExport.toBlob(function (blob) {
-                                var date = $('#dataju-datepicker-de-local').val().replace("/", "-");
-                                var tipo = $('#tipo-mapa-magnetico').val();
-                                saveAs(blob, tipo + date + ".png");
-                                $('.form-magnetico-input').removeClass('disabled').removeAttr('disabled');
-                                $('body').css({'cursor': 'inherit'});
-                                recriarMarcador();
-                            });
+							canvasExport.toBlob(function (blob) {
+								var date = $('#dataju-datepicker-de-local').val().replace("/", "-");
+								var tipo = $('#tipo-mapa-magnetico').val();
+								saveAs(blob, tipo + date + ".png");
+								$('.form-magnetico-input').removeClass('disabled').removeAttr('disabled');
+								$('body').css({'cursor': 'inherit'});
+								recriarMarcador();
+							});
 
-                        }
-                    });
-                }, false);
+						}
+					});
+				}, false);
 
-        window.onresize = function () {
+			window.onresize = function () {
 
-            redraw(true);
-            if (marcador !== null) {
-                marcador.remove();
-                marcador = null;
-                $('#export-mapa').addClass('disabled');
-                $('#resultado-magnetico').hide();
-            }
+				redraw(true);
+				if (marcador !== null) {
+					marcador.remove();
+					marcador = null;
+					$('#export-mapa').addClass('disabled');
+					$('#resultado-magnetico').hide();
+				}
 
-        };
+			};
 
-        ON_DAED['3D'].START_RENDER = true;
-    })();
-    /*]]>*/
+			ON_DAED['3D'].START_RENDER = true;
+		})();
+
+	});
+
+	/*]]>*/
 </script>
