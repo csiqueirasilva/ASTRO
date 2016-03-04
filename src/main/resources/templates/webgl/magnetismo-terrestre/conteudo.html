@@ -1156,7 +1156,9 @@
                     ctx.fillStyle = "#ffffff";
                     ctx.fillRect(0, 0, canvasExport.width, canvasExport.height);
 
-                    canvg('gera-textura', document.getElementById('mapa-terra').innerHTML, {
+					var svgStr = new XMLSerializer().serializeToString(document.getElementById('mapa-terra'));
+
+                    canvg('gera-textura', svgStr, {
                         renderCallback: function () {
 
                             var imageHeight = canvasExport.width * 0.4;
