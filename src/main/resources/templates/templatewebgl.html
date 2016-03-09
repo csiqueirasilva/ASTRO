@@ -49,6 +49,8 @@
         <script src="lib/on-daed-js/MathHelper.js"></script>
         <script src="lib/on-daed-js/3D.js"></script>
 
+        <script src="lib/intro.js/intro.min.js"></script>
+
         <link href="css/bootstrap.min.css" rel="stylesheet"/>
         <link href="css/bootstrap-responsive.css" rel="stylesheet"/>
 
@@ -59,6 +61,8 @@
         <link href="css/jquery-ui.structure.min.css" rel="stylesheet"/>
         <link href="css/jquery-ui.theme.min.css" rel="stylesheet"/>
 
+        <link href="lib/intro.js/introjs.min.css" rel="stylesheet"/>
+        
         <link rel="stylesheet" type="text/css" href="css/jquery.qtip.min.css"/>
 
         <link href="http://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet" type="text/css"/>
@@ -359,19 +363,19 @@
             <img src='imgs/logo-on.jpg' />
         </div>
 
-        <a id="home-btn" data-placement="left" href='./' data-toggle="tooltip" title="Página Inicial" class="ui-astro-tooltip ui-astro-icon hidden ui-observacao-horizontal jlink">
+        <a id="home-btn" data-step="1" data-intro="Use para voltar a tela inicial." data-position='left' data-placement="left" href='./' data-toggle="tooltip" title="Página Inicial" class="ui-astro-tooltip ui-astro-icon hidden ui-observacao-horizontal jlink">
             <i class="glyphicon glyphicon-home"></i>
         </a>
 
-        <a id="ajuda-btn" data-placement="left" title="Dicas de Uso" class="ui-astro-tooltip ui-astro-icon hidden ui-observacao-horizontal jlink" target="_blank" data-toggle="modal" data-target="#ajuda-texto-modal">
+        <a id="ajuda-btn" data-step="3" data-intro="Use para consultar dicas de uso." data-position='left' data-placement="left" title="Dicas de Uso" class="ui-astro-tooltip ui-astro-icon hidden ui-observacao-horizontal jlink" target="_blank" data-toggle="modal" data-target="#ajuda-texto-modal">
             <i class="glyphicon glyphicon-question-sign"></i>
         </a>
 
-        <a id="info-btn" data-placement="left" title="Sobre" class="ui-astro-tooltip ui-astro-icon hidden ui-observacao-horizontal jlink" target="_blank" data-toggle="modal" data-target="#informacao-texto-modal">
+        <a id="info-btn" data-step="4" data-intro="Use para saber mais sobre o conceito." data-position='left' data-placement="left" title="Sobre" class="ui-astro-tooltip ui-astro-icon hidden ui-observacao-horizontal jlink" target="_blank" data-toggle="modal" data-target="#informacao-texto-modal">
             <i class="glyphicon glyphicon-book"></i>
         </a>
 
-        <a id="credits-btn" data-placement="left" title="Créditos" class="ui-astro-tooltip ui-astro-icon hidden ui-observacao-horizontal jlink" target="_blank" data-toggle="modal" data-target="#creditos-texto-modal">
+        <a id="credits-btn" data-step="2" data-intro="Use para ver os créditos da aplicação." data-position='left' data-placement="left" title="Créditos" class="ui-astro-tooltip ui-astro-icon hidden ui-observacao-horizontal jlink" target="_blank" data-toggle="modal" data-target="#creditos-texto-modal">
             <i class="glyphicon glyphicon-info-sign"></i>
         </a>
 
@@ -585,6 +589,11 @@
                                 window.setTimeout(function () {
                                     $('#load-modal').fadeOut(500, function () {
                                         $(this).remove();
+                                        
+                                        /* LOADED */
+                                        
+                                        introJs().setOptions({ 'prevLabel': 'Anterior', 'nextLabel': 'Próximo', 'skipLabel': 'Encerrar', doneLabel: 'Concluir', 'tooltipPosition': 'bottom', showBullets: false, showProgress: false, showStepNumbers: false }).start();
+                                        
                                     });
                                 }, 750);
 
