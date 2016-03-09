@@ -406,19 +406,19 @@
             <i class="glyphicon glyphicon-info-sign"></i>
         </a>
 
-        <div id='primeiro-acesso-overlay'>
+        <div id='primeiro-acesso-overlay' style='display: none;'>
             <div class="container vertical-center">
                 <div id="primeiro-acesso-texto" class="jumbotron">
                     <h1>Bem vindo ao ASTRO</h1> 
-                    
+
                     <p>Use o tour guiado para aprender como aproveitar melhor as ferramentas oferecidas no software.</p>
-                    
+
                     <div id="primeiro-acesso-button-box">
-                        <button class='btn btn-lg btn-primary'>Iniciar tour guiado</button>
-                        <button class='btn btn-lg btn-primary'>Fechar</button>
+                        <button id='primeiro-acesso-tour' class='btn btn-lg btn-primary'>Iniciar tour guiado</button>
+                        <button id='primeiro-acesso-fechar' class='btn btn-lg btn-primary'>Fechar</button>
 
                         <div class="checkbox">
-                            <label><input type="checkbox" value="" />Não exibir tela de boas vindas</label>
+                            <label><input id='primeiro-acesso-lembrar' type="checkbox" value="" />Não exibir tela de boas vindas</label>
                         </div>
                     </div>
                 </div>
@@ -542,6 +542,25 @@
         <script th:inline="javascript">
             /*<![CDATA[*/
             $(document).ready(function () {
+
+                function setEsconderPrimeiroAcesso() {
+                    localStorage.esconderPrimeiroAcesso = $('#primeiro-acesso-lembrar').is(':checked');
+                }
+
+                $('#primeiro-acesso-tour').click(function () {
+                    setEsconderPrimeiroAcesso();
+                    $.when($('#primeiro-acesso-overlay').remove())
+                            .then(
+                                    introJs()
+                                    .setOptions({'prevLabel': 'Anterior', 'nextLabel': 'Próximo', 'skipLabel': 'Encerrar', doneLabel: 'Concluir', 'tooltipPosition': 'bottom', showBullets: false, showProgress: false, showStepNumbers: false}).start()
+                                    );
+                });
+
+                $('#primeiro-acesso-fechar').click(function () {
+                    setEsconderPrimeiroAcesso();
+                    $('#primeiro-acesso-overlay').remove();
+                });
+
                 var overflowY = $('body').css('overflow-y');
 
                 $('.modal').on('show.bs.modal', function () {
@@ -632,16 +651,17 @@
                                     beforeReady[i]();
                                 }
 
+                                function showPrimeiroAcesso() {
+                                    if (localStorage.esconderPrimeiroAcesso === undefined || localStorage.esconderPrimeiroAcesso === "false") {
+                                        $('#primeiro-acesso-overlay').show();
+                                    } else {
+                                        $('#primeiro-acesso-overlay').remove();
+                                    }
+                                }
+
                                 window.setTimeout(function () {
                                     $('#load-modal').fadeOut(500, function () {
-                                        $(this).remove();
-
-                                        /* LOADED */
-
-                                        //introJs()
-                                        //.onexit(providedCallback)
-                                        //.setOptions({ 'prevLabel': 'Anterior', 'nextLabel': 'Próximo', 'skipLabel': 'Encerrar', doneLabel: 'Concluir', 'tooltipPosition': 'bottom', showBullets: false, showProgress: false, showStepNumbers: false }).start();
-
+                                        $.when($(this).remove()).then(showPrimeiroAcesso());
                                     });
                                 }, 750);
 
