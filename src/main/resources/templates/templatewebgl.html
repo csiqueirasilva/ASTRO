@@ -651,17 +651,15 @@
                                     beforeReady[i]();
                                 }
 
-                                function showPrimeiroAcesso() {
-                                    if (localStorage.esconderPrimeiroAcesso === undefined || localStorage.esconderPrimeiroAcesso === "false") {
-                                        $('#primeiro-acesso-overlay').show();
-                                    } else {
-                                        $('#primeiro-acesso-overlay').remove();
-                                    }
+                                if (localStorage.esconderPrimeiroAcesso === undefined || localStorage.esconderPrimeiroAcesso === "false") {
+                                    $('#primeiro-acesso-overlay').show();
+                                } else {
+                                    $('#primeiro-acesso-overlay').remove();
                                 }
 
                                 window.setTimeout(function () {
                                     $('#load-modal').fadeOut(500, function () {
-                                        $.when($(this).remove()).then(showPrimeiroAcesso());
+                                        $(this).remove();
                                     });
                                 }, 750);
 
