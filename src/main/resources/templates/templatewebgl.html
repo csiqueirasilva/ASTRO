@@ -552,7 +552,7 @@
                     $.when($('#primeiro-acesso-overlay').remove())
                             .then(
                                     introJs()
-                                    .setOptions({'prevLabel': 'Anterior', 'nextLabel': 'Próximo', 'skipLabel': 'Encerrar', doneLabel: 'Concluir', 'tooltipPosition': 'bottom', showBullets: false, showProgress: false, showStepNumbers: false}).start()
+                                    .setOptions({disableInteraction: true, 'prevLabel': 'Anterior', 'nextLabel': 'Próximo', 'skipLabel': 'Encerrar', doneLabel: 'Concluir', 'tooltipPosition': 'bottom', showBullets: false, showProgress: false, showStepNumbers: false}).start()
                                     );
                 });
 
