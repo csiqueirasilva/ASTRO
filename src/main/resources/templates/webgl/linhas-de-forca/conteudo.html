@@ -423,35 +423,9 @@
 
                 var alt = 0;
 
-                var valoresCampoPrincipal = ON_DAED.GEO.IGRF(
-                        ON_DAED.GEO.IGRF_ISV.MAIN_FIELD_VALUES,
-                        date,
-                        ON_DAED.GEO.IGRF_MODE.GEODETIC,
-                        alt,
-                        colat,
-                        elong
-                        );
+                var result = ON_DAED['GEO'].obterDadosMagneticos(date, alt, colat, elong);
 
-                var grau = 180 / Math.PI;
                 var rad = Math.PI / 180;
-
-                var D = grau * Math.atan2(valoresCampoPrincipal.y, valoresCampoPrincipal.x);
-                var H = Math.sqrt(valoresCampoPrincipal.x * valoresCampoPrincipal.x + valoresCampoPrincipal.y * valoresCampoPrincipal.y);
-                var S = grau * Math.atan2(valoresCampoPrincipal.z, H);
-
-                var valoresSeculares = ON_DAED.GEO.IGRF(
-                        ON_DAED.GEO.IGRF_ISV.SECULAR_VARIATION,
-                        date,
-                        ON_DAED.GEO.IGRF_MODE.GEODETIC,
-                        alt,
-                        colat,
-                        elong
-                        );
-
-                var DD = (60 * grau * (valoresCampoPrincipal.x * valoresSeculares.y - valoresCampoPrincipal.y * valoresSeculares.x)) / (H * H);
-                var DH = (valoresCampoPrincipal.x * valoresSeculares.x + valoresCampoPrincipal.y * valoresSeculares.y) / H;
-                var DS = (60 * grau * (H * valoresSeculares.z - valoresCampoPrincipal.z * DH)) / (valoresCampoPrincipal.f * valoresCampoPrincipal.f);
-                var DF = (H * DH + valoresCampoPrincipal.z * valoresSeculares.z) / valoresCampoPrincipal.z;
 
                 function txtCols(txt1, txt2) {
                     return "<div><div class='igrf-col'>" + txt1 + "</div><div class='igrf-col'>" + txt2 + "</div></div>";
@@ -459,16 +433,16 @@
 
                 var txt = '<div class="igrf-divisao">';
 
-                txt += txtCols("D = " + ON_DAED.tempoSideral(D * rad, true), "VS = " + Math.round(DD) + " min/ano");
-                txt += txtCols("I = " + ON_DAED.tempoSideral(S * rad, true), "VS = " + Math.round(DS) + " min/ano");
+                txt += txtCols("D = " + ON_DAED.tempoSideral(result.declinacao * rad, true), "VS = " + Math.round(result.variacaoDeclinacao) + " min/ano");
+                txt += txtCols("I = " + ON_DAED.tempoSideral(result.inclinacao * rad, true), "VS = " + Math.round(result.variacaoInclinacao) + " min/ano");
 
-                txt += txtCols("H = " + Math.round(H) + " nT", "VS = " + Math.round(DH) + " nT/ano");
+                txt += txtCols("H = " + Math.round(result.H) + " nT", "VS = " + Math.round(result.DH) + " nT/ano");
 
-                txt += txtCols("X = " + Math.round(valoresCampoPrincipal.x) + " nT", "VS = " + Math.round(valoresSeculares.x) + " nT/ano");
-                txt += txtCols("Y = " + Math.round(valoresCampoPrincipal.y) + " nT", "VS = " + Math.round(valoresSeculares.y) + " nT/ano");
-                txt += txtCols("Z = " + Math.round(valoresCampoPrincipal.z) + " nT", "VS = " + Math.round(valoresSeculares.z) + " nT/ano");
+                txt += txtCols("X = " + Math.round(result.valoresCampo.x) + " nT", "VS = " + Math.round(result.variacaoSecular.x) + " nT/ano");
+                txt += txtCols("Y = " + Math.round(result.valoresCampo.y) + " nT", "VS = " + Math.round(result.variacaoSecular.y) + " nT/ano");
+                txt += txtCols("Z = " + Math.round(result.valoresCampo.z) + " nT", "VS = " + Math.round(result.variacaoSecular.z) + " nT/ano");
 
-                txt += txtCols("F = " + Math.round(valoresCampoPrincipal.f) + " nT", "VS = " + Math.round(DF) + " nT/ano");
+                txt += txtCols("F = " + Math.round(result.valoresCampo.f) + " nT", "VS = " + Math.round(result.variacaoIntensidade) + " nT/ano");
 
                 txt += "</div>";
 
