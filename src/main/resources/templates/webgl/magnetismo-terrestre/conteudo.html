@@ -487,7 +487,7 @@
 
 				var R = obterRaioMarcador();
 
-				var anguloDeclinacao = -mArc * (Math.PI / 180);
+				var anguloDeclinacao = mArc * (Math.PI / 180);
 
 				var arc = d3.svg.arc()
 					.innerRadius(R * 2.65)
@@ -514,7 +514,7 @@
 					.attr('xlink:href', 'imgs/compass-arrow.png')
 					.attr('width', compassFullSize)
 					.attr('height', compassFullSize)
-					.attr("transform", "translate(" + -compassFullSize / 2 + "," + -compassFullSize / 2 + ") rotate(" + -mArc + "," + compassFullSize / 2 + "," + compassFullSize / 2 + ")");
+					.attr("transform", "translate(" + -compassFullSize / 2 + "," + -compassFullSize / 2 + ") rotate(" + mArc + "," + compassFullSize / 2 + "," + compassFullSize / 2 + ")");
 
 				var nodeTexto = marcador
 					.append("g");
@@ -855,11 +855,11 @@
 
 					var offsetAngle = 270;
 
-					var angle = (offsetAngle - result.declinacao) % 360;
+					var angle = (offsetAngle + result.declinacao) % 360;
 
 					var counterClockwise = true;
 
-					if (result.declinacao < 0) {
+					if (result.declinacao > 0) {
 						counterClockwise = false;
 					}
 
