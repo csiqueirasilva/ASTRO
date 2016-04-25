@@ -855,11 +855,11 @@
 
 					var offsetAngle = 270;
 
-					var angle = (offsetAngle - result.declinacao) % 360;
+					var angle = (offsetAngle + result.declinacao) % 360;
 
 					var counterClockwise = true;
 
-					if (result.declinacao < 0) {
+					if (result.declinacao > 0) {
 						counterClockwise = false;
 					}
 
