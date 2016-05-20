@@ -494,8 +494,6 @@
             /*<![CDATA[*/
             (function () {
 
-                $('.ui-astro-tooltip').tooltip();
-
                 var textures = [];
                 var models = [];
                 var modelosIt = -1;
@@ -542,6 +540,8 @@
         <script th:inline="javascript">
             /*<![CDATA[*/
             $(document).ready(function () {
+
+				$('.ui-astro-tooltip').tooltip();
 
                 function setEsconderPrimeiroAcesso() {
                     localStorage.esconderPrimeiroAcesso = $('#primeiro-acesso-lembrar').is(':checked');
