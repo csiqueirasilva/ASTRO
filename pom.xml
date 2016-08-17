@@ -5,7 +5,7 @@
     <groupId>br.on.daed</groupId>
     <artifactId>ASTRO</artifactId>
     <version>1.0-RC</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <name>ASTRO</name>
 
