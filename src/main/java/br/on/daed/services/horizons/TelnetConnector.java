@@ -7,6 +7,8 @@ package br.on.daed.services.horizons;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,6 +37,7 @@ public class TelnetConnector {
 
 	private Pattern HORIZON_DATA_PATTERN = null;
 
+	private int queryCount = 0;
 	private TelnetClient tc = null;
 	private final String REMOTE_ADDR = "horizons.jpl.nasa.gov";
 	private final int REMOTE_PORT = 6775;
@@ -97,52 +100,85 @@ public class TelnetConnector {
 
 	}
 
+	public boolean open() {
+		boolean ret = true;
+		try {
+			queryCount = 0;
+			tc.connect(REMOTE_ADDR, REMOTE_PORT);
+		} catch (IOException ex) {
+			ret = false;
+		}
+		return ret;
+	}
+
+	public boolean close() {
+		boolean ret = true;
+		try {
+			tc.disconnect();
+		} catch (IOException ex) {
+			ret = false;
+		}
+		return ret;
+	}
+
 	public Object query() {
 		String ret = null;
 
-		try {
-			tc.connect(REMOTE_ADDR, REMOTE_PORT);
+		if (tc.isConnected()) {
 
-			String output;
+			try {
 
-			readUntilRegex(HORIZON_SCREEN_PATTERN[0]);
-			sendString("APOPHIS", true); // get body "APOPHIS"
-			sendString("\r\n", false);
-			readUntilRegex(HORIZON_SCREEN_PATTERN[1]);
-			sendString("\r\n", false); // confirms result
-			readUntilRegex(HORIZON_SCREEN_PATTERN[2]);
-			sendString("E", true); // get ephemerides
-			sendString("\r\n", false);
-			readUntilRegex(HORIZON_SCREEN_PATTERN[3]);
-			sendString("E", true); // get orbital elements
-			sendString("\r\n", false);
-			readUntilRegex(HORIZON_SCREEN_PATTERN[4]);
-			sendString("sun", true); // set it to heliocentric, on future it is needed to send 'y' to repeat last center used
-			sendString("\r\n", false);
-			readUntilRegex(HORIZON_SCREEN_PATTERN[5]);
-			sendString("frame", true); // use J2000
-			sendString("\r\n", false);
-			readUntilRegex(HORIZON_SCREEN_PATTERN[6]);
-			sendString("JD2454441.5", true); // start date on 2454441.5
-			sendString("\r\n", false);
-			readUntilRegex(HORIZON_SCREEN_PATTERN[7]);
-			sendString("JD2454442.5", true); // end date on 2454441.5
-			sendString("\r\n", false);
-			readUntilRegex(HORIZON_SCREEN_PATTERN[8]);
-			sendString("5d", true); // 5 day interval
-			sendString("\r\n", false);
-			readUntilRegex(HORIZON_SCREEN_PATTERN[9]);
-			sendString("\r\n", false); // confirm input data
-			output = readUntilRegex(HORIZON_SCREEN_PATTERN[10]);
+				String output;
 
-			Matcher m = HORIZON_DATA_PATTERN.matcher(output);
+				readUntilRegex(HORIZON_SCREEN_PATTERN[0]);
+				sendString("APOPHIS", true); // get body "APOPHIS"
+				sendString("\r\n", false);
+				readUntilRegex(HORIZON_SCREEN_PATTERN[1]);
+				sendString("\r\n", false); // confirms result
+				readUntilRegex(HORIZON_SCREEN_PATTERN[2]);
+				sendString("E", true); // get ephemerides
+				sendString("\r\n", false);
+				readUntilRegex(HORIZON_SCREEN_PATTERN[3]);
+				sendString("E", true); // get orbital elements
+				sendString("\r\n", false);
+				readUntilRegex(HORIZON_SCREEN_PATTERN[4]);
+				
+				String center = "sun";
+				
+				if(queryCount != 0) {
+					center = "y";
+				}
+				
+				sendString(center, true); // set it to heliocentric, on future it is needed to send 'y' to repeat last center used
+				sendString("\r\n", false);
+				readUntilRegex(HORIZON_SCREEN_PATTERN[5]);
+				sendString("frame", true); // use J2000
+				sendString("\r\n", false);
+				readUntilRegex(HORIZON_SCREEN_PATTERN[6]);
+				sendString("JD2454441.5", true); // start date on 2454441.5
+				sendString("\r\n", false);
+				readUntilRegex(HORIZON_SCREEN_PATTERN[7]);
+				sendString("JD2454442.5", true); // end date on 2454441.5
+				sendString("\r\n", false);
+				readUntilRegex(HORIZON_SCREEN_PATTERN[8]);
+				sendString("5d", true); // 5 day interval
+				sendString("\r\n", false);
+				readUntilRegex(HORIZON_SCREEN_PATTERN[9]);
+				sendString("\r\n", false); // confirm input data
+				output = readUntilRegex(HORIZON_SCREEN_PATTERN[10]);
 
-			m.find();
+				Matcher m = HORIZON_DATA_PATTERN.matcher(output);
 
-			System.out.println(m.group("data"));
+				m.find();
 
-			tc.disconnect();
-		} catch (Exception e) {
+				ret = m.group("data");
+
+				sendString("n", true); // return to main screen
+				sendString("\r\n", false);
+
+			} catch (Exception e) {
+			}
+
 		}
 
 		return ret;
@@ -150,7 +186,13 @@ public class TelnetConnector {
 
 	public static void main(String[] args) throws Exception {
 		TelnetConnector conn = new TelnetConnector();
+		conn.open();
 		conn.query();
+		conn.query();
+		conn.query();
+		conn.query();
+		conn.query();
+		conn.close();
 	}
-	
+
 }
