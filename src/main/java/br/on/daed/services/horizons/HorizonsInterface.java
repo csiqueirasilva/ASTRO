@@ -19,7 +19,7 @@ public class HorizonsInterface {
 		HorizonsID[] values = HorizonsID.values();
 		
 		for(int i = 0; i < values.length; i++) {
-			String output = (String) tc.query(values[i], HorizonsOptions.ORBITAL_ELEMENTS, 2451544.5);
+			String output = (String) tc.query(values[i], HorizonsOptions.CARTESIAN, 2451544.5);
 			System.out.println(values[i].name());
 			System.out.println(output);
 		}

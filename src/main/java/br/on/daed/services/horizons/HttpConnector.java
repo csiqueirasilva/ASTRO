@@ -28,6 +28,8 @@ public class HttpConnector {
 
 	private final String HORIZONS_BATCH_URL = "http://ssd.jpl.nasa.gov/horizons_batch.cgi";
 	private final Pattern HORIZONS_DATA_PATTERN = Pattern.compile("(?:\\$\\$SOE)(?<data>[^$]*)");
+	private final Pattern HORIZONS_ORBITAL_DATA_PATTERN = Pattern.compile("(?:(EC|OM|N |A |QR|W |MA|AD|IN|Tp|TA|PR)=[ ]*)([^ ]*)");
+	private final Pattern HORIZONS_CARTESIAN_DATA_PATTERN = Pattern.compile("((?:[ ]+)[0-9.E+-]+){3}");
 	private final HttpClient client = HttpClientBuilder.create().build();
 
 	public Object query(HorizonsID id, HorizonsOptions op, Double jd) {
@@ -37,7 +39,7 @@ public class HttpConnector {
 		if (id != null && op != null && jd != null) {
 
 			try {
-				
+
 				HttpPost request = new HttpPost(HORIZONS_BATCH_URL);
 
 				// add header
@@ -49,17 +51,15 @@ public class HttpConnector {
 				urlParameters.add(new BasicNameValuePair("MAKE_EPHEM", "YES"));
 				urlParameters.add(new BasicNameValuePair("CENTER", "500@10")); // SUN, HELIOCENTRIC COORDS
 				urlParameters.add(new BasicNameValuePair("TABLE_TYPE", op.toString()));
-				urlParameters.add(new BasicNameValuePair("REF_PLANE", "FRAME"));
+				urlParameters.add(new BasicNameValuePair("REF_PLANE", "ECLIPTIC"));
 				urlParameters.add(new BasicNameValuePair("START_TIME", "JD" + jd));
 				urlParameters.add(new BasicNameValuePair("STOP_TIME", "JD" + (jd + 1)));
 				urlParameters.add(new BasicNameValuePair("STEP_SIZE", "5d"));
 				urlParameters.add(new BasicNameValuePair("OUT_UNITS", "AU-D"));
-				
+
 				request.setEntity(new UrlEncodedFormEntity(urlParameters));
 
 				HttpResponse response = client.execute(request);
-				System.out.println("Response Code : "
-						+ response.getStatusLine().getStatusCode());
 
 				BufferedReader rd = new BufferedReader(
 						new InputStreamReader(response.getEntity().getContent()));
@@ -72,15 +72,67 @@ public class HttpConnector {
 
 				Matcher m = HORIZONS_DATA_PATTERN.matcher(result);
 
-				if(m.find()) {
-					ret = m.group("data");
+				if (m.find()) {
+					String data = m.group("data");
+
+					if (op == HorizonsOptions.ORBITAL_ELEMENTS) {
+						ret = parseOrbital(data);
+					} else {
+						ret = parseCartesian(data);
+					}
+
 				}
-				
+
 			} catch (Exception e) {
 				ret = null;
 			}
 		}
-		
+
+		return ret;
+	}
+
+	private String parseOrbital(String raw) {
+		String ret = "";
+
+		Matcher m = HORIZONS_ORBITAL_DATA_PATTERN.matcher(raw);
+
+		while (m.find()) {
+			ret += m.group(2) + "\n";
+		}
+
+		if (ret.isEmpty()) {
+			ret = null;
+		}
+
+		return ret;
+	}
+
+	private String parseCartesian(String raw) {
+		String ret = "";
+
+		Matcher m = HORIZONS_CARTESIAN_DATA_PATTERN.matcher(raw);
+
+		if (m.find()) {
+			String[] split = m.group(0).split("[ ]+");
+			ret += "position:\n";
+			ret += "x: " + split[1] + "\n";
+			ret += "y: " + split[2] + "\n";
+			ret += "z: " + split[3] + "\n";
+
+			if (m.find()) {
+				split = m.group(0).split("[ ]+");
+				ret += "velocity:\n";
+				ret += "x: " + split[1] + "\n";
+				ret += "y: " + split[2] + "\n";
+				ret += "z: " + split[3] + "\n";
+			} else {
+				ret = null;
+			}
+
+		} else {
+			ret = null;
+		}
+
 		return ret;
 	}
 }
