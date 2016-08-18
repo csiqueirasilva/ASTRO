@@ -11,8 +11,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.net.telnet.EchoOptionHandler;
+import org.apache.commons.net.telnet.InvalidTelnetOptionException;
+import org.apache.commons.net.telnet.SuppressGAOptionHandler;
 
 import org.apache.commons.net.telnet.TelnetClient;
+import org.apache.commons.net.telnet.TerminalTypeOptionHandler;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,16 +25,7 @@ public class TelnetConnector {
 	private final String[] HORIZON_SCREEN_REGEX
 			= {
 				".*Horizons> $",
-				".*Continue \\[ <cr>=yes, n=no, \\? \\] : $",
-				".*Select ... \\[A\\]pproaches, \\[E\\]phemeris, \\[F\\]tp,\\[M\\]ail,\\[R\\]edisplay, \\[S\\]PK,\\?,<cr>: $",
-				".*Observe, Elements, Vectors  \\[o,e,v,\\?\\] : $",
-				".*\\? \\] : $",
-				".*Reference plane \\[eclip, frame, body \\] : $",
-				".*Starting CT  \\[>=   1599-Dec-12 00:00\\] : $",
-				".*Ending   CT  \\[<=   2500-Dec-31 00:00\\] : $",
-				".*Output interval \\[ex: 10m, 1h, 1d, \\? \\] : $",
-				".*Accept default output \\[ cr=\\(y\\), n, \\?\\] : $",
-				".* >>> Select... \\[A\\]gain, \\[N\\]ew-case, \\[F\\]tp, \\[K\\]ermit, \\[M\\]ail, \\[R\\]edisplay, \\? : $"
+				".*: $",
 			};
 
 	private final Pattern[] HORIZON_SCREEN_PATTERN = new Pattern[HORIZON_SCREEN_REGEX.length];
@@ -45,6 +40,21 @@ public class TelnetConnector {
 	public TelnetConnector() {
 		tc = new TelnetClient();
 
+		TerminalTypeOptionHandler ttopt = new TerminalTypeOptionHandler("VT100", false, false, true, false);
+        EchoOptionHandler echoopt = new EchoOptionHandler(true, false, true, false);
+        SuppressGAOptionHandler gaopt = new SuppressGAOptionHandler(true, true, true, true);
+
+        try
+        {
+            tc.addOptionHandler(ttopt);
+            tc.addOptionHandler(echoopt);
+            tc.addOptionHandler(gaopt);
+        }
+        catch (InvalidTelnetOptionException | IOException e)
+        {
+            System.err.println("Error registering option handlers: " + e.getMessage());
+        }
+		
 		for (int i = 0; i < HORIZON_SCREEN_REGEX.length; i++) {
 			HORIZON_SCREEN_PATTERN[i] = Pattern.compile(HORIZON_SCREEN_REGEX[i]);
 		}
@@ -107,6 +117,8 @@ public class TelnetConnector {
 			tc.connect(REMOTE_ADDR, REMOTE_PORT);
 		} catch (IOException ex) {
 			ret = false;
+		} catch (Exception ex) {
+			Logger.getLogger(TelnetConnector.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		return ret;
 	}
@@ -121,27 +133,28 @@ public class TelnetConnector {
 		return ret;
 	}
 
-	public Object query() {
+	public Object query(Object bodyId, HorizonsOptions ho, Double jd) {
 		String ret = null;
 
-		if (tc.isConnected()) {
+		if (tc.isConnected() && bodyId != null && ho != null && jd != null) {
 
 			try {
 
 				String output;
 
-				readUntilRegex(HORIZON_SCREEN_PATTERN[0]);
-				sendString("APOPHIS", true); // get body "APOPHIS"
+				sendString("\r\n", false); // prevents XTERM bug
+				sendString("\r\n", false); // prevents XTERM bug
+
+				output = readUntilRegex(HORIZON_SCREEN_PATTERN[0]);
+				sendString(bodyId.toString(), true); // get body
 				sendString("\r\n", false);
 				readUntilRegex(HORIZON_SCREEN_PATTERN[1]);
-				sendString("\r\n", false); // confirms result
-				readUntilRegex(HORIZON_SCREEN_PATTERN[2]);
 				sendString("E", true); // get ephemerides
 				sendString("\r\n", false);
-				readUntilRegex(HORIZON_SCREEN_PATTERN[3]);
-				sendString("E", true); // get orbital elements
+				readUntilRegex(HORIZON_SCREEN_PATTERN[1]);
+				sendString(ho.toString(), true); // get orbital elements or cartesian vector
 				sendString("\r\n", false);
-				readUntilRegex(HORIZON_SCREEN_PATTERN[4]);
+				readUntilRegex(HORIZON_SCREEN_PATTERN[1]);
 				
 				String center = "sun";
 				
@@ -151,21 +164,21 @@ public class TelnetConnector {
 				
 				sendString(center, true); // set it to heliocentric, on future it is needed to send 'y' to repeat last center used
 				sendString("\r\n", false);
-				readUntilRegex(HORIZON_SCREEN_PATTERN[5]);
+				readUntilRegex(HORIZON_SCREEN_PATTERN[1]);
 				sendString("frame", true); // use J2000
 				sendString("\r\n", false);
-				readUntilRegex(HORIZON_SCREEN_PATTERN[6]);
-				sendString("JD2454441.5", true); // start date on 2454441.5
+				readUntilRegex(HORIZON_SCREEN_PATTERN[1]);
+				sendString("JD" + jd, true); // start date on jd
 				sendString("\r\n", false);
-				readUntilRegex(HORIZON_SCREEN_PATTERN[7]);
-				sendString("JD2454442.5", true); // end date on 2454441.5
+				readUntilRegex(HORIZON_SCREEN_PATTERN[1]);
+				sendString("JD" + (jd + 1), true); // end date on jd + 1
 				sendString("\r\n", false);
-				readUntilRegex(HORIZON_SCREEN_PATTERN[8]);
-				sendString("5d", true); // 5 day interval
+				readUntilRegex(HORIZON_SCREEN_PATTERN[1]);
+				sendString("5d", true); // 5 day interval, to skip end date and return only set of data
 				sendString("\r\n", false);
-				readUntilRegex(HORIZON_SCREEN_PATTERN[9]);
+				readUntilRegex(HORIZON_SCREEN_PATTERN[1]);
 				sendString("\r\n", false); // confirm input data
-				output = readUntilRegex(HORIZON_SCREEN_PATTERN[10]);
+				output = readUntilRegex(HORIZON_SCREEN_PATTERN[1]);
 
 				Matcher m = HORIZON_DATA_PATTERN.matcher(output);
 
@@ -182,17 +195,6 @@ public class TelnetConnector {
 		}
 
 		return ret;
-	}
-
-	public static void main(String[] args) throws Exception {
-		TelnetConnector conn = new TelnetConnector();
-		conn.open();
-		conn.query();
-		conn.query();
-		conn.query();
-		conn.query();
-		conn.query();
-		conn.close();
 	}
 
 }

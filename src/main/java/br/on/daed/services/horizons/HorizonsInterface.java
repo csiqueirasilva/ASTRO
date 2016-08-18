@@ -13,8 +13,18 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class HorizonsInterface {
-	public void main (String args[]) {
+	public static void main (String args[]) {
 		TelnetConnector tc = new TelnetConnector();
 		
+		tc.open();
+		
+		HorizonsID[] values = HorizonsID.values();
+		
+		for(int i = 0; i < values.length; i++) {
+			String output = (String) tc.query(values[i], HorizonsOptions.ORBITAL_ELEMENTS, 2451544.5);
+			System.out.println(output);
+		}
+		
+		tc.close();
 	}
 }

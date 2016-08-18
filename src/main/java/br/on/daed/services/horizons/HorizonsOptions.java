@@ -9,29 +9,18 @@ package br.on.daed.services.horizons;
  *
  * @author csiqueira
  */
-public enum HorizonsID {
-	EARTH_MOON_BARY(3),
-	MERCURY(199),
-	VENUS(299),
-	EARTH(399),
-	MARS(499),
-	JUPITER(599),
-	SATURN(699),
-	URANUS(799),
-	NEPTUNE(899),
-	CERES(1),
-	PALLAS(2),
-	VESTA(4);
+public enum HorizonsOptions {
+	ORBITAL_ELEMENTS("E"),
+	CARTESIAN("V");
 	
-	private final Integer value;
+	private final String value;
 	
-	HorizonsID(int val) {
-		this.value = val;
-	};
+	HorizonsOptions(String v) {
+		this.value = v;
+	}
 	
 	@Override
 	public String toString() {
-		return value.toString();
+		return this.value;
 	}
-	
 }
