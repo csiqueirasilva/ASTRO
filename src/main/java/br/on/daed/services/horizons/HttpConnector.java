@@ -7,7 +7,6 @@ package br.on.daed.services.horizons;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -17,9 +16,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import static org.apache.http.client.methods.RequestBuilder.post;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -27,7 +24,7 @@ import org.apache.http.message.BasicNameValuePair;
  *
  * @author csiqueira
  */
-public class HtmlConnector {
+public class HttpConnector {
 
 	private final String HORIZONS_BATCH_URL = "http://ssd.jpl.nasa.gov/horizons_batch.cgi";
 	private final Pattern HORIZONS_DATA_PATTERN = Pattern.compile("(?:\\$\\$SOE)(?<data>[^$]*)");
@@ -50,7 +47,7 @@ public class HtmlConnector {
 				urlParameters.add(new BasicNameValuePair("batch", "1"));
 				urlParameters.add(new BasicNameValuePair("COMMAND", id.toString()));
 				urlParameters.add(new BasicNameValuePair("MAKE_EPHEM", "YES"));
-				urlParameters.add(new BasicNameValuePair("CENTER", "SUN"));
+				urlParameters.add(new BasicNameValuePair("CENTER", "500@10")); // SUN, HELIOCENTRIC COORDS
 				urlParameters.add(new BasicNameValuePair("TABLE_TYPE", op.toString()));
 				urlParameters.add(new BasicNameValuePair("REF_PLANE", "FRAME"));
 				urlParameters.add(new BasicNameValuePair("START_TIME", "JD" + jd));

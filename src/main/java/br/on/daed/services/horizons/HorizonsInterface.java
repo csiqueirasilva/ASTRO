@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class HorizonsInterface {
 	public static void main (String args[]) {
-		HtmlConnector tc = new HtmlConnector();
+		HttpConnector tc = new HttpConnector();
 		
 		HorizonsID[] values = HorizonsID.values();
 		
