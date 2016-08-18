@@ -59,7 +59,7 @@ public class TelnetConnector {
 			HORIZON_SCREEN_PATTERN[i] = Pattern.compile(HORIZON_SCREEN_REGEX[i]);
 		}
 
-		HORIZON_DATA_PATTERN = Pattern.compile("(?:\\$\\$SOE)(?<data>[^$]*)");
+		HORIZON_DATA_PATTERN = Pattern.compile("(?:\\$\\$SOE)(?<data>[^$]*)(?:\\$\\$EOE)");
 	}
 
 	private String readUntilRegex(Pattern p) throws Exception {

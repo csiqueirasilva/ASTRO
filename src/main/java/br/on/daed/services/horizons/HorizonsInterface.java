@@ -14,17 +14,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class HorizonsInterface {
 	public static void main (String args[]) {
-		TelnetConnector tc = new TelnetConnector();
-		
-		tc.open();
+		HtmlConnector tc = new HtmlConnector();
 		
 		HorizonsID[] values = HorizonsID.values();
 		
 		for(int i = 0; i < values.length; i++) {
 			String output = (String) tc.query(values[i], HorizonsOptions.ORBITAL_ELEMENTS, 2451544.5);
+			System.out.println(values[i].name());
 			System.out.println(output);
 		}
 		
-		tc.close();
 	}
 }

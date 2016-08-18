@@ -21,7 +21,8 @@ public enum HorizonsID {
 	NEPTUNE(899),
 	CERES(1),
 	PALLAS(2),
-	VESTA(4);
+	VESTA(4),
+	APOPHIS(99942);
 	
 	private final Integer value;
 	

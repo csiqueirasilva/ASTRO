@@ -10,8 +10,8 @@ package br.on.daed.services.horizons;
  * @author csiqueira
  */
 public enum HorizonsOptions {
-	ORBITAL_ELEMENTS("E"),
-	CARTESIAN("V");
+	ORBITAL_ELEMENTS("ELEM"),
+	CARTESIAN("VECTOR");
 	
 	private final String value;
 	
