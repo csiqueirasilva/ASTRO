@@ -5,7 +5,7 @@
 	<groupId>br.on.daed</groupId>
 	<artifactId>ASTRO</artifactId>
 	<version>1.0-RC</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<name>ASTRO</name>
 
@@ -67,6 +67,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
         
 		<dependency>

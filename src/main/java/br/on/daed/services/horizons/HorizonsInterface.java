@@ -8,6 +8,7 @@ package br.on.daed.services.horizons;
 import br.on.daed.services.horizons.objects.HorizonsResult;
 import br.on.daed.services.horizons.objects.HorizonsResultCollection;
 import com.google.gson.Gson;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,6 +21,9 @@ public class HorizonsInterface {
 	private static final double MIN_JD = 2444240.0;
 	private static final double MAX_JD = 2480765.0;
 	
+	@Autowired
+	private HttpConnector tc;
+	
 	public static boolean validateInputDate(Double date) {
 		return date != null && date >= MIN_JD && date <= MAX_JD;
 	}
@@ -28,8 +32,6 @@ public class HorizonsInterface {
 		HorizonsResultCollection ret = null;
 		
 		if(validateInputDate(JD) && op != null && ids != null && ids.length > 0) {
-		
-			HttpConnector tc = new HttpConnector();
 
 			ret = new HorizonsResultCollection();
 
@@ -49,13 +51,11 @@ public class HorizonsInterface {
 		return ret;
 	}
 	
-	public static void main (String args[]) {
+	public HorizonsResultCollection getStandardDynamicalModel (Double JD) {
 
-		Double JD = 2451544.5;
+		// REF J2000 = 2451544.5;
 		
 		HorizonsOptions op = HorizonsOptions.ORBITAL_ELEMENTS;
-		
-		HorizonsInterface hi = new HorizonsInterface();
 		
 		HorizonsID[] values = {
 			HorizonsID.MERCURY,
@@ -70,13 +70,10 @@ public class HorizonsInterface {
 			HorizonsID.VESTA,
 			HorizonsID.PALLAS
 		};
-				
-		HorizonsResultCollection ret = hi.fecthResultCollection(JD, op, values);
 
-		Gson gson = new Gson();
-		String jsonResults = gson.toJson(ret);
-		
-		System.out.println(jsonResults);
+		HorizonsResultCollection ret = this.fecthResultCollection(JD, op, values);
+
+		return ret;
 	}
 	
 }

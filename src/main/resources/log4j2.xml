@@ -4,13 +4,13 @@
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
 		</Console>
-		<File name="File" fileName="ASTRO.log">
+<!--		<File name="File" fileName="ASTRO.log">
 			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-		</File>
+		</File>-->
 	</Appenders>
 	<Loggers>
-		<Root level="error">
-			<AppenderRef ref="File"/>
+		<Root level="info">
+			<AppenderRef ref="Console"/>
 		</Root>
 	</Loggers>
 </Configuration>

@@ -28,6 +28,10 @@ public class HorizonsResultCollection<T extends HorizonsResult> {
 		this.results.add(obj);
 	}
 
+	public List<T> getResults() {
+		return this.results;
+	}
+	
 	public Double getJd() {
 		return jd;
 	}
