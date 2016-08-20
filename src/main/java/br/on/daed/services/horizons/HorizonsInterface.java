@@ -29,9 +29,21 @@ public class HorizonsInterface {
 	}
 	
 	public HorizonsResultCollection fecthResultCollection(Double JD, HorizonsOptions op, HorizonsID[] ids) {
+		int[] arrIds = new int[ids.length];
+		String[] arrNames = new String[ids.length];
+		
+		for(int i = 0; i < ids.length; i++) {
+			arrIds[i] = ids[i].getValue();
+			arrNames[i] = ids[i].name();
+		}
+		
+		return fecthResultCollection(JD, op, arrIds, arrNames);
+	}
+	
+	public HorizonsResultCollection fecthResultCollection(Double JD, HorizonsOptions op, int[] ids, String[] names) {
 		HorizonsResultCollection ret = null;
 		
-		if(validateInputDate(JD) && op != null && ids != null && ids.length > 0) {
+		if(validateInputDate(JD) && op != null && ids != null && ids.length > 0 && ids.length == names.length) {
 
 			ret = new HorizonsResultCollection();
 
@@ -39,7 +51,7 @@ public class HorizonsInterface {
 			ret.setOp(op);
 
 			for(int i = 0; i < ids.length; i++) {
-				HorizonsResult query = tc.query(ids[i], op, JD);
+				HorizonsResult query = tc.query(ids[i], names[i], op, JD);
 				if(query == null) {
 					throw new UnsupportedOperationException("Error while getting data from Horizons to assemble ResultCollection");
 				}
@@ -49,6 +61,20 @@ public class HorizonsInterface {
 		}
 		
 		return ret;
+	}
+	
+	public HorizonsResultCollection getElements(Integer id, String name, Double JD) {
+		String[] arrNames = {name};
+		int[] arrIds = {id};
+		
+		return fecthResultCollection(JD, HorizonsOptions.ORBITAL_ELEMENTS, arrIds, arrNames);
+	}
+	
+	public HorizonsResultCollection getVectors(Integer id, String name, Double JD) {
+		String[] arrNames = {name};
+		int[] arrIds = {id};
+		
+		return fecthResultCollection(JD, HorizonsOptions.CARTESIAN, arrIds, arrNames);
 	}
 	
 	public HorizonsResultCollection getStandardDynamicalModel (Double JD) {

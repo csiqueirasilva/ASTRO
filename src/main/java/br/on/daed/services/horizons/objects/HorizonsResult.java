@@ -10,14 +10,15 @@ package br.on.daed.services.horizons.objects;
  * @author csiqueira
  */
 public abstract class HorizonsResult {
-	protected String id;
+
+	protected Integer id;
 	protected String name;
 
-	public String getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
@@ -28,4 +29,5 @@ public abstract class HorizonsResult {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
 }

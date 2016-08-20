@@ -19,13 +19,38 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/horizons")
 public class HorizonsController {
-	
+
 	@Autowired
 	private HorizonsInterface horizonsInterface;
-	
+
 	@RequestMapping("/sdm")
 	public HorizonsResultCollection getStandardDynamicalModel(@RequestParam Double jd) {
-		return horizonsInterface.getStandardDynamicalModel(jd);
+		HorizonsResultCollection ret = null;
+		try {
+			ret = horizonsInterface.getStandardDynamicalModel(jd);
+		} catch (UnsupportedOperationException e) {
+		}
+		return ret;
 	}
-	
+
+	@RequestMapping("/elements")
+	public HorizonsResultCollection getElements(@RequestParam Integer id, @RequestParam Double jd) {
+		HorizonsResultCollection ret = null;
+		try {
+			ret = horizonsInterface.getElements(id, null, jd);
+		} catch (UnsupportedOperationException e) {
+		}
+		return ret;
+	}
+
+	@RequestMapping("/vectors")
+	public HorizonsResultCollection getVectors(@RequestParam Integer id, @RequestParam Double jd) {
+		HorizonsResultCollection ret = null;
+		try {
+			ret = horizonsInterface.getVectors(id, null, jd);
+		} catch (UnsupportedOperationException e) {
+		}
+		return ret;
+	}
+
 }

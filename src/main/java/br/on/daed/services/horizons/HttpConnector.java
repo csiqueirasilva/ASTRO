@@ -7,7 +7,6 @@ package br.on.daed.services.horizons;
 
 import br.on.daed.services.horizons.objects.CartesianCoordinates;
 import br.on.daed.services.horizons.objects.HorizonsResult;
-import br.on.daed.services.horizons.objects.HorizonsResultCollection;
 import br.on.daed.services.horizons.objects.OrbitalElements;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -38,7 +37,7 @@ public class HttpConnector {
 	private final Pattern HORIZONS_CARTESIAN_DATA_PATTERN = Pattern.compile("((?:[ ]+)[0-9.E+-]+){3}");
 	private final HttpClient client = HttpClientBuilder.create().build();
 
-	public HorizonsResult query(HorizonsID id, HorizonsOptions op, Double jd) {
+	public HorizonsResult query(Integer id, String name, HorizonsOptions op, Double jd) {
 
 		HorizonsResult ret = null;
 
@@ -85,8 +84,8 @@ public class HttpConnector {
 					ret = parseResults(data, op);
 					
 					if(ret != null) {
-						ret.setId(id.toString());
-						ret.setName(id.name());
+						ret.setId(id);
+						ret.setName(name);
 					}
 				}
 
@@ -155,4 +154,5 @@ public class HttpConnector {
 
 		return ret;
 	}
+	
 }

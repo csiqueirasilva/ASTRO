@@ -34,5 +34,9 @@ public enum HorizonsID {
 	public String toString() {
 		return value.toString();
 	}
+
+	Integer getValue() {
+		return this.value;
+	}
 	
 }
