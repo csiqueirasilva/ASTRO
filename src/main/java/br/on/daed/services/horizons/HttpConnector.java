@@ -5,6 +5,10 @@
  */
 package br.on.daed.services.horizons;
 
+import br.on.daed.services.horizons.objects.CartesianCoordinates;
+import br.on.daed.services.horizons.objects.HorizonsResult;
+import br.on.daed.services.horizons.objects.HorizonsResultCollection;
+import br.on.daed.services.horizons.objects.OrbitalElements;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -32,9 +36,9 @@ public class HttpConnector {
 	private final Pattern HORIZONS_CARTESIAN_DATA_PATTERN = Pattern.compile("((?:[ ]+)[0-9.E+-]+){3}");
 	private final HttpClient client = HttpClientBuilder.create().build();
 
-	public Object query(HorizonsID id, HorizonsOptions op, Double jd) {
+	public HorizonsResult query(HorizonsID id, HorizonsOptions op, Double jd) {
 
-		Object ret = null;
+		HorizonsResult ret = null;
 
 		if (id != null && op != null && jd != null) {
 
@@ -66,8 +70,9 @@ public class HttpConnector {
 
 				StringBuffer result = new StringBuffer();
 				String line = "";
+				
 				while ((line = rd.readLine()) != null) {
-					result.append(line).append("\n");
+					result.append(line);
 				}
 
 				Matcher m = HORIZONS_DATA_PATTERN.matcher(result);
@@ -75,12 +80,12 @@ public class HttpConnector {
 				if (m.find()) {
 					String data = m.group("data");
 
-					if (op == HorizonsOptions.ORBITAL_ELEMENTS) {
-						ret = parseOrbital(data);
-					} else {
-						ret = parseCartesian(data);
+					ret = parseResults(data, op);
+					
+					if(ret != null) {
+						ret.setId(id.toString());
+						ret.setName(id.name());
 					}
-
 				}
 
 			} catch (Exception e) {
@@ -90,14 +95,27 @@ public class HttpConnector {
 
 		return ret;
 	}
+	
+	private HorizonsResult parseResults (String data, HorizonsOptions op) {
+		
+		HorizonsResult ret;
 
-	private String parseOrbital(String raw) {
-		String ret = "";
+		if (op == HorizonsOptions.ORBITAL_ELEMENTS) {
+			ret = new OrbitalElements(parseOrbital(data));
+		} else /* vector, cartesian */ {
+			ret = new CartesianCoordinates(parseCartesian(data));
+		}
+		
+		return ret;
+	}
+
+	private List<String> parseOrbital(String raw) {
+		List<String> ret = new ArrayList<>();
 
 		Matcher m = HORIZONS_ORBITAL_DATA_PATTERN.matcher(raw);
 
 		while (m.find()) {
-			ret += m.group(2) + "\n";
+			ret.add(m.group(2));
 		}
 
 		if (ret.isEmpty()) {
@@ -107,28 +125,28 @@ public class HttpConnector {
 		return ret;
 	}
 
-	private String parseCartesian(String raw) {
-		String ret = "";
+	private List<String> parseCartesian(String raw) {
+		List<String> ret = new ArrayList<>();
 
 		Matcher m = HORIZONS_CARTESIAN_DATA_PATTERN.matcher(raw);
 
 		if (m.find()) {
+			
 			String[] split = m.group(0).split("[ ]+");
-			ret += "position:\n";
-			ret += "x: " + split[1] + "\n";
-			ret += "y: " + split[2] + "\n";
-			ret += "z: " + split[3] + "\n";
-
+			
+			ret.add(split[1]);
+			ret.add(split[2]);
+			ret.add(split[3]);
+			
 			if (m.find()) {
 				split = m.group(0).split("[ ]+");
-				ret += "velocity:\n";
-				ret += "x: " + split[1] + "\n";
-				ret += "y: " + split[2] + "\n";
-				ret += "z: " + split[3] + "\n";
+				ret.add(split[1]);
+				ret.add(split[2]);
+				ret.add(split[3]);
 			} else {
 				ret = null;
 			}
-
+			
 		} else {
 			ret = null;
 		}

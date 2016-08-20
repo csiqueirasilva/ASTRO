@@ -5,6 +5,9 @@
  */
 package br.on.daed.services.horizons;
 
+import br.on.daed.services.horizons.objects.HorizonsResult;
+import br.on.daed.services.horizons.objects.HorizonsResultCollection;
+import com.google.gson.Gson;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,16 +16,67 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class HorizonsInterface {
-	public static void main (String args[]) {
-		HttpConnector tc = new HttpConnector();
+	
+	private static final double MIN_JD = 2444240.0;
+	private static final double MAX_JD = 2480765.0;
+	
+	public static boolean validateInputDate(Double date) {
+		return date != null && date >= MIN_JD && date <= MAX_JD;
+	}
+	
+	public HorizonsResultCollection fecthResultCollection(Double JD, HorizonsOptions op, HorizonsID[] ids) {
+		HorizonsResultCollection ret = null;
 		
-		HorizonsID[] values = HorizonsID.values();
+		if(validateInputDate(JD) && op != null && ids != null && ids.length > 0) {
 		
-		for(int i = 0; i < values.length; i++) {
-			String output = (String) tc.query(values[i], HorizonsOptions.CARTESIAN, 2451544.5);
-			System.out.println(values[i].name());
-			System.out.println(output);
+			HttpConnector tc = new HttpConnector();
+
+			ret = new HorizonsResultCollection();
+
+			ret.setJd(JD);
+			ret.setOp(op);
+
+			for(int i = 0; i < ids.length; i++) {
+				HorizonsResult query = tc.query(ids[i], op, JD);
+				if(query == null) {
+					throw new UnsupportedOperationException("Error while getting data from Horizons to assemble ResultCollection");
+				}
+				ret.add(query);
+			}
+		
 		}
 		
+		return ret;
 	}
+	
+	public static void main (String args[]) {
+
+		Double JD = 2451544.5;
+		
+		HorizonsOptions op = HorizonsOptions.ORBITAL_ELEMENTS;
+		
+		HorizonsInterface hi = new HorizonsInterface();
+		
+		HorizonsID[] values = {
+			HorizonsID.MERCURY,
+			HorizonsID.VENUS,
+			HorizonsID.EARTH,
+			HorizonsID.MARS,
+			HorizonsID.JUPITER,
+			HorizonsID.SATURN,
+			HorizonsID.NEPTUNE,
+			HorizonsID.URANUS,
+			HorizonsID.CERES,
+			HorizonsID.VESTA,
+			HorizonsID.PALLAS
+		};
+				
+		HorizonsResultCollection ret = hi.fecthResultCollection(JD, op, values);
+
+		Gson gson = new Gson();
+		String jsonResults = gson.toJson(ret);
+		
+		System.out.println(jsonResults);
+	}
+	
 }
