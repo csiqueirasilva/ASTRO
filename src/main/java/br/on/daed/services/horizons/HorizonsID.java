@@ -19,24 +19,31 @@ public enum HorizonsID {
 	SATURN(699),
 	URANUS(799),
 	NEPTUNE(899),
-	CERES(1),
-	PALLAS(2),
-	VESTA(4),
+	CERES("Ceres"),
+	PALLAS("Pallas"),
+	VESTA("Vesta"),
 	APOPHIS(99942);
 	
 	private final Integer value;
+	private final String stringValue;
+
+	HorizonsID(String val) {
+		this.value = null;
+		this.stringValue = val;
+	};
 	
 	HorizonsID(int val) {
+		this.stringValue = null;
 		this.value = val;
 	};
 	
 	@Override
 	public String toString() {
-		return value.toString();
+		return value == null ? stringValue : value.toString();
 	}
 
-	Integer getValue() {
-		return this.value;
+	Object getValue() {
+		return this.value != null ? this.value : this.stringValue;
 	}
 	
 }

@@ -7,7 +7,6 @@ package br.on.daed.services.horizons;
 
 import br.on.daed.services.horizons.objects.HorizonsResult;
 import br.on.daed.services.horizons.objects.HorizonsResultCollection;
-import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +28,7 @@ public class HorizonsInterface {
 	}
 	
 	public HorizonsResultCollection fecthResultCollection(Double JD, HorizonsOptions op, HorizonsID[] ids) {
-		int[] arrIds = new int[ids.length];
+		Object[] arrIds = new Object[ids.length];
 		String[] arrNames = new String[ids.length];
 		
 		for(int i = 0; i < ids.length; i++) {
@@ -40,7 +39,7 @@ public class HorizonsInterface {
 		return fecthResultCollection(JD, op, arrIds, arrNames);
 	}
 	
-	public HorizonsResultCollection fecthResultCollection(Double JD, HorizonsOptions op, int[] ids, String[] names) {
+	public HorizonsResultCollection fecthResultCollection(Double JD, HorizonsOptions op, Object[] ids, String[] names) {
 		HorizonsResultCollection ret = null;
 		
 		if(validateInputDate(JD) && op != null && ids != null && ids.length > 0 && ids.length == names.length) {
@@ -65,14 +64,14 @@ public class HorizonsInterface {
 	
 	public HorizonsResultCollection getElements(Integer id, String name, Double JD) {
 		String[] arrNames = {name};
-		int[] arrIds = {id};
+		Object[] arrIds = {id};
 		
 		return fecthResultCollection(JD, HorizonsOptions.ORBITAL_ELEMENTS, arrIds, arrNames);
 	}
 	
 	public HorizonsResultCollection getVectors(Integer id, String name, Double JD) {
 		String[] arrNames = {name};
-		int[] arrIds = {id};
+		Object[] arrIds = {id};
 		
 		return fecthResultCollection(JD, HorizonsOptions.CARTESIAN, arrIds, arrNames);
 	}

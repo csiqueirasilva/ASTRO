@@ -11,14 +11,14 @@ package br.on.daed.services.horizons.objects;
  */
 public abstract class HorizonsResult {
 
-	protected Integer id;
+	protected Object id;
 	protected String name;
 
-	public Integer getId() {
+	public Object getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Object id) {
 		this.id = id;
 	}
 

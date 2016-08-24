@@ -37,7 +37,7 @@ public class HttpConnector {
 	private final Pattern HORIZONS_CARTESIAN_DATA_PATTERN = Pattern.compile("((?:[ ]+)[0-9.E+-]+){3}");
 	private final HttpClient client = HttpClientBuilder.create().build();
 
-	public HorizonsResult query(Integer id, String name, HorizonsOptions op, Double jd) {
+	public HorizonsResult query(Object id, String name, HorizonsOptions op, Double jd) {
 
 		HorizonsResult ret = null;
 
