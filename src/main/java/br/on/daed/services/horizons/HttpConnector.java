@@ -32,9 +32,16 @@ import org.springframework.stereotype.Service;
 public class HttpConnector {
 
 	private final String HORIZONS_BATCH_URL = "http://ssd.jpl.nasa.gov/horizons_batch.cgi";
+	
 	private final Pattern HORIZONS_DATA_PATTERN = Pattern.compile("(?:\\$\\$SOE)(?<data>[^$]*)");
 	private final Pattern HORIZONS_ORBITAL_DATA_PATTERN = Pattern.compile("(?:(EC|OM|N |A |QR|W |MA|AD|IN|Tp|TA|PR)=[ ]*)([^ ]*)");
 	private final Pattern HORIZONS_CARTESIAN_DATA_PATTERN = Pattern.compile("((?:[ ]+)[0-9.E+-]+){3}");
+	
+	// optional data
+	private final Pattern HORIZONS_GM_PATTERN = Pattern.compile("(?:^\\s*)?GM(?:\\s*\\,?\\s*\\(?)(?<unit>[0-9^]+)?(?:[a-z^0-9- /]+)?(?:\\)?(?:[a-z^0-9- /]+)?\\s*)?=\\s*(?<GM>\\S+)(?:$|\\s{2,})");
+	private final Pattern HORIZONS_RADIUS_PATTERN = Pattern.compile("(?:^|\\s+)(?:(?:RAD=)|(?:(?:R|r)adius[^=]*=))\\s+(?!km)(?<radius>[0-9.,E^]+)");
+	private final Pattern HORIZONS_MASS_PATTERN = Pattern.compile("(?:^|\\s+)(?:Mass[^(]*\\(?)(?<unit>[0-9^]+)?(?:[^=~]*(?:=|~)\\s*)(?<mass>[0-9.,E]+)");
+	
 	private final HttpClient client = HttpClientBuilder.create().build();
 
 	public HorizonsResult query(Object id, String name, HorizonsOptions op, Double jd) {
