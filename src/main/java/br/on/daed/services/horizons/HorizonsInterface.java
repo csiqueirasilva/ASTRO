@@ -20,12 +20,23 @@ public class HorizonsInterface {
 	private static final double MIN_JD = 2444240.0;
 	private static final double MAX_JD = 2480765.0;
 	
+	private static final double KM_SEC_TO_AU_DAY = 448485856027460.06;
+	private static final double AU_KM = 149597870.700;
+	
 	@Autowired
 	private HttpConnector tc;
 	
 	public static boolean validateInputDate(Double date) {
 		return date != null && date >= MIN_JD && date <= MAX_JD;
 	}
+	
+	public static double kmSecToAUDay(double input) {
+		return input / KM_SEC_TO_AU_DAY;
+	}
+	
+	public static double kmToAU (double input) {
+		return input / AU_KM;
+	} 
 	
 	public HorizonsResultCollection fecthResultCollection(Double JD, HorizonsOptions op, HorizonsID[] ids) {
 		Object[] arrIds = new Object[ids.length];
