@@ -32,16 +32,16 @@ import org.springframework.stereotype.Service;
 public class HttpConnector {
 
 	private final String HORIZONS_BATCH_URL = "http://ssd.jpl.nasa.gov/horizons_batch.cgi";
-	
+
 	private final Pattern HORIZONS_DATA_PATTERN = Pattern.compile("(?:\\$\\$SOE)(?<data>[^$]*)");
 	private final Pattern HORIZONS_ORBITAL_DATA_PATTERN = Pattern.compile("(?:(EC|OM|N |A |QR|W |MA|AD|IN|Tp|TA|PR)=[ ]*)([^ ]*)");
 	private final Pattern HORIZONS_CARTESIAN_DATA_PATTERN = Pattern.compile("((?:[ ]+)[0-9.E+-]+){3}");
-	
+
 	// optional data
 	private final Pattern HORIZONS_GM_PATTERN = Pattern.compile("(?:^\\s*)?GM(?:\\s*\\,?\\s*\\(?)(?<unit>[0-9^]+)?(?:[a-z^0-9- /]+)?(?:\\)?(?:[a-z^0-9- /]+)?\\s*)?=\\s*(?<GM>\\S+)(?:$|\\s{2,})");
 	private final Pattern HORIZONS_RADIUS_PATTERN = Pattern.compile("(?:^|\\s+)(?:(?:RAD=)|(?:(?:R|r)adius[^=]*=))\\s+(?!km)(?<radius>[0-9.,E^]+)");
 	private final Pattern HORIZONS_MASS_PATTERN = Pattern.compile("(?:^|\\s+)(?:Mass[^(]*\\(?)(?<unit>[0-9^]+)?(?:[^=~]*(?:=|~)\\s*)(?<mass>[0-9.,E]+)");
-	
+
 	private final HttpClient client = HttpClientBuilder.create().build();
 
 	public HorizonsResult query(Object id, String name, HorizonsOptions op, Double jd) {
@@ -78,7 +78,7 @@ public class HttpConnector {
 
 				StringBuffer result = new StringBuffer();
 				String line = "";
-				
+
 				while ((line = rd.readLine()) != null) {
 					result.append(line);
 				}
@@ -89,10 +89,12 @@ public class HttpConnector {
 					String data = m.group("data");
 
 					ret = parseResults(data, op);
-					
-					if(ret != null) {
+
+					if (ret != null) {
 						ret.setId(id);
 						ret.setName(name);
+
+						matchOptionalParameters(result, ret);
 					}
 				}
 
@@ -103,9 +105,9 @@ public class HttpConnector {
 
 		return ret;
 	}
-	
-	private HorizonsResult parseResults (String data, HorizonsOptions op) {
-		
+
+	private HorizonsResult parseResults(String data, HorizonsOptions op) {
+
 		HorizonsResult ret;
 
 		if (op == HorizonsOptions.ORBITAL_ELEMENTS) {
@@ -113,7 +115,7 @@ public class HttpConnector {
 		} else /* vector, cartesian */ {
 			ret = new CartesianCoordinates(parseCartesian(data));
 		}
-		
+
 		return ret;
 	}
 
@@ -139,13 +141,13 @@ public class HttpConnector {
 		Matcher m = HORIZONS_CARTESIAN_DATA_PATTERN.matcher(raw);
 
 		if (m.find()) {
-			
+
 			String[] split = m.group(0).split("[ ]+");
-			
+
 			ret.add(split[1]);
 			ret.add(split[2]);
 			ret.add(split[3]);
-			
+
 			if (m.find()) {
 				split = m.group(0).split("[ ]+");
 				ret.add(split[1]);
@@ -154,12 +156,91 @@ public class HttpConnector {
 			} else {
 				ret = null;
 			}
-			
+
 		} else {
 			ret = null;
 		}
 
 		return ret;
 	}
+
+	private boolean findOptionalGM(StringBuffer result, HorizonsResult ret) {
+		boolean flag = false;
+		Matcher m = HORIZONS_GM_PATTERN.matcher(result);
+
+		// found mass
+		if (m.find()) {
+			String unit = m.group("unit");
+			if (unit != null) {
+				unit = unit.replace("^", "E");
+			} else {
+				unit = "";
+			}
+
+			String numbers = m.group("gm");
+
+			try {
+				numbers = numbers.replace(",", "");
+				double gm = Double.parseDouble(numbers + unit); // in km^3/sec^2
+				double finalMass = HorizonsInterface.gmToMass(gm);
+				ret.setMass(finalMass);
+				flag = true;
+			} catch (Exception e) {
+			}
+		}
+		
+		return flag;
+	}
 	
+	private void findOptionalMass(StringBuffer result, HorizonsResult ret) {
+		Matcher m = HORIZONS_MASS_PATTERN.matcher(result);
+
+		// found mass
+		if (m.find()) {
+			String unit = m.group("unit");
+			if (unit != null) {
+				unit = unit.replace("^", "E");
+			} else {
+				unit = "";
+			}
+
+			String numbers = m.group("mass");
+
+			try {
+				numbers = numbers.replace(",", "");
+				double massKG = Double.parseDouble(numbers + unit); // in KG
+				double finalMass = HorizonsInterface.kgToSunMass(massKG);
+				ret.setMass(finalMass);
+			} catch (Exception e) {
+			}
+
+		}
+	}
+
+	private void findOptionalRadius(StringBuffer result, HorizonsResult ret) {
+		Matcher m = HORIZONS_RADIUS_PATTERN.matcher(result);
+
+		// found radius
+		if (m.find()) {
+			String numbers = m.group("radius"); // in km
+
+			try {
+				numbers = numbers.replace(",", "");
+				double radiusKM = Double.parseDouble(numbers); // in KM
+				double finalRadius = HorizonsInterface.kmToAU(radiusKM);
+				ret.setRadius(finalRadius);
+			} catch (Exception e) {
+			}
+
+		}
+	}
+	
+	private void matchOptionalParameters(StringBuffer result, HorizonsResult ret) {
+		boolean foundMass = findOptionalGM(result, ret);
+		if(!foundMass) {
+			findOptionalMass(result, ret);
+		}
+		findOptionalRadius(result, ret);
+	}
+
 }

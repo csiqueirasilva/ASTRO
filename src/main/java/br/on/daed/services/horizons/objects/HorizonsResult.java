@@ -14,7 +14,6 @@ public abstract class HorizonsResult {
 	protected Object id;
 	protected String name;
 	protected Double mass;
-	protected Double gm;
 	protected Double radius;
 	
 	public Object getId() {
@@ -39,14 +38,6 @@ public abstract class HorizonsResult {
 
 	public void setMass(Double mass) {
 		this.mass = mass;
-	}
-
-	public Double getGm() {
-		return gm;
-	}
-
-	public void setGm(Double gm) {
-		this.gm = gm;
 	}
 
 	public Double getRadius() {

@@ -22,12 +22,19 @@ public class HorizonsInterface {
 	
 	private static final double KM_SEC_TO_AU_DAY = 448485856027460.06;
 	private static final double AU_KM = 149597870.700;
+	private static final double SUN_MASS_KG = 1.989E30;
+	
+	private static final double G = 2.9591293263082414E-04;
 	
 	@Autowired
 	private HttpConnector tc;
 	
 	public static boolean validateInputDate(Double date) {
 		return date != null && date >= MIN_JD && date <= MAX_JD;
+	}
+	
+	public static double kgToSunMass(double input) {
+		return input / SUN_MASS_KG;
 	}
 	
 	public static double kmSecToAUDay(double input) {
@@ -37,6 +44,10 @@ public class HorizonsInterface {
 	public static double kmToAU (double input) {
 		return input / AU_KM;
 	} 
+	
+	public static double gmToMass (double GM) {
+		return kmSecToAUDay(GM) / G;
+	}
 	
 	public HorizonsResultCollection fecthResultCollection(Double JD, HorizonsOptions op, HorizonsID[] ids) {
 		Object[] arrIds = new Object[ids.length];
