@@ -31,7 +31,7 @@ public class HorizonsController {
 	}
 
 	@RequestMapping("/elements")
-	public HorizonsResultCollection getElements(@RequestParam Integer id, @RequestParam Double jd) {
+	public HorizonsResultCollection getElements(@RequestParam Object id, @RequestParam Double jd) {
 		HorizonsResultCollection ret = null;
 		try {
 			ret = horizonsInterface.getElements(id, null, jd);
@@ -41,7 +41,7 @@ public class HorizonsController {
 	}
 
 	@RequestMapping("/vectors")
-	public HorizonsResultCollection getVectors(@RequestParam Integer id, @RequestParam Double jd) {
+	public HorizonsResultCollection getVectors(@RequestParam Object id, @RequestParam Double jd) {
 		HorizonsResultCollection ret = null;
 		try {
 			ret = horizonsInterface.getVectors(id, null, jd);

@@ -84,14 +84,14 @@ public class HorizonsInterface {
 		return ret;
 	}
 	
-	public HorizonsResultCollection getElements(Integer id, String name, Double JD) {
+	public HorizonsResultCollection getElements(Object id, String name, Double JD) {
 		String[] arrNames = {name};
 		Object[] arrIds = {id};
 		
 		return fecthResultCollection(JD, HorizonsOptions.ORBITAL_ELEMENTS, arrIds, arrNames);
 	}
 	
-	public HorizonsResultCollection getVectors(Integer id, String name, Double JD) {
+	public HorizonsResultCollection getVectors(Object id, String name, Double JD) {
 		String[] arrNames = {name};
 		Object[] arrIds = {id};
 		

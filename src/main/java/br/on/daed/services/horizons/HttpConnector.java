@@ -38,7 +38,7 @@ public class HttpConnector {
 	private final Pattern HORIZONS_CARTESIAN_DATA_PATTERN = Pattern.compile("((?:[ ]+)[0-9.E+-]+){3}");
 
 	// optional data
-	private final Pattern HORIZONS_GM_PATTERN = Pattern.compile("(?:^\\s*)?GM(?:\\s*\\,?\\s*\\(?)(?<unit>[0-9^]+)?(?:[a-z^0-9- /]+)?(?:\\)?(?:[a-z^0-9- /]+)?\\s*)?=\\s*(?<GM>\\S+)(?:$|\\s{2,})");
+	private final Pattern HORIZONS_GM_PATTERN = Pattern.compile("(?:^\\s*)?GM(?:\\s*\\,?\\s*\\(?)(?<unit>[0-9^]+)?(?:[a-z^0-9- /]+)?(?:\\)?(?:[a-z^0-9- /]+)?\\s*)?=\\s*(?<gm>\\S+)(?:$|\\s{2,})");
 	private final Pattern HORIZONS_RADIUS_PATTERN = Pattern.compile("(?:^|\\s+)(?:(?:RAD=)|(?:(?:R|r)adius[^=]*=))\\s+(?!km)(?<radius>[0-9.,E^]+)");
 	private final Pattern HORIZONS_MASS_PATTERN = Pattern.compile("(?:^|\\s+)(?:Mass[^(]*\\(?)(?<unit>[0-9^]+)?(?:[^=~]*(?:=|~)\\s*)(?<mass>[0-9.,E]+)");
 
@@ -177,9 +177,8 @@ public class HttpConnector {
 				unit = "";
 			}
 
-			String numbers = m.group("gm");
-
 			try {
+				String numbers = m.group("gm");
 				numbers = numbers.replace(",", "");
 				double gm = Double.parseDouble(numbers + unit); // in km^3/sec^2
 				double finalMass = HorizonsInterface.gmToMass(gm);
@@ -204,9 +203,8 @@ public class HttpConnector {
 				unit = "";
 			}
 
-			String numbers = m.group("mass");
-
 			try {
+				String numbers = m.group("mass");
 				numbers = numbers.replace(",", "");
 				double massKG = Double.parseDouble(numbers + unit); // in KG
 				double finalMass = HorizonsInterface.kgToSunMass(massKG);
@@ -222,9 +220,8 @@ public class HttpConnector {
 
 		// found radius
 		if (m.find()) {
-			String numbers = m.group("radius"); // in km
-
 			try {
+				String numbers = m.group("radius"); // in km
 				numbers = numbers.replace(",", "");
 				double radiusKM = Double.parseDouble(numbers); // in KM
 				double finalRadius = HorizonsInterface.kmToAU(radiusKM);
