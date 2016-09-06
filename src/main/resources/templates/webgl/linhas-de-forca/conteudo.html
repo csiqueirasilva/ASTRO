@@ -245,7 +245,7 @@
             });
 
             buscaCidadeInput.typeahead({source: cidades,
-                autoSelect: true});
+                autoSelect: true, items: 100});
 
             function labelCidade(nome) {
                 $('#label-cidade').html(nome);
