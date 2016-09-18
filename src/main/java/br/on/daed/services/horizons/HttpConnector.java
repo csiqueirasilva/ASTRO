@@ -61,7 +61,7 @@ public class HttpConnector {
 				urlParameters.add(new BasicNameValuePair("batch", "1"));
 				urlParameters.add(new BasicNameValuePair("COMMAND", id.toString()));
 				urlParameters.add(new BasicNameValuePair("MAKE_EPHEM", "YES"));
-				urlParameters.add(new BasicNameValuePair("CENTER", "500@10")); // SUN, HELIOCENTRIC COORDS
+				urlParameters.add(new BasicNameValuePair("CENTER", "500@0")); // SOLAR SYSTEM BARYCENTER, SSB
 				urlParameters.add(new BasicNameValuePair("TABLE_TYPE", op.toString()));
 				urlParameters.add(new BasicNameValuePair("REF_PLANE", "ECLIPTIC"));
 				urlParameters.add(new BasicNameValuePair("START_TIME", "JD" + jd));
