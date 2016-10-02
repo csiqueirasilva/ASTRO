@@ -1,3 +1,6 @@
 [submodule "src/main/resources/static/lib/on-daed-js"]
 	path = src/main/resources/static/lib/on-daed-js
 	url = https://csiqueirasilva@github.com/csiqueirasilva/on-daed-js
+[submodule "src/main/resources/static/lib/on-physics"]
+	path = src/main/resources/static/lib/on-physics
+	url = https://csiqueirasilva@github.com/csiqueirasilva/on-physics

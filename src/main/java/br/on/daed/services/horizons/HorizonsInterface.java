@@ -49,7 +49,7 @@ public class HorizonsInterface {
 		return kmSecToAUDay(GM) / G;
 	}
 	
-	public HorizonsResultCollection fecthResultCollection(Double JD, HorizonsOptions op, HorizonsID[] ids) {
+	public HorizonsResultCollection fecthResultCollection(Double JD, HorizonsCenter center, HorizonsOptions op, HorizonsID[] ids) {
 		Object[] arrIds = new Object[ids.length];
 		String[] arrNames = new String[ids.length];
 		
@@ -58,10 +58,10 @@ public class HorizonsInterface {
 			arrNames[i] = ids[i].name();
 		}
 		
-		return fecthResultCollection(JD, op, arrIds, arrNames);
+		return fecthResultCollection(JD, center, op, arrIds, arrNames);
 	}
 	
-	public HorizonsResultCollection fecthResultCollection(Double JD, HorizonsOptions op, Object[] ids, String[] names) {
+	public HorizonsResultCollection fecthResultCollection(Double JD, HorizonsCenter center, HorizonsOptions op, Object[] ids, String[] names) {
 		HorizonsResultCollection ret = null;
 		
 		if(validateInputDate(JD) && op != null && ids != null && ids.length > 0 && ids.length == names.length) {
@@ -72,7 +72,7 @@ public class HorizonsInterface {
 			ret.setOp(op);
 
 			for(int i = 0; i < ids.length; i++) {
-				HorizonsResult query = tc.query(ids[i], names[i], op, JD);
+				HorizonsResult query = tc.query(ids[i], names[i], center, op, JD);
 				if(query == null) {
 					throw new UnsupportedOperationException("Error while getting data from Horizons to assemble ResultCollection");
 				}
@@ -88,14 +88,14 @@ public class HorizonsInterface {
 		String[] arrNames = {name};
 		Object[] arrIds = {id};
 		
-		return fecthResultCollection(JD, HorizonsOptions.ORBITAL_ELEMENTS, arrIds, arrNames);
+		return fecthResultCollection(JD, HorizonsCenter.SSB, HorizonsOptions.ORBITAL_ELEMENTS, arrIds, arrNames);
 	}
 	
 	public HorizonsResultCollection getVectors(Object id, String name, Double JD) {
 		String[] arrNames = {name};
 		Object[] arrIds = {id};
 		
-		return fecthResultCollection(JD, HorizonsOptions.CARTESIAN, arrIds, arrNames);
+		return fecthResultCollection(JD, HorizonsCenter.SSB, HorizonsOptions.CARTESIAN, arrIds, arrNames);
 	}
 	
 	public HorizonsResultCollection getStandardDynamicalModel (Double JD) {
@@ -118,7 +118,24 @@ public class HorizonsInterface {
 			HorizonsID.PALLAS
 		};
 
-		HorizonsResultCollection ret = this.fecthResultCollection(JD, op, values);
+		HorizonsResultCollection ret = this.fecthResultCollection(JD, HorizonsCenter.SSB, op, values);
+
+		return ret;
+	}
+	
+	public HorizonsResultCollection getJupiterModel (Double JD) {
+		
+		HorizonsOptions op = HorizonsOptions.ORBITAL_ELEMENTS;
+		
+		HorizonsID[] values = {
+			HorizonsID.SUN,
+			HorizonsID.IO,
+			HorizonsID.EUROPA,
+			HorizonsID.GANYMEDE,
+			HorizonsID.CALLISTO
+		};
+
+		HorizonsResultCollection ret = this.fecthResultCollection(JD, HorizonsCenter.JUPITER, op, values);
 
 		return ret;
 	}

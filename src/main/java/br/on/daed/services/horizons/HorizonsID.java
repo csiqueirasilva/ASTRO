@@ -22,7 +22,12 @@ public enum HorizonsID {
 	CERES("Ceres"),
 	PALLAS("Pallas"),
 	VESTA("Vesta"),
-	APOPHIS(99942);
+	APOPHIS(99942),
+	IO(501),
+	EUROPA(502),
+	GANYMEDE(503),
+	CALLISTO(504),
+	SUN(10);
 	
 	private final Integer value;
 	private final String stringValue;

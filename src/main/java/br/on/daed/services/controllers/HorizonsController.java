@@ -20,6 +20,16 @@ public class HorizonsController {
 	@Autowired
 	private HorizonsInterface horizonsInterface;
 
+	@RequestMapping("/jupiter-satellites-model")
+	public HorizonsResultCollection getJupiterSatellitesModel(@RequestParam Double jd) {
+		HorizonsResultCollection ret = null;
+		try {
+			ret = horizonsInterface.getJupiterModel(jd);
+		} catch (UnsupportedOperationException e) {
+		}
+		return ret;
+	}
+	
 	@RequestMapping("/sdm")
 	public HorizonsResultCollection getStandardDynamicalModel(@RequestParam Double jd) {
 		HorizonsResultCollection ret = null;

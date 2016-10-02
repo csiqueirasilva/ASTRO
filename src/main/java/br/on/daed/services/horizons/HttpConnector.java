@@ -44,7 +44,7 @@ public class HttpConnector {
 
 	private final HttpClient client = HttpClientBuilder.create().build();
 
-	public HorizonsResult query(Object id, String name, HorizonsOptions op, Double jd) {
+	public HorizonsResult query(Object id, String name, HorizonsCenter center, HorizonsOptions op, Double jd) {
 
 		HorizonsResult ret = null;
 
@@ -61,7 +61,7 @@ public class HttpConnector {
 				urlParameters.add(new BasicNameValuePair("batch", "1"));
 				urlParameters.add(new BasicNameValuePair("COMMAND", id.toString()));
 				urlParameters.add(new BasicNameValuePair("MAKE_EPHEM", "YES"));
-				urlParameters.add(new BasicNameValuePair("CENTER", "500@0")); // SOLAR SYSTEM BARYCENTER, SSB
+				urlParameters.add(new BasicNameValuePair("CENTER", center.toString()));
 				urlParameters.add(new BasicNameValuePair("TABLE_TYPE", op.toString()));
 				urlParameters.add(new BasicNameValuePair("REF_PLANE", "ECLIPTIC"));
 				urlParameters.add(new BasicNameValuePair("START_TIME", "JD" + jd));
