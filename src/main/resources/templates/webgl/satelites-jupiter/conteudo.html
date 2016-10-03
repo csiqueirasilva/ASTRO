@@ -157,7 +157,7 @@
 
 <div id="parent-slider-data" class="parent-bs-slider noselect">
     <div class="titulo-slider">Data</div>
-    <input class="bs-slider" data-slider-tooltip="hide" id="slider-data" data-slider-id='slider-data' type="text" data-slider-min="0" data-slider-max="365.25" data-slider-step="0.01" data-slider-value="0" />
+    <input class="bs-slider" data-slider-tooltip="hide" id="slider-data" data-slider-id='slider-data' type="text" data-slider-min="0" data-slider-max="36525" data-slider-step="1" data-slider-value="0" />
     <span class="label-slider"></span>
 </div>
 
@@ -354,7 +354,7 @@
             $('.campo-de-observacao').bind('mouseup', clearTextSelection);
 
             $('#slider-data').data('cb', function (value) {
-                posicaoJupiter.traceLines(value);
+                posicaoJupiter.traceLines(value / 100);
             });
 
             $('#velocidade-translacao-terra').data('cb', function (value) {
@@ -388,9 +388,8 @@
             var posicaoJupiter;
             var control;
 
-            function posicaoInicialCamera() {
-                control.object.position.set(0, 0, 20);
-                control.object.lookAt(new THREE.Vector3(0, 0, 0));
+            function posicaoInicialCamera() {				
+				posicaoJupiter.setCameraPosition(control.object, new THREE.Vector3(-4.171985103936415E+00, 1.018191608902774E-01, -1.966569926403000E+00));
             }
 
             ON_DAED["3D"].create(function (scene, camera) {
