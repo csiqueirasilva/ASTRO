@@ -155,9 +155,9 @@
     </div>
 </div>
 
-<div style="display: none;" id="parent-slider-intensidade-vento" class="parent-bs-slider noselect">
-    <div class="titulo-slider">Intensidade do Vento Solar</div>
-    <input class="bs-slider" data-slider-tooltip="hide" id="slider-intensidade-vento" data-slider-id='slider-intensidade-vento' type="text" data-slider-min="0" data-slider-max="10000" data-slider-step="1" data-slider-value="140" />
+<div id="parent-slider-data" class="parent-bs-slider noselect">
+    <div class="titulo-slider">Data</div>
+    <input class="bs-slider" data-slider-tooltip="hide" id="slider-data" data-slider-id='slider-data' type="text" data-slider-min="0" data-slider-max="365.25" data-slider-step="0.01" data-slider-value="0" />
     <span class="label-slider"></span>
 </div>
 
@@ -353,8 +353,8 @@
 
             $('.campo-de-observacao').bind('mouseup', clearTextSelection);
 
-            $('#slider-intensidade-vento').data('cb', function (value) {
-                //intensidadeVento = value / 10000;
+            $('#slider-data').data('cb', function (value) {
+                posicaoJupiter.traceLines(value);
             });
 
             $('#velocidade-translacao-terra').data('cb', function (value) {
