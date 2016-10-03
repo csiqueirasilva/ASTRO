@@ -125,10 +125,11 @@ public class HorizonsInterface {
 	
 	public HorizonsResultCollection getJupiterModel (Double JD) {
 		
-		HorizonsOptions op = HorizonsOptions.ORBITAL_ELEMENTS;
+		HorizonsOptions op = HorizonsOptions.CARTESIAN;
 		
 		HorizonsID[] values = {
 			HorizonsID.SUN,
+			HorizonsID.EARTH,
 			HorizonsID.IO,
 			HorizonsID.EUROPA,
 			HorizonsID.GANYMEDE,

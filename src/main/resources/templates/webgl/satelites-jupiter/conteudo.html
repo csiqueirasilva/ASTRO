@@ -1,0 +1,435 @@
+<link href="css/bootstrap-slider.css" rel="stylesheet" />
+<script src='js/bootstrap-slider.js'>
+</script>
+
+<script src='lib/on-physics/src/core/PhysWrapperTrace.js'>
+</script>
+
+<script src='lib/on-daed-js/3D/JupiterSatelites.js'>
+</script>
+
+<div id="campo-de-observacao" class="row-fluid">
+</div>
+
+<button type="button" id="btn-info-local" class="btn btn-primary btn-lg ui-observacao-horizontal" data-toggle="modal" data-target="#info-local">
+    Configurar Data e Local
+</button>
+
+<div class="modal fade ui-observacao-horizontal" id="cidade-form" tabindex="-1" role="dialog" aria-labelledby="Localizar Cidade" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Localizar Cidade</h4>
+            </div>
+
+            <div class="modal-body">
+                <label id="busca-cidade-feedback"></label>
+                <input type="text" data-provide="typeahead" autocomplete="off" class="form-control" id="busca-cidade-input"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade ui-observacao-horizontal" id="info-local" tabindex="-1" role="dialog" aria-labelledby="Informações de Data e Local" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Data e Local</h4>
+            </div>
+
+            <div class="modal-body">
+
+                <button type="button" id="btn-cidade-form" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#cidade-form">
+                    Escolher Local
+                </button>
+
+                <div id="label-cidade-form" style="display: none;">OBSERVATORIO NACIONAL</div>
+
+                <div class='igrf-divisao'>
+                    <h4>Data (2016 até 2020) <span title="Referência: J2000" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></h4>
+
+                    <input readonly="readonly" class="form-control input-centralizado jlink dataju-datepicker" name="data-gregoriana-de-local" size="16" type="text" id="dataju-datepicker-de-local" value="12/02/2012" />
+                </div>
+
+                <div class='igrf-divisao'>
+
+                    <div class="celula-angulo">
+                        <div id="igrf-latitude">
+                        </div>
+
+                        <div class="row-fluid">
+                            <div class="col-md-12">
+                                <label>Latitude</label>
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <button id="igrf-latitude-sinal" class="btn btn-info" type="button">+</button>
+                                    </span>
+                                    <input value="0" id="igrf-latitude-hora" class="form-control input-centralizado jlink input-small input-numerico" min="0" type="number" />
+                                    <span class="input-group-addon">º</span>
+                                    <input value="0" id="igrf-latitude-min" class="form-control input-centralizado jlink input-small input-numerico" min="0" max="59" type="number" />
+                                    <span class="input-group-addon">'</span>
+                                    <input value="0" id="igrf-latitude-sec" class="form-control input-centralizado jlink input-small input-numerico" min="0" max="59" type="number" />
+                                    <span class="input-group-addon">"</span>
+                                    <input name="latitude" type="hidden" class="data-source-coordenada" id="igrf-latitude-hidden" value="0" min="-90" max="90" />
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="celula-angulo">
+                        <div id="igrf-longitude">
+                        </div>
+
+                        <div class="row-fluid">
+                            <div class="col-md-12">
+                                <label>Longitude</label>
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <button id="igrf-longitude-sinal" class="btn btn-info" type="button">+</button>
+                                    </span>
+                                    <input value="0" id="igrf-longitude-hora" class="form-control input-centralizado jlink input-small input-numerico" min="0" type="number" />
+                                    <span class="input-group-addon">º</span>
+                                    <input value="0" id="igrf-longitude-min" class="form-control input-centralizado jlink input-small input-numerico" min="0" max="59" type="number" />
+                                    <span class="input-group-addon">'</span>
+                                    <input value="0" id="igrf-longitude-sec" class="form-control input-centralizado jlink input-small input-numerico" min="0" max="59" type="number" />
+                                    <span class="input-group-addon">"</span>
+                                    <input name="longitude" type="hidden" class="data-source-coordenada" id="igrf-longitude-hidden" value="0" min="-180" max="180" />
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id='igrf-wrap-resultados' style='display: none;'>
+
+                    <h4>Resultados</h4>
+
+                    <div id='igrf-resultados'>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade ui-observacao-horizontal" id="info-magnetica" tabindex="-1" role="dialog" aria-labelledby="Informações Magnéticas" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Cartas Magnéticas do Brasil</h4>
+            </div>
+
+            <div class="modal-body">
+
+                <div class='igrf-divisao'>
+                    <h4>Data (1900 até 2020) <span title="A cada 5 anos os dados são atualizados" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></h4>
+
+                    <input readonly="readonly" class="form-control input-centralizado jlink dataju-datepicker" name="data-gregoriana-de" size="16" type="text" id="dataju-datepicker-de" value="12/02/2012" />
+                </div>
+
+                <div class='igrf-divisao'>
+
+                    <h4>Tipo</h4>
+
+                    <select id='info-magnetica-tipo' name='tipo' class='form-control'>
+                        <option value='1'>Declinação</option>
+                        <option value='2'>Inclinação</option>
+                        <option value='3'>Intensidade</option>
+                    </select>
+                </div>
+
+                <div class='igrf-divisao'>
+                    <a id="btn-gerar-pdf" target="_blank" class="btn btn-primary">
+                        Gerar Arquivo de Carta para o Brasil
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="display: none;" id="parent-slider-intensidade-vento" class="parent-bs-slider noselect">
+    <div class="titulo-slider">Intensidade do Vento Solar</div>
+    <input class="bs-slider" data-slider-tooltip="hide" id="slider-intensidade-vento" data-slider-id='slider-intensidade-vento' type="text" data-slider-min="0" data-slider-max="10000" data-slider-step="1" data-slider-value="140" />
+    <span class="label-slider"></span>
+</div>
+
+<div style="display: none;" id="parent-velocidade-translacao-terra" class="parent-bs-slider noselect">
+    <div class="titulo-slider">Velocidade de Translação da Terra</div>
+    <input class="bs-slider" data-slider-tooltip="hide" id="velocidade-translacao-terra" data-slider-id='velocidade-translacao-terra' type="text" data-slider-min="0" data-slider-max="1000" data-slider-step="1" data-slider-value="250" />
+    <span class="label-slider"></span>
+</div>
+
+<div style="display: none;" id="parent-velocidade-rotacao-terra" class="parent-bs-slider noselect">
+    <div class="titulo-slider">Velocidade de Rotação da Terra</div>
+    <input class="bs-slider" data-slider-tooltip="hide" id="velocidade-rotacao-terra" data-slider-id='velocidade-rotacao-terra' type="text" data-slider-min="0" data-slider-max="2000" data-slider-step="1" data-slider-value="200" />
+    <span class="label-slider"></span>
+</div>
+
+<div style="display: none;" id="parent-foco-terra">
+    <i id="foco-terra" class="glyphicon glyphicon-eye-open terra-ligado jlink"></i>
+</div>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    (function () {
+
+        $.getJSON('lib/on-daed-js/CID-ALL.json', function (data) {
+
+            $('#cidade-form').on('show.bs.modal', function () {
+                $('#busca-cidade-input').val('');
+                $('#info-magnetica-local').modal('hide');
+                $('#busca-cidade-feedback').html("Digite a cidade");
+            });
+
+            $('#cidade-form').on('hidden.bs.modal', function () {
+                $('#info-magnetica-local').modal('show');
+            });
+
+            var cidades = [];
+
+            for (var i in data) {
+                var estado = data[i];
+                for (var j = 0; j < estado.length; j++) {
+                    cidades.push({
+                        name: i + ' - ' + data[i][j].c,
+                        l: parseFloat(data[i][j].l),
+                        b: parseFloat(data[i][j].b)
+                    });
+                }
+            }
+
+            var buscaCidadeInput = $('#busca-cidade-input');
+
+            buscaCidadeInput.on('keyup', function () {
+                window.setTimeout(function () {
+                    if ($('ul.typeahead li:visible').length === 0 && buscaCidadeInput.val()) {
+                        $('#busca-cidade-feedback').html("Nenhuma cidade foi localizada");
+                    } else if (!buscaCidadeInput.val()) {
+                        $('#busca-cidade-feedback').html("Digite a cidade");
+                    } else if ($('ul.typeahead li:visible').length !== 0) {
+                        $('#busca-cidade-feedback').html("Escolha a cidade");
+                    } else {
+                        $('#busca-cidade-feedback').empty();
+                    }
+                }, 10);
+            });
+
+            buscaCidadeInput.typeahead({source: cidades,
+                autoSelect: true, items: 100});
+
+            function labelCidade(nome) {
+                $('#label-cidade').html(nome);
+                $('#label-cidade-form').html(nome);
+                $('#label-cidade-form').show();
+            }
+
+            buscaCidadeInput.change(function () {
+                var current = buscaCidadeInput.typeahead("getActive");
+                if (current) {
+                    // Some item from your model is active!
+                    if (current.name === buscaCidadeInput.val().toUpperCase()) {
+                        $('#igrf-longitude').anglepicker('value', current.l, true);
+                        $('#igrf-latitude').anglepicker('value', current.b * 2, true);
+                        labelCidade(current.name);
+                        $('#cidade-form').modal('hide');
+                    } else {
+                    }
+                } else {
+                    // new value
+                }
+            });
+
+            ON_DAED.numberInputMinMax('.input-numerico');
+
+            ON_DAED.addTempoSideralAnglepicker($('#igrf-latitude'), '#igrf-latitude');
+            ON_DAED.addTempoSideralAnglepicker($('#igrf-longitude'), '#igrf-longitude');
+
+            var date = new Date();
+
+            $('#dataju-datepicker-de')
+                    .val(date.getUTCDate() + '/' + (date.getUTCMonth() < 9 ? '0' + (date.getUTCMonth() + 1) : date.getUTCMonth() + 1) + '/' + date.getUTCFullYear())
+                    .datepicker({
+                        orientation: "top",
+                        format: 'dd/mm/yyyy',
+                        language: 'pt-BR',
+                        autoclose: true,
+                        startDate: "01/01/2016",
+                        endDate: "31/12/2020"
+                    }).on('changeDate',
+                    function (ev) {
+                        setUrlPDF();
+                    });
+
+            $('#dataju-datepicker-de-local')
+                    .val(date.getUTCDate() + '/' + (date.getUTCMonth() < 9 ? '0' + (date.getUTCMonth() + 1) : date.getUTCMonth() + 1) + '/' + date.getUTCFullYear())
+                    .datepicker({
+                        orientation: "top",
+                        format: 'dd/mm/yyyy',
+                        language: 'pt-BR',
+                        autoclose: true,
+                        startDate: "01/01/1900",
+                        endDate: "31/12/2020"
+                    }).on('changeDate',
+                    function (ev) {
+                        
+                    });
+
+            $('#igrf-latitude-hidden').change(function () {
+                $('#label-cidade-form').hide();
+            });
+
+            $('#igrf-longitude-hidden').change(function () {
+                $('#label-cidade-form').hide();
+            });
+
+            function getHiddenDate(id) {
+
+                id = id || '#dataju-datepicker-de';
+
+                var split = $(id).val().split("/");
+
+                var dt = new Date(split[2], split[1] - 1, split[0], 0, 0, 0, 0, 0);
+
+                var ano = parseInt(split[2]) + (ON_DAED.diaDoAno(dt) / 365.25);
+
+                return ano;
+            }
+
+            function setUrlPDF() {
+                var ano = getHiddenDate();
+                var tipo = $('#info-magnetica-tipo').val();
+                $('#btn-gerar-pdf').attr('href', "pdf/dados-magneticos.pdf?ano=" + ano + "&tipo=" + tipo);
+            }
+
+            $('#info-magnetica-tipo').change(function () {
+                setUrlPDF();
+            });
+
+            setUrlPDF();
+
+            $('#info-magnetica-local').on('shown.modal.bs', function () {
+
+            });
+
+            /* SRC: http://stackoverflow.com/questions/3169786/clear-text-selection-with-javascript */
+            function clearTextSelection() {
+                if (window.getSelection) {
+                    if (window.getSelection().empty) {  // Chrome
+                        window.getSelection().empty();
+                    } else if (window.getSelection().removeAllRanges) {  // Firefox
+                        window.getSelection().removeAllRanges();
+                    }
+                } else if (document.selection) {  // IE?
+                    document.selection.empty();
+                }
+            }
+
+            $('.bs-slider').bootstrapSlider();
+
+            function sliderBtn(slideEvt) {
+                var value = parseInt(slideEvt.value);
+                if (isNaN(value)) {
+                    value = parseInt($(this).attr('data-slider-value'));
+                }
+
+                var cb = $('#' + this.id).data('cb');
+                cb(value);
+                $('#' + this.id).siblings('.label-slider').html(value);
+                clearTextSelection();
+            }
+
+            $('.bs-slider').on('slideStop', sliderBtn);
+            $('.bs-slider').on('slide', sliderBtn);
+
+            $('.parent-bs-slider').bind('mouseup', clearTextSelection);
+
+            $('.campo-de-observacao').bind('mouseup', clearTextSelection);
+
+            $('#slider-intensidade-vento').data('cb', function (value) {
+                //intensidadeVento = value / 10000;
+            });
+
+            $('#velocidade-translacao-terra').data('cb', function (value) {
+                //observacaoSistemaSolar.setVelocidadeRotacao(value / 10000);
+            });
+
+            $('#velocidade-rotacao-terra').data('cb', function (value) {
+                //linhasDeForca.setVelocidadeRotacao(value / 10000);
+            });
+
+            $('#foco-terra').bind('click', function () {
+                var ativoClass = 'glyphicon-eye-close terra-desligado';
+                var inativoClass = 'glyphicon-eye-open terra-ligado';
+
+                $(this).toggleClass(ativoClass);
+                $(this).toggleClass(inativoClass);
+
+                cameraTerra = !cameraTerra;
+
+                if (!cameraTerra) {
+                    control.target.set(0, 0, 0);
+                    posicaoInicialCamera();
+                    $('input#velocidade-translacao-terra').bootstrapSlider('setValue', 250, true);
+                } else {
+                    $('input#velocidade-translacao-terra').bootstrapSlider('setValue', 0, true);
+                }
+
+            });
+
+            var cameraTerra = false;
+            var posicaoJupiter;
+            var control;
+
+            function posicaoInicialCamera() {
+                control.object.position.set(0, 0, 20);
+                control.object.lookAt(new THREE.Vector3(0, 0, 0));
+            }
+
+            ON_DAED["3D"].create(function (scene, camera) {
+
+                var wrapperJupiter = new THREE.Object3D();
+
+                posicaoJupiter = new ON_DAED["3D"].JupiterSatelites(wrapperJupiter);
+
+				scene.add(wrapperJupiter);
+
+		        posicaoInicialCamera();
+
+				posicaoJupiter.traceLines(0);
+				
+				window.pj = posicaoJupiter;
+
+            }, function (cameraControl, renderer, scene, camera, stats, clock) {
+
+                if (($('#campo-de-observacao canvas').is(':hover') || cameraTerra) && !$('.modal').is(':visible')) {
+                    cameraControl.enabled = true;
+                    cameraControl.update(clock.getDelta());
+                } else {
+                    cameraControl.enabled = false;
+                }
+
+                ON_DAED["3D"].update(camera);
+                renderer.render(scene, camera);
+            }, document.getElementById('campo-de-observacao'),
+                    function (camera, renderer, scene, stats) {
+                        control = new THREE.OrbitControls(camera);
+                        return control;
+                    });
+
+            $('#load-modal').data('beforeReady').push(function () {
+                $('.bs-slider').trigger('slideStop');
+            });
+
+        });
+
+    })();
+    /*]]>*/
+</script>

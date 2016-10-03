@@ -99,6 +99,11 @@ public class SiteController {
         return setWebGLTemplate(map, "equacao-de-kepler");
     }
 
+	@RequestMapping("/satelites-jupiter")
+    public String satelitesJupiter(ModelMap map) {
+        return setWebGLTemplate(map, "satelites-jupiter");
+    }
+	
     @RequestMapping("/linhas-de-forca")
     public String linhasDeForca(ModelMap map) {
         return setWebGLTemplate(map, "linhas-de-forca");
