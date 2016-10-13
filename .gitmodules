@@ -4,3 +4,6 @@
 [submodule "src/main/resources/static/lib/on-physics"]
 	path = src/main/resources/static/lib/on-physics
 	url = https://csiqueirasilva@github.com/csiqueirasilva/on-physics
+[submodule "src/main/resources/static/lib/jupiter-satellite-events-json"]
+	path = src/main/resources/static/lib/jupiter-satellite-events-json
+	url = https://csiqueirasilva@github.com/csiqueirasilva/jupiter-satellite-events-json

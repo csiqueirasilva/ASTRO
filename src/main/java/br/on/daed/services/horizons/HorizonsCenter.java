@@ -11,6 +11,7 @@ package br.on.daed.services.horizons;
  */
 public enum HorizonsCenter {
 	SSB("500@0"),
+	SUN("500@10"),
 	JUPITER("500@599");
 	
 	private final String value;

@@ -49,7 +49,7 @@ public class HorizonsInterface {
 		return kmSecToAUDay(GM) / G;
 	}
 	
-	public HorizonsResultCollection fecthResultCollection(Double JD, HorizonsCenter center, HorizonsOptions op, HorizonsID[] ids) {
+	public HorizonsResultCollection fetchResultCollection(Double JD, HorizonsCenter center, HorizonsOptions op, HorizonsID[] ids) {
 		Object[] arrIds = new Object[ids.length];
 		String[] arrNames = new String[ids.length];
 		
@@ -118,7 +118,7 @@ public class HorizonsInterface {
 			HorizonsID.PALLAS
 		};
 
-		HorizonsResultCollection ret = this.fecthResultCollection(JD, HorizonsCenter.SSB, op, values);
+		HorizonsResultCollection ret = this.fetchResultCollection(JD, HorizonsCenter.SSB, op, values);
 
 		return ret;
 	}
@@ -129,15 +129,18 @@ public class HorizonsInterface {
 		
 		HorizonsID[] values = {
 			HorizonsID.SUN,
-			HorizonsID.EARTH,
 			HorizonsID.IO,
 			HorizonsID.EUROPA,
 			HorizonsID.GANYMEDE,
 			HorizonsID.CALLISTO
 		};
 
-		HorizonsResultCollection ret = this.fecthResultCollection(JD, HorizonsCenter.JUPITER, op, values);
+		HorizonsResultCollection ret = this.fetchResultCollection(JD, HorizonsCenter.JUPITER, op, values);
 
+		HorizonsResult earthResult = tc.query(HorizonsID.EARTH, "EARTH", HorizonsCenter.SUN, HorizonsOptions.CARTESIAN, JD);
+		
+		ret.getResults().add(earthResult);
+		
 		return ret;
 	}
 	

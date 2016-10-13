@@ -48,9 +48,11 @@
                 <div id="label-cidade-form" style="display: none;">OBSERVATORIO NACIONAL</div>
 
                 <div class='igrf-divisao'>
-                    <h4>Data (2016 até 2020) <span title="Referência: J2000" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></h4>
+					
+                    <h4>Data <span title="Referência: J2000" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></h4>
 
                     <input readonly="readonly" class="form-control input-centralizado jlink dataju-datepicker" name="data-gregoriana-de-local" size="16" type="text" id="dataju-datepicker-de-local" value="12/02/2012" />
+
                 </div>
 
                 <div class='igrf-divisao'>
@@ -103,52 +105,12 @@
 
                 </div>
 
-                <div id='igrf-wrap-resultados' style='display: none;'>
-
-                    <h4>Resultados</h4>
-
-                    <div id='igrf-resultados'>
-                    </div>
-
-                </div>
-
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade ui-observacao-horizontal" id="info-magnetica" tabindex="-1" role="dialog" aria-labelledby="Informações Magnéticas" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Cartas Magnéticas do Brasil</h4>
-            </div>
-
-            <div class="modal-body">
-
-                <div class='igrf-divisao'>
-                    <h4>Data (1900 até 2020) <span title="A cada 5 anos os dados são atualizados" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></h4>
-
-                    <input readonly="readonly" class="form-control input-centralizado jlink dataju-datepicker" name="data-gregoriana-de" size="16" type="text" id="dataju-datepicker-de" value="12/02/2012" />
-                </div>
-
-                <div class='igrf-divisao'>
-
-                    <h4>Tipo</h4>
-
-                    <select id='info-magnetica-tipo' name='tipo' class='form-control'>
-                        <option value='1'>Declinação</option>
-                        <option value='2'>Inclinação</option>
-                        <option value='3'>Intensidade</option>
-                    </select>
-                </div>
-
-                <div class='igrf-divisao'>
-                    <a id="btn-gerar-pdf" target="_blank" class="btn btn-primary">
-                        Gerar Arquivo de Carta para o Brasil
-                    </a>
-                </div>
+				<div class='igrf-divisao'>
+					<label>Fuso horário</label>
+					<div>
+						<input value="0" class="form-control" id="info-fuso-horario" type="text" />
+					</div>
+				</div>
 
             </div>
         </div>
@@ -157,7 +119,7 @@
 
 <div id="parent-slider-data" class="parent-bs-slider noselect">
     <div class="titulo-slider">Data</div>
-    <input class="bs-slider" data-slider-tooltip="hide" id="slider-data" data-slider-id='slider-data' type="text" data-slider-min="0" data-slider-max="36525" data-slider-step="1" data-slider-value="0" />
+    <input class="bs-slider" data-slider-tooltip="hide" id="slider-data" data-slider-id='slider-data' type="text" data-slider-min="0" data-slider-max="365250000000" data-slider-step="1" data-slider-value="0" />
     <span class="label-slider"></span>
 </div>
 
@@ -173,8 +135,8 @@
     <span class="label-slider"></span>
 </div>
 
-<div style="display: none;" id="parent-foco-terra">
-    <i id="foco-terra" class="glyphicon glyphicon-eye-open terra-ligado jlink"></i>
+<div id="parent-foco-terra">
+    <i id="foco-terra" class="glyphicon glyphicon-eye-close terra-desligado jlink"></i>
 </div>
 
 <script th:inline='javascript'>
@@ -185,12 +147,12 @@
 
             $('#cidade-form').on('show.bs.modal', function () {
                 $('#busca-cidade-input').val('');
-                $('#info-magnetica-local').modal('hide');
+                $('#info-local').modal('hide');
                 $('#busca-cidade-feedback').html("Digite a cidade");
             });
 
             $('#cidade-form').on('hidden.bs.modal', function () {
-                $('#info-magnetica-local').modal('show');
+                $('#info-local').modal('show');
             });
 
             var cidades = [];
@@ -254,20 +216,6 @@
 
             var date = new Date();
 
-            $('#dataju-datepicker-de')
-                    .val(date.getUTCDate() + '/' + (date.getUTCMonth() < 9 ? '0' + (date.getUTCMonth() + 1) : date.getUTCMonth() + 1) + '/' + date.getUTCFullYear())
-                    .datepicker({
-                        orientation: "top",
-                        format: 'dd/mm/yyyy',
-                        language: 'pt-BR',
-                        autoclose: true,
-                        startDate: "01/01/2016",
-                        endDate: "31/12/2020"
-                    }).on('changeDate',
-                    function (ev) {
-                        setUrlPDF();
-                    });
-
             $('#dataju-datepicker-de-local')
                     .val(date.getUTCDate() + '/' + (date.getUTCMonth() < 9 ? '0' + (date.getUTCMonth() + 1) : date.getUTCMonth() + 1) + '/' + date.getUTCFullYear())
                     .datepicker({
@@ -290,32 +238,16 @@
                 $('#label-cidade-form').hide();
             });
 
-            function getHiddenDate(id) {
+			$('#info-fuso-horario').change(function() {
+				var v = $(this).val();
+				if(isNaN(v)) {
+					$(this).val("0");
+				}
+			});
 
-                id = id || '#dataju-datepicker-de';
+			$('#info-fuso-horario').val(ON_DAED.fusoOriginal());
 
-                var split = $(id).val().split("/");
-
-                var dt = new Date(split[2], split[1] - 1, split[0], 0, 0, 0, 0, 0);
-
-                var ano = parseInt(split[2]) + (ON_DAED.diaDoAno(dt) / 365.25);
-
-                return ano;
-            }
-
-            function setUrlPDF() {
-                var ano = getHiddenDate();
-                var tipo = $('#info-magnetica-tipo').val();
-                $('#btn-gerar-pdf').attr('href', "pdf/dados-magneticos.pdf?ano=" + ano + "&tipo=" + tipo);
-            }
-
-            $('#info-magnetica-tipo').change(function () {
-                setUrlPDF();
-            });
-
-            setUrlPDF();
-
-            $('#info-magnetica-local').on('shown.modal.bs', function () {
+            $('#info-local').on('shown.modal.bs', function () {
 
             });
 
@@ -354,7 +286,7 @@
             $('.campo-de-observacao').bind('mouseup', clearTextSelection);
 
             $('#slider-data').data('cb', function (value) {
-                posicaoJupiter.traceLines(value / 1000);
+                posicaoJupiter.traceLines(value / 1000000000);
             });
 
             $('#velocidade-translacao-terra').data('cb', function (value) {
@@ -372,43 +304,46 @@
                 $(this).toggleClass(ativoClass);
                 $(this).toggleClass(inativoClass);
 
-                cameraTerra = !cameraTerra;
-
-                if (!cameraTerra) {
-                    control.target.set(0, 0, 0);
-                    posicaoInicialCamera();
-                    $('input#velocidade-translacao-terra').bootstrapSlider('setValue', 250, true);
-                } else {
-                    $('input#velocidade-translacao-terra').bootstrapSlider('setValue', 0, true);
-                }
-
+				posicaoJupiter.cameraOnEarth = !posicaoJupiter.cameraOnEarth;
+				if(posicaoJupiter.cameraOnEarth) {
+					posicaoJupiter.setEarthCameraPos();
+					// show msg
+				}
             });
 
-            var cameraTerra = false;
             var posicaoJupiter;
             var control;
+			var timeData = null;
 
-            function posicaoInicialCamera() {				
-				posicaoJupiter.setCameraPosition(control.object, new THREE.Vector3(-4.171985103936415E+00, 1.018191608902774E-01, -1.966569926403000E+00));
-            }
+			function fetchTimeData (dt) {
+				
+				var jd = ON_DAED.ASTRO.getJulianFromGregorian(1, 1, dt, 0, 0, 0, 0);
+				
+				$.getJSON('lib/jupiter-satellite-events-json/export/' + dt + '.json', function (data) {
+					timeData = data;
+					
+					$.getJSON('horizons/jupiter-satellites-model', {jd: jd}, function (posData) {
+						console.log(posData);
+					});
+				});
+				
+			}
+			
+			fetchTimeData(2016);
 
             ON_DAED["3D"].create(function (scene, camera) {
 
                 var wrapperJupiter = new THREE.Object3D();
 
-                posicaoJupiter = new ON_DAED["3D"].JupiterSatelites(wrapperJupiter);
+                posicaoJupiter = new ON_DAED["3D"].JupiterSatelites(wrapperJupiter, control);
 
 				scene.add(wrapperJupiter);
 
-		        posicaoInicialCamera();
-
 				posicaoJupiter.traceLines(0);
-				
-				window.pj = posicaoJupiter;
 
             }, function (cameraControl, renderer, scene, camera, stats, clock) {
 
-                if (($('#campo-de-observacao canvas').is(':hover') || cameraTerra) && !$('.modal').is(':visible')) {
+                if (($('#campo-de-observacao canvas').is(':hover') || posicaoJupiter.cameraOnEarth) && !$('.modal').is(':visible')) {
                     cameraControl.enabled = true;
                     cameraControl.update(clock.getDelta());
                 } else {
@@ -420,11 +355,18 @@
             }, document.getElementById('campo-de-observacao'),
                     function (camera, renderer, scene, stats) {
                         control = new THREE.OrbitControls(camera);
+						control.maxDistance = 125000;
+						control.minDistance = 1000;
                         return control;
                     });
 
             $('#load-modal').data('beforeReady').push(function () {
                 $('.bs-slider').trigger('slideStop');
+            });
+			
+			$('#load-modal').data('beforeReady').push(function () {
+				posicaoJupiter.setEarthCameraPos();
+                posicaoJupiter.started = true;
             });
 
         });
