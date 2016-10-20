@@ -123,18 +123,6 @@
     <span class="label-slider"></span>
 </div>
 
-<div style="display: none;" id="parent-velocidade-translacao-terra" class="parent-bs-slider noselect">
-    <div class="titulo-slider">Velocidade de Translação da Terra</div>
-    <input class="bs-slider" data-slider-tooltip="hide" id="velocidade-translacao-terra" data-slider-id='velocidade-translacao-terra' type="text" data-slider-min="0" data-slider-max="1000" data-slider-step="1" data-slider-value="250" />
-    <span class="label-slider"></span>
-</div>
-
-<div style="display: none;" id="parent-velocidade-rotacao-terra" class="parent-bs-slider noselect">
-    <div class="titulo-slider">Velocidade de Rotação da Terra</div>
-    <input class="bs-slider" data-slider-tooltip="hide" id="velocidade-rotacao-terra" data-slider-id='velocidade-rotacao-terra' type="text" data-slider-min="0" data-slider-max="2000" data-slider-step="1" data-slider-value="200" />
-    <span class="label-slider"></span>
-</div>
-
 <div id="parent-foco-terra">
     <i id="foco-terra" class="glyphicon glyphicon-eye-close terra-desligado jlink"></i>
 </div>
@@ -245,11 +233,17 @@
 				}
 			});
 
-			$('#info-fuso-horario').val(ON_DAED.fusoOriginal());
+			(function() {
+				
+				var fuso = ON_DAED.fusoOriginal();
 
-            $('#info-local').on('shown.modal.bs', function () {
+				$('#info-fuso-horario').val(ON_DAED.horarioVerao() ? fuso + 1 : fuso);
 
-            });
+				$('#info-local').on('shown.modal.bs', function () {
+					
+				});
+				
+			})();
 
             /* SRC: http://stackoverflow.com/questions/3169786/clear-text-selection-with-javascript */
             function clearTextSelection() {
@@ -266,6 +260,8 @@
 
             $('.bs-slider').bootstrapSlider();
 
+			var sliderFact = 1000000000;
+
             function sliderBtn(slideEvt) {
                 var value = parseInt(slideEvt.value);
                 if (isNaN(value)) {
@@ -274,7 +270,10 @@
 
                 var cb = $('#' + this.id).data('cb');
                 cb(value);
-                $('#' + this.id).siblings('.label-slider').html(value);
+				
+				var displayValue = refJD + value / sliderFact;
+
+				$('#' + this.id).siblings('.label-slider').html(displayValue);
                 clearTextSelection();
             }
 
@@ -286,7 +285,7 @@
             $('.campo-de-observacao').bind('mouseup', clearTextSelection);
 
             $('#slider-data').data('cb', function (value) {
-                posicaoJupiter.traceLines(value / 1000000000);
+                posicaoJupiter.traceLines(value / sliderFact);
             });
 
             $('#velocidade-translacao-terra').data('cb', function (value) {
@@ -314,23 +313,29 @@
             var posicaoJupiter;
             var control;
 			var timeData = null;
+			var refJD = 0;
 
 			function fetchTimeData (dt) {
+
+				$('input#slider-data').bootstrapSlider('disable');
 				
 				var jd = ON_DAED.ASTRO.getJulianFromGregorian(1, 1, dt, 0, 0, 0, 0);
 				
 				$.getJSON('lib/jupiter-satellite-events-json/export/' + dt + '.json', function (data) {
 					timeData = data;
 					
+					console.log(timeData);
+					
 					$.getJSON('horizons/jupiter-satellites-model', {jd: jd}, function (posData) {
-						console.log(posData);
+						posicaoJupiter.updateFromData(posData);	
+						refJD = jd;
+						$('input#slider-data').trigger('slide');
+						$('input#slider-data').bootstrapSlider('enable');
 					});
 				});
 				
 			}
 			
-			fetchTimeData(2016);
-
             ON_DAED["3D"].create(function (scene, camera) {
 
                 var wrapperJupiter = new THREE.Object3D();
@@ -367,6 +372,7 @@
 			$('#load-modal').data('beforeReady').push(function () {
 				posicaoJupiter.setEarthCameraPos();
                 posicaoJupiter.started = true;
+				fetchTimeData(2000);
             });
 
         });
