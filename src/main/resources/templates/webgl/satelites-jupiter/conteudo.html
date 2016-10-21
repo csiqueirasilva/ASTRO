@@ -119,7 +119,7 @@
 
 <div id="parent-slider-data" class="parent-bs-slider noselect">
     <div class="titulo-slider">Data</div>
-    <input class="bs-slider" data-slider-tooltip="hide" id="slider-data" data-slider-id='slider-data' type="text" data-slider-min="0" data-slider-max="365250000000" data-slider-step="1" data-slider-value="0" />
+    <input class="bs-slider" data-slider-tooltip="hide" id="slider-data" data-slider-id='slider-data' type="text" data-slider-min="0" data-slider-max="36525" data-slider-step="1" data-slider-value="0" />
     <span class="label-slider"></span>
 </div>
 
@@ -260,7 +260,7 @@
 
             $('.bs-slider').bootstrapSlider();
 
-			var sliderFact = 1000000000;
+			var sliderFact = 100;
 
             function sliderBtn(slideEvt) {
                 var value = parseInt(slideEvt.value);
