@@ -119,7 +119,7 @@
 
 <div id="parent-slider-data" class="parent-bs-slider noselect">
     <div class="titulo-slider">Data</div>
-    <input class="bs-slider" data-slider-tooltip="hide" id="slider-data" data-slider-id='slider-data' type="text" data-slider-min="0" data-slider-max="36525" data-slider-step="1" data-slider-value="0" />
+    <input class="bs-slider" data-slider-tooltip="hide" id="slider-data" data-slider-id='slider-data' type="text" data-slider-min="0" data-slider-max="3100" data-slider-step="1" data-slider-value="0" />
     <span class="label-slider"></span>
 </div>
 
@@ -285,7 +285,8 @@
             $('.campo-de-observacao').bind('mouseup', clearTextSelection);
 
             $('#slider-data').data('cb', function (value) {
-                posicaoJupiter.traceLines(value / sliderFact);
+				var t = value / sliderFact;
+                posicaoJupiter.traceLines(t);
             });
 
             $('#velocidade-translacao-terra').data('cb', function (value) {
@@ -303,9 +304,9 @@
                 $(this).toggleClass(ativoClass);
                 $(this).toggleClass(inativoClass);
 
-				posicaoJupiter.cameraOnEarth = !posicaoJupiter.cameraOnEarth;
-				if(posicaoJupiter.cameraOnEarth) {
-					posicaoJupiter.setEarthCameraPos();
+				posicaoJupiter.cameraLocked = !posicaoJupiter.cameraLocked;
+				if(posicaoJupiter.cameraLocked) {
+					posicaoJupiter.setSunCameraPos();
 					// show msg
 				}
             });
@@ -346,9 +347,11 @@
 
 				posicaoJupiter.traceLines(0);
 
+				window.posJup = posicaoJupiter;
+
             }, function (cameraControl, renderer, scene, camera, stats, clock) {
 
-                if (($('#campo-de-observacao canvas').is(':hover') || posicaoJupiter.cameraOnEarth) && !$('.modal').is(':visible')) {
+                if (($('#campo-de-observacao canvas').is(':hover') || posicaoJupiter.cameraLocked) && !$('.modal').is(':visible')) {
                     cameraControl.enabled = true;
                     cameraControl.update(clock.getDelta());
                 } else {
@@ -370,7 +373,7 @@
             });
 			
 			$('#load-modal').data('beforeReady').push(function () {
-				posicaoJupiter.setEarthCameraPos();
+				posicaoJupiter.setSunCameraPos();
                 posicaoJupiter.started = true;
 				fetchTimeData(2000);
             });

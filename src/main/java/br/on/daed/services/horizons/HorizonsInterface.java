@@ -137,7 +137,7 @@ public class HorizonsInterface {
 
 		HorizonsResultCollection ret = this.fetchResultCollection(JD, HorizonsCenter.JUPITER, op, values);
 
-		HorizonsResult earthResult = tc.query(HorizonsID.EARTH, "EARTH", HorizonsCenter.SUN, HorizonsOptions.CARTESIAN, JD);
+		HorizonsResult earthResult = tc.query(HorizonsID.EARTH, "EARTH", HorizonsCenter.JUPITER, HorizonsOptions.CARTESIAN, JD);
 		
 		ret.getResults().add(earthResult);
 		
