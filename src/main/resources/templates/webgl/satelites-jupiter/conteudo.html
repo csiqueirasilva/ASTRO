@@ -11,6 +11,8 @@
 <div id="campo-de-observacao" class="row-fluid">
 </div>
 
+<div id="loading-satelites">Carregando posições!</div>
+
 <button type="button" id="btn-info-local" class="btn btn-primary btn-lg ui-observacao-horizontal" data-toggle="modal" data-target="#info-local">
     Configurar Data e Local
 </button>
@@ -119,12 +121,10 @@
 
 <div id="parent-slider-data" class="parent-bs-slider noselect">
     <div class="titulo-slider">Data</div>
+    <div class="label-data-slider"></div>
+	<div class="label-eventos-slider"></div>
+	<div id="parent-foco-terra"><i id="foco-terra" class="glyphicon glyphicon-eye-close terra-desligado jlink"></i></div>
     <input class="bs-slider" data-slider-tooltip="hide" id="slider-data" data-slider-id='slider-data' type="text" data-slider-min="0" data-slider-max="3100" data-slider-step="1" data-slider-value="0" />
-    <span class="label-slider"></span>
-</div>
-
-<div id="parent-foco-terra">
-    <i id="foco-terra" class="glyphicon glyphicon-eye-close terra-desligado jlink"></i>
 </div>
 
 <script th:inline='javascript'>
@@ -239,8 +239,14 @@
 
 				$('#info-fuso-horario').val(ON_DAED.horarioVerao() ? fuso + 1 : fuso);
 
-				$('#info-local').on('shown.modal.bs', function () {
+				$('#info-local').on('hidden.modal.bs', function () {
+					var dtVal = $('#dataju-datepicker-de-local').val().split('/');
+		
+					var fuso = $('#info-fuso-horario').val();
 					
+					var dt = new Date(Date.UTC(dtVal[2], dtVal[1] - 1, dtVal[0], -fuso, 0, 0));
+					
+					setModelDate(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate(), dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
 				});
 				
 			})();
@@ -260,10 +266,103 @@
 
             $('.bs-slider').bootstrapSlider();
 
-			var sliderFact = 100;
+			function formatEventoMutuo(ev) {
+				var sat;
+				var tipo;
+				var movimento;
+				
+				var ret = "<div>";
+				
+				switch(ev.sat) {
+					case "1":
+						sat = "Io";
+					break;
+					case "2":
+						sat = "Europa";
+					break;
+					case "3":
+						sat = "Ganímedes";
+					break;
+					case "4":
+						sat = "Calisto";
+				}
+
+				switch(ev.type) {
+					case "Ecl":
+						if(movimento === "start") {
+							tipo = " começa a ter sua sombra tocando Júpiter ";
+						} else {
+							tipo = " termina de ter sua sombra tocando Júpiter ";
+						}
+						break;
+					case "Sha":
+						if(movimento === "start") {
+							tipo = " começa a ser envolvido na sombra de Júpiter ";
+						} else {
+							tipo = " termina de ser envolvido na sombra de Júpiter ";
+						}
+						break;
+					case "Occ":
+						if(movimento === "start") {
+							tipo = " começa a ter o seu disco oculto por Júpiter ";
+						} else {
+							tipo = " termina de ter o seu disco oculto por Júpiter ";
+						}
+						break;
+					case "Tra":
+						if(movimento === "start") {
+							tipo = " começa a ter o seu disco sobre Júpiter ";
+						} else {
+							tipo = " termina de ter o seu disco sobre Júpiter ";
+						}
+						break;
+				}
+		
+				var fuso = parseInt($('#info-fuso-horario').val());
+				
+				var jd = ON_DAED.ASTRO.getJulianFromUnix(ev.date);
+				
+				ret += sat + tipo + ON_DAED.formatarDataJuliana(jd, fuso);
+
+				ret += "</div>";
+				
+				return ret;
+			}
+
+			function timeDataFromJulian (jd) {
+				var fuso = parseInt($('#info-fuso-horario').val());
+				var dt = ON_DAED.ASTRO.getDateFromJulian(jd - (1 / 24) * fuso);
+				var idx = dt.toISOString().slice(0, 10).replace(/-/g, '');
+				var events = timeData[idx];
+				var ret = '<h2>Eventos do dia</h2><div>';
+				
+				if(events) {
+					if(events.length > 0) {
+						var rad = Math.PI / 180;
+						var localLatitude = parseFloat($('#igrf-latitude-hidden').val()) * rad;
+						var localLongitude = parseFloat($('#igrf-longitude-hidden').val()) * rad;
+						var transitTimes = ON_DAED.ASTRO.getTransit(localLongitude, localLatitude, jd, ON_DAED["ASTRO"].SolarSystemBody.SUN);
+						//console.log(transitTimes);
+						
+						for(var i = 0; i < events.length; i++) {
+							var ev = events[i];
+							ret += formatEventoMutuo(ev);
+						}
+					} else {
+						ret += "Não há eventos para a data selecionada";
+					}
+				}
+				
+				ret += '</div>';
+				
+				return ret;
+			}
+
+			var sliderFact = 100000000;
 
             function sliderBtn(slideEvt) {
                 var value = parseInt(slideEvt.value);
+				
                 if (isNaN(value)) {
                     value = parseInt($(this).attr('data-slider-value'));
                 }
@@ -273,8 +372,18 @@
 				
 				var displayValue = refJD + value / sliderFact;
 
-				$('#' + this.id).siblings('.label-slider').html(displayValue);
-                clearTextSelection();
+				$(this).data('JD', displayValue);
+
+				var fuso = parseInt($('#info-fuso-horario').val());
+
+				displayValue = ON_DAED.formatarDataJuliana(displayValue, fuso);
+
+				var q = $('#' + this.id);
+
+				q.siblings('.label-data-slider').html(displayValue);
+				q.siblings('.label-eventos-slider').html(timeDataFromJulian($(this).data('JD')));
+                
+				clearTextSelection();
             }
 
             $('.bs-slider').on('slideStop', sliderBtn);
@@ -316,22 +425,28 @@
 			var timeData = null;
 			var refJD = 0;
 
-			function fetchTimeData (dt) {
+			function fetchTimeData (mes, ano, callback) {
 
 				$('input#slider-data').bootstrapSlider('disable');
 				
-				var jd = ON_DAED.ASTRO.getJulianFromGregorian(1, 1, dt, 0, 0, 0, 0);
+				var jd = ON_DAED.ASTRO.getJulianFromGregorian(1, mes, ano, 0, 0, 0, 0);
 				
-				$.getJSON('lib/jupiter-satellite-events-json/export/' + dt + '.json', function (data) {
+				$.getJSON('lib/jupiter-satellite-events-json/export/' + ano + '.json', function (data) {
 					timeData = data;
 					
-					console.log(timeData);
+					window.td = timeData;
 					
 					$.getJSON('horizons/jupiter-satellites-model', {jd: jd}, function (posData) {
+						
 						posicaoJupiter.updateFromData(posData);	
 						refJD = jd;
+						
 						$('input#slider-data').trigger('slide');
 						$('input#slider-data').bootstrapSlider('enable');
+						
+						if(callback instanceof Function) {
+							callback();
+						}
 					});
 				});
 				
@@ -369,15 +484,35 @@
                     });
 
             $('#load-modal').data('beforeReady').push(function () {
-                $('.bs-slider').trigger('slideStop');
+                //$('input#slider-data').trigger('slideStop');
             });
 			
+			function setModelDate(ano, mes, dia, hora, min, sec) {
+				
+				$('#loading-satelites').show();
+				
+				fetchTimeData(mes, ano, function() {
+					var t = ON_DAED.diaDoMesFloat(dia, hora, min, sec);
+					$('input#slider-data').bootstrapSlider('setAttribute', 'max', ON_DAED.qtdDiasMes(ano, mes) * sliderFact);
+					$('input#slider-data').bootstrapSlider('setValue', t * sliderFact, true);
+					posicaoJupiter.setSunCameraPos();
+					posicaoJupiter.traceLines(t);
+					posicaoJupiter.started = true;
+					
+					posicaoJupiter.cameraLocked = false;
+					
+					window.setTimeout(function() {
+						$('#foco-terra').trigger('click');
+						$('#loading-satelites').hide();
+					}, 1000);
+				});
+			}
+			
 			$('#load-modal').data('beforeReady').push(function () {
-				posicaoJupiter.setSunCameraPos();
-                posicaoJupiter.started = true;
-				fetchTimeData(2000);
+				var dt = new Date();
+				setModelDate(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate(), dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
             });
-
+			
         });
 
     })();
