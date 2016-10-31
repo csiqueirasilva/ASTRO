@@ -120,10 +120,10 @@
 </div>
 
 <div id="parent-slider-data" class="parent-bs-slider noselect">
-    <div class="titulo-slider">Data</div>
-    <div class="label-data-slider"></div>
-	<div class="label-eventos-slider"></div>
-	<div id="parent-foco-terra"><i id="foco-terra" class="glyphicon glyphicon-eye-close terra-desligado jlink"></i></div>
+	<div class="label-data-slider"></div>
+    <div class="label-eventos-slider">Eventos do dia <span rel='tooltip' title="" data-placement="top right" data-toggle="tooltip" id="eventos-do-dia" data-html="true"><i class="glyphicon glyphicon-question-sign"></i></span></div>
+    <div id="eventos-do-dia-hidden" class="hidden"></div>
+    <div id="parent-foco-terra"><i id="play-terra" class="glyphicon glyphicon-play terra-ligado jlink"></i>&nbsp;<i id="foco-terra" class="glyphicon glyphicon-eye-open terra-ligado jlink"></i></div>
     <input class="bs-slider" data-slider-tooltip="hide" id="slider-data" data-slider-id='slider-data' type="text" data-slider-min="0" data-slider-max="3100" data-slider-step="1" data-slider-value="0" />
 </div>
 
@@ -366,6 +366,11 @@
                 window.clearInterval(animateYear);
                 animateYear = null;
                 $('input#slider-data').bootstrapSlider('enable');
+                var ativoClass = 'glyphicon-pause terra-desligado';
+                var inativoClass = 'glyphicon-play terra-ligado';
+
+                $('#play-terra').removeClass(ativoClass);
+                $('#play-terra').addClass(inativoClass);
             }
 
             function startAnimateYear() {
@@ -374,11 +379,12 @@
                     $('input#slider-data').bootstrapSlider('disable');
                     var max = $('input#slider-data').bootstrapSlider('getAttribute', 'max');
                     animateYear = window.setInterval(function() {
-                        $('input#slider-data').bootstrapSlider('setValue', ++t, true);
-                        if(t === max) {
+                        t += sliderFact / 50;
+                        $('input#slider-data').bootstrapSlider('setValue', t, true);
+                        if(t >= max) {
                             stopAnimateYear();
                         }
-                    }, 5);
+                    }, 20);
                 }
             }
 
@@ -403,7 +409,7 @@
 				var q = $('#' + this.id);
 
 				q.siblings('.label-data-slider').html(displayValue);
-				q.siblings('.label-eventos-slider').html(timeDataFromJulian($(this).data('JD')));
+				$('#eventos-do-dia-hidden').html(timeDataFromJulian($(this).data('JD')));
                 
 				clearTextSelection();
             }
@@ -440,6 +446,29 @@
 					posicaoJupiter.setSunCameraPos();
 					// show msg
 				}
+            });
+
+            $('#play-terra').bind('click', function () {
+                var ativoClass = 'glyphicon-pause terra-desligado';
+                var inativoClass = 'glyphicon-play terra-ligado';
+
+                $(this).toggleClass(ativoClass);
+                $(this).toggleClass(inativoClass);
+
+                if(animateYear === null) {
+                    startAnimateYear();
+                } else {
+                    stopAnimateYear();
+                }
+            });
+
+            $('#eventos-do-dia').tooltip({
+                html : true,
+                container: "body",
+                placement: "top",
+                title: function() {
+                  return $('#eventos-do-dia-hidden').html();
+                }
             });
 
             var posicaoJupiter;
