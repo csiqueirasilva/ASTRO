@@ -360,6 +360,28 @@
 
 			var sliderFact = 100000000;
 
+            var animateYear = null;
+
+            function stopAnimateYear() {
+                window.clearInterval(animateYear);
+                animateYear = null;
+                $('input#slider-data').bootstrapSlider('enable');
+            }
+
+            function startAnimateYear() {
+                if(animateYear === null) {
+                    var t = $('input#slider-data').bootstrapSlider('getValue');
+                    $('input#slider-data').bootstrapSlider('disable');
+                    var max = $('input#slider-data').bootstrapSlider('getAttribute', 'max');
+                    animateYear = window.setInterval(function() {
+                        $('input#slider-data').bootstrapSlider('setValue', ++t, true);
+                        if(t === max) {
+                            stopAnimateYear();
+                        }
+                    }, 5);
+                }
+            }
+
             function sliderBtn(slideEvt) {
                 var value = parseInt(slideEvt.value);
 				
