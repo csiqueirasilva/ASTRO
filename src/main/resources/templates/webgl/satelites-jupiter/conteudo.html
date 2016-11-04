@@ -243,9 +243,13 @@
 			});
 
 			$('#info-fuso-horario').change(function () {
-				var v = $(this).val();
+				var v = parseInt($(this).val());
 				if (isNaN(v)) {
 					$(this).val("0");
+				} else if (v > 12) {
+					$(this).val("12");
+				} else if (v < -12) {
+					$(this).val("-12");
 				}
 			});
 
@@ -352,48 +356,68 @@
 				return ret;
 			}
 
+			function fixTransitTimes(transit, fuso) {
+
+				var correcaoMinutos = 0.00235;
+
+				if (transit.rising !== null) {
+					transit.rising = (transit.rising + fuso / 24 + correcaoMinutos);
+					if(transit.rising < 0 || transit.rising > 1) transit.rising = null;
+				}
+
+				if (transit.transit !== null) {
+					transit.transit = (transit.transit + fuso / 24);
+					if(transit.transit < 0 || transit.transit > 1) transit.transit = null;
+				}
+
+				if (transit.setting !== null) {
+					transit.setting = (transit.setting + fuso / 24 - correcaoMinutos);
+					if(transit.setting < 0 || transit.setting > 1) transit.setting = null;
+				}
+			}
+
 			function timeDataFromJulian(jd) {
 				var fuso = obterFusoHorario();
 
 				var dt1 = ON_DAED.ASTRO.getDateFromJulian(jd - 1 - (1 / 24) * fuso);
 				var idx1 = dt1.toISOString().slice(0, 10).replace(/-/g, '');
-				var events1 = timeData[idx1];
+				var events1 = timeData[idx1].slice(0);
 
 				var dt2 = ON_DAED.ASTRO.getDateFromJulian(jd - (1 / 24) * fuso);
 				var idx2 = dt2.toISOString().slice(0, 10).replace(/-/g, '');
-				var events2 = timeData[idx2];
+				var events2 = timeData[idx2].slice(0);
 
 				var dt3 = ON_DAED.ASTRO.getDateFromJulian(jd + 1 - (1 / 24) * fuso);
 				var idx3 = dt3.toISOString().slice(0, 10).replace(/-/g, '');
-				var events3 = timeData[idx3];
-				
+				var events3 = timeData[idx3].slice(0);
+
 				var ret = '<h2>Eventos de ' + ON_DAED.formatarDataJuliana(jd, fuso).substr(0, 10) + '</h2><div>';
 
 				var dateRef = dt2.getUTCDate();
 
-				for(var i = events1.length - 1; i >= 0; i--) {
+				for (var i = events1.length - 1; i >= 0; i--) {
 					var dt = new Date(events1[i].date);
 					dt.setHours(dt.getHours() + fuso);
 					var utcDate = dt.getUTCDate();
-					if(utcDate !== dateRef) {
+					if (utcDate !== dateRef) {
 						events1.splice(i, 1);
 					}
 				}
 
-				for(var i = events2.length - 1; i >= 0; i--) {
+				for (var i = events2.length - 1; i >= 0; i--) {
 					var dt = new Date(events2[i].date);
 					dt.setHours(dt.getHours() + fuso);
 					var utcDate = dt.getUTCDate();
-					if(utcDate !== dateRef) {
+					if (utcDate !== dateRef) {
 						events2.splice(i, 1);
 					}
 				}
 
-				for(var i = events3.length - 1; i >= 0; i--) {
+				for (var i = events3.length - 1; i >= 0; i--) {
 					var dt = new Date(events3[i].date);
 					dt.setHours(dt.getHours() + fuso);
 					var utcDate = dt.getUTCDate();
-					if(utcDate !== dateRef) {
+					if (utcDate !== dateRef) {
 						events3.splice(i, 1);
 					}
 				}
@@ -404,20 +428,92 @@
 					if (events.length > 0) {
 						var rad = Math.PI / 180;
 						var localLatitude = parseFloat($('#igrf-latitude-hidden').val()) * rad;
-						var localLongitude = parseFloat($('#igrf-longitude-hidden').val()) * rad;
+						var localLongitude = -parseFloat($('#igrf-longitude-hidden').val()) * rad;
 						var solarTransitTimes = ON_DAED.ASTRO.getTransit(localLongitude, localLatitude, jd, ON_DAED["ASTRO"].SolarSystemBody.SUN);
 						var jupiterTransitTimes = ON_DAED.ASTRO.getTransit(localLongitude, localLatitude, jd, ON_DAED["ASTRO"].SolarSystemBody.JUPITER);
+
+						fixTransitTimes(solarTransitTimes, fuso);
+						fixTransitTimes(jupiterTransitTimes, fuso);
+
+						var transits = [];
+
+						transits.push({
+							t: solarTransitTimes.rising,
+							text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Nascer)</span>"
+						});
+
+						transits.push({
+							t: solarTransitTimes.transit,
+							text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Passagem Meridiana)</span>"
+						});
+
+						transits.push({
+							t: solarTransitTimes.setting,
+							text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Ocaso)</span>"
+						});
+
+						var jupiterRising = jupiterTransitTimes.rising;
+
+						var oldJupiterTransit = ON_DAED.ASTRO.getTransit(localLongitude, localLatitude, jd - 1, ON_DAED["ASTRO"].SolarSystemBody.JUPITER);
+
+						fixTransitTimes(oldJupiterTransit, fuso);
+
+						var jupiterTransit = jupiterRising < jupiterTransitTimes.transit ? jupiterTransitTimes.transit : oldJupiterTransit.transit;
+						var jupiterSetting = jupiterRising < jupiterTransitTimes.setting ? jupiterTransitTimes.setting : oldJupiterTransit.setting;
+
+						transits.push({
+							t: jupiterRising,
+							text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Nascer)</span>"
+						});
+
+						transits.push({
+							t: jupiterTransit,
+							text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Passagem Meridiana)</span>"
+						});
+
+						transits.push({
+							t: jupiterSetting,
+							text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Ocaso)</span>"
+						});
+
+						transits.sort(function (a, b) {
+							return b.t - a.t;
+						});
+
+						var lastHourFrac = 0;
 
 						for (var i = 0; i < events.length; i++) {
 							var ev = events[i];
 							var eventStr = formatEventoSatelite(ev);
-							var hourFrac = (parseInt(eventStr.substr(1, 2)) + parseInt(eventStr.substr(4, 2)) * 60) / 24;
-							
-							//if(hourFrac)
-							
+							var hourFrac = (parseInt(eventStr.substr(6, 2)) + parseInt(eventStr.substr(9, 2)) / 60) / 24;
+
+							for (var j = transits.length - 1; j >= 0; j--) {
+								if (transits[j].t !== null && lastHourFrac <= transits[j].t && transits[j].t <= hourFrac) {
+									var transit = transits.splice(j, 1)[0];
+									var h = parseInt(transit.t * 24);
+									var m = parseInt(((transit.t * 24) % 1) * 60);
+									var s = parseInt(((((transit.t * 24) % 1) * 60) % 1) * 60);
+
+									ret += "<div>[" + ON_DAED.formatarHora(h, m, s) + "] " + transit.text + "</div>";
+								}
+							}
+
 							ret += eventStr;
+
+							lastHourFrac = hourFrac;
 						}
-						
+
+						for (var i = transits.length - 1; i >= 0; i--) {
+							if (transits[i].t !== null) {
+								var transit = transits[i];
+								var h = parseInt(transit.t * 24);
+								var m = parseInt(((transit.t * 24) % 1) * 60);
+								var s = parseInt(((((transit.t * 24) % 1) * 60) % 1) * 60);
+
+								ret += "<div>[" + ON_DAED.formatarHora(h, m, s) + "] " + transit.text + "</div>";
+							}
+						}
+
 					} else {
 						ret += "Não há eventos para a data selecionada";
 					}
@@ -616,6 +712,12 @@
 
 			$('#load-modal').data('beforeReady').push(function () {
 				//$('input#slider-data').trigger('slideStop');
+
+				window.navigator.geolocation.getCurrentPosition(function (pos) {
+					$('#igrf-longitude').anglepicker("value", pos.coords.longitude);
+					$('#igrf-latitude').anglepicker("value", pos.coords.latitude * 2);
+				});
+
 			});
 
 			function setModelDate(ano, mes, dia, hora, min, sec) {
@@ -624,14 +726,14 @@
 
 				fetchTimeData(mes, ano, function () {
 					var t = ON_DAED.diaDoMesFloat(dia, hora, min, sec);
-					
+
 					var horario = $('#hora-minuto-segundo-row').children('input').map(function (k, v) {
 						return parseFloat($(v).val());
 					});
-					
+
 					t += (horario[0] + horario[1] / 60 + horario[2] / 3600) / 24;
-					
-					$('input#slider-data').bootstrapSlider('setAttribute', 'max', ON_DAED.qtdDiasMes(ano, mes) * sliderFact);
+
+					$('input#slider-data').bootstrapSlider('setAttribute', 'max', (ON_DAED.qtdDiasMes(ano, mes) + 1) * sliderFact);
 					$('input#slider-data').bootstrapSlider('setValue', t * sliderFact, true);
 					posicaoJupiter.setSunCameraPos();
 					posicaoJupiter.traceLines(t);
