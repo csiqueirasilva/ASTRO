@@ -8,6 +8,18 @@
 <script src='lib/on-daed-js/3D/JupiterSatelites.js'>
 </script>
 
+<script src="js/jspdf.min.js">
+</script>
+
+<script src="js/jspdf-fromhtml.js">
+</script>
+
+<script src="js/jspdf-splitext.js">
+</script>
+
+<script src="js/jspdf-stdfonts.js">
+</script>
+
 <div id="campo-de-observacao" class="row-fluid">
 </div>
 
@@ -15,6 +27,10 @@
 
 <button type="button" id="btn-info-local" class="btn btn-primary btn-lg ui-observacao-horizontal" data-toggle="modal" data-target="#info-local">
     Configurar Data e Local
+</button>
+
+<button type="button" id="btn-exportar-eventos" onclick="printPDF()" class="btn btn-primary btn-lg ui-observacao-horizontal">
+    Exportar eventos
 </button>
 
 <div class="modal fade ui-observacao-horizontal" id="cidade-form" tabindex="-1" role="dialog" aria-labelledby="Localizar Cidade" aria-hidden="true">
@@ -134,6 +150,8 @@
         </div>
     </div>
 </div>
+
+<div id="print-pdf" class="hidden"></div>
 
 <div id="parent-slider-data" class="parent-bs-slider noselect">
 	<div id="satelite-label-io">Io</div>
@@ -689,13 +707,15 @@
 			var control;
 			var timeData = null;
 			var refJD = 0;
+			var diasRef = 0;
 
 			function fetchTimeData(mes, ano, callback) {
 
 				$('input#slider-data').bootstrapSlider('disable');
 
 				var jd = ON_DAED.ASTRO.getJulianFromGregorian(1, mes, ano, 0, 0, 0, 0);
-
+				diasRef = ON_DAED.qtdDiasMes(ano, mes);
+				
 				$.getJSON('lib/jupiter-satellite-events-json/export/' + ano + '.json', function (data) {
 					timeData = data;
 
@@ -812,6 +832,22 @@
 				var dt = new Date();
 				setModelDate(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate(), dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
 			});
+
+			function printPDF() {
+				var printDoc = new jsPDF();
+				
+				var ret = "";
+				
+				for(var i = 1; i <= diasRef; i++) {
+					var jd = refJD + i;
+					ret += timeDataFromJulian(jd);
+				}
+				
+				printDoc.fromHTML(ret, 10, 10, {'width': 180});
+				printDoc.save('satelites-jupiter.pdf');
+			}
+
+			window.printPDF = printPDF;
 
 		});
 
