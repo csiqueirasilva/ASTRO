@@ -136,8 +136,12 @@
 </div>
 
 <div id="parent-slider-data" class="parent-bs-slider noselect">
-    <div class="label-data-slider"></div>
-    <div class="label-eventos-slider">Eventos do dia <span rel='tooltip' title="" data-placement="top right" data-toggle="tooltip" id="eventos-do-dia" data-html="true"><i class="glyphicon glyphicon-question-sign"></i></span></div>
+	<div id="satelite-label-io">Io</div>
+	<div id="satelite-label-europa">Europa</div>
+	<div id="satelite-label-ganymede">Ganímede</div>
+	<div id="satelite-label-callisto">Calisto</div>
+	<div class="label-data-slider"></div>
+	<div class="label-eventos-slider">Eventos do dia <span rel='tooltip' title="" data-placement="top right" data-toggle="tooltip" id="eventos-do-dia" data-html="true"><i class="glyphicon glyphicon-question-sign"></i></span></div>
     <div id="eventos-do-dia-hidden" class="hidden"></div>
     <div id="parent-foco-terra"><i id="play-terra" class="glyphicon glyphicon-play terra-ligado jlink"></i>&nbsp;<i id="foco-terra" class="glyphicon glyphicon-eye-open terra-ligado jlink"></i></div>
     <input class="bs-slider" data-slider-tooltip="hide" id="slider-data" data-slider-id='slider-data' type="text" data-slider-min="0" data-slider-max="3100" data-slider-step="1" data-slider-value="0" />
@@ -292,6 +296,45 @@
 
 			$('.bs-slider').bootstrapSlider();
 
+			function getObjectPosition(body, jd) {
+				
+				var obliquity = ON_DAED.ASTRO.getEclipticObliquity(jd);
+				
+				var pos;
+				
+				if(body === ON_DAED.ASTRO.SolarSystemBody.SUN) {
+					pos = ON_DAED.ASTRO.getSolarCoordinates(jd);
+				} else {
+					pos = ON_DAED.ASTRO.getSolarSystemBodyPosition(body, jd, obliquity.nutation.longitude);
+				}
+				
+				var rad = Math.PI / 180;
+
+				var localLatitude = parseFloat($('#igrf-latitude-hidden').val()) * rad;
+				var localLongitude = -parseFloat($('#igrf-longitude-hidden').val()) * rad;
+
+				var horizontalCoords = ON_DAED.ASTRO.getTransformedCoordinates({
+					from: ON_DAED["ASTRO"].CoordinateType.ECLIPTIC,
+					to: ON_DAED["ASTRO"].CoordinateType.HORIZONTAL,
+					localLatitude: localLatitude,
+					localLongitude: localLongitude,
+					julian: jd,
+					latitude: pos.latitudeRadian,
+					longitude: pos.longitudeRadian,
+					obliquity: obliquity.obliquityRadian
+				});
+				
+				return horizontalCoords;
+			}
+
+			function getEventTimestamp(body, jd, timeString) {
+				var fuso = obterFusoHorario();
+				
+				var horizontalCoords = getObjectPosition(body, jd);
+
+				return "[" + (timeString ? timeString : ON_DAED.formatarDataJuliana(jd, fuso).substr(14)) + " Az: " + ON_DAED.tempoSideral(horizontalCoords.azimute, true) + " H: " + ON_DAED.tempoSideral(horizontalCoords.altitude, true) + "]";
+			}
+
 			function formatEventoSatelite(ev) {
 				var sat;
 				var tipo;
@@ -345,11 +388,9 @@
 
 				movimento = movimento === "start" ? "início" : "fim";
 
-				var fuso = obterFusoHorario();
-
 				var jd = ON_DAED.ASTRO.getJulianFromUnix(ev.date);
 
-				ret += "[" + ON_DAED.formatarDataJuliana(jd, fuso).substr(14) + "] " + tipo + " (" + movimento + "): " + b1 + " sobre " + b2;
+				ret += getEventTimestamp(ON_DAED.ASTRO.SolarSystemBody.JUPITER, jd) + " " + tipo + " (" + movimento + "): " + b1 + " sobre " + b2;
 
 				ret += "</div>";
 
@@ -439,17 +480,20 @@
 
 						transits.push({
 							t: solarTransitTimes.rising,
-							text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Nascer)</span>"
+							text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Nascer)</span>",
+							body: ON_DAED.ASTRO.SolarSystemBody.SUN
 						});
 
 						transits.push({
 							t: solarTransitTimes.transit,
-							text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Passagem Meridiana)</span>"
+							text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Passagem Meridiana)</span>",
+							body: ON_DAED.ASTRO.SolarSystemBody.SUN
 						});
 
 						transits.push({
 							t: solarTransitTimes.setting,
-							text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Ocaso)</span>"
+							text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Ocaso)</span>",
+							body: ON_DAED.ASTRO.SolarSystemBody.SUN
 						});
 
 						var jupiterRising = jupiterTransitTimes.rising;
@@ -463,17 +507,20 @@
 
 						transits.push({
 							t: jupiterRising,
-							text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Nascer)</span>"
+							text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Nascer)</span>",
+							body: ON_DAED.ASTRO.SolarSystemBody.JUPITER
 						});
 
 						transits.push({
 							t: jupiterTransit,
-							text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Passagem Meridiana)</span>"
+							text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Passagem Meridiana)</span>",
+							body: ON_DAED.ASTRO.SolarSystemBody.JUPITER
 						});
 
 						transits.push({
 							t: jupiterSetting,
-							text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Ocaso)</span>"
+							text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Ocaso)</span>",
+							body: ON_DAED.ASTRO.SolarSystemBody.JUPITER
 						});
 
 						transits.sort(function (a, b) {
@@ -485,7 +532,8 @@
 						for (var i = 0; i < events.length; i++) {
 							var ev = events[i];
 							var eventStr = formatEventoSatelite(ev);
-							var hourFrac = (parseInt(eventStr.substr(6, 2)) + parseInt(eventStr.substr(9, 2)) / 60) / 24;
+							var hourString = eventStr.replace(/.*?(?=\d{2}:\d{2}:\d{2})/g, '');
+							var hourFrac = (parseInt(hourString.substr(0, 2)) + parseInt(hourString.substr(3, 2)) / 60) / 24;
 
 							for (var j = transits.length - 1; j >= 0; j--) {
 								if (transits[j].t !== null && lastHourFrac <= transits[j].t && transits[j].t <= hourFrac) {
@@ -494,7 +542,7 @@
 									var m = parseInt(((transit.t * 24) % 1) * 60);
 									var s = parseInt(((((transit.t * 24) % 1) * 60) % 1) * 60);
 
-									ret += "<div>[" + ON_DAED.formatarHora(h, m, s) + "] " + transit.text + "</div>";
+									ret += "<div>" + getEventTimestamp(transit.body, parseInt(jd) + 0.5 + transit.t - fuso / 24, ON_DAED.formatarHora(h, m, s)) + " " + transit.text + "</div>";
 								}
 							}
 
@@ -510,7 +558,7 @@
 								var m = parseInt(((transit.t * 24) % 1) * 60);
 								var s = parseInt(((((transit.t * 24) % 1) * 60) % 1) * 60);
 
-								ret += "<div>[" + ON_DAED.formatarHora(h, m, s) + "] " + transit.text + "</div>";
+								ret += "<div>" + getEventTimestamp(transit.body, parseInt(jd) + 0.5 + transit.t - fuso / 24, ON_DAED.formatarHora(h, m, s)) + " " + transit.text + "</div>";
 							}
 						}
 
@@ -713,10 +761,22 @@
 			$('#load-modal').data('beforeReady').push(function () {
 				//$('input#slider-data').trigger('slideStop');
 
+				var satColors = posicaoJupiter.getSatelliteColors();
+
+				$('#satelite-label-io').css({color: satColors['1']});
+				$('#satelite-label-europa').css({color: satColors['2']});
+				$('#satelite-label-ganymede').css({color: satColors['3']});
+				$('#satelite-label-callisto').css({color: satColors['4']});
+				
 				window.navigator.geolocation.getCurrentPosition(function (pos) {
 					$('#igrf-longitude').anglepicker("value", pos.coords.longitude);
 					$('#igrf-latitude').anglepicker("value", pos.coords.latitude * 2);
-				});
+				}, 
+				function(err) {
+					console.log("Erro ao obter coordenadas geográficas. Informe-as manualmente.");
+					console.log(err);
+				}, 
+				{maximumAge:60000, timeout:5000, enableHighAccuracy:true});
 
 			});
 
