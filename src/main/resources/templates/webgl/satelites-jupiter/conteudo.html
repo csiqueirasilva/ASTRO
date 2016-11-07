@@ -837,13 +837,22 @@
 				var printDoc = new jsPDF();
 				
 				var ret = "";
-				
-				for(var i = 1; i <= diasRef; i++) {
-					var jd = refJD + i;
-					ret += timeDataFromJulian(jd);
+                
+                var maxEventsPerPage = 3;
+                
+				for(var i = 0; i < diasRef; i++) {
+					var jd = refJD + i + 0.5;
+                    var eventString = timeDataFromJulian(jd);
+                    eventString = eventString.replace('<div>', '');
+                    eventString = eventString.replace(/color:[ ]?.{7};/g, '');
+                    eventString = eventString.substr(0, eventString.length - 6);
+					ret += eventString;
+                    if((i - maxEventsPerPage + 1) % maxEventsPerPage === 0 && i !== diasRef - 1) {
+                        ret += "<!-- ADD_PAGE -->";
+                    }
 				}
 				
-				printDoc.fromHTML(ret, 10, 10, {'width': 180});
+				printDoc.fromHTML(ret, 10, 0, {'width': 180});
 				printDoc.save('satelites-jupiter.pdf');
 			}
 
