@@ -1,1 +1,92 @@
-<h3>Satélites de Júpiter</h3>
+<h2 class="astro-dialog-label">Fenômenos dos satélites de Júpiter</h2>
+
+<h2>Botões de Tela</h2>
+
+<div class='dicas-de-uso-ferramenta'>
+    <a class="btn btn-primary">Configurar Data e Local</a>
+</div>
+
+<p>No <b>calendário</b>, a <b>Data</b> é alterada clicando-se sobre ela. O <b>Ano</b> é alterado clicando-se sobre o <b>Mês</b>.
+Os intervalos dos anos são alterados clicando-se sobre o <b>Ano</b>. Clicando-se nas setas esquerda ou
+direita é possível mudar os intervalos (décadas). Note que esses sucessivos cliques permitem ao
+usuário avançar ou regredir rapidamente no tempo. O modelo dinâmico utilizado nesse programa
+permite gerar os dados entre o ano de 2000 e 2100.
+Além de detectar as coordenadas geográficas locais automaticamente do computador, é possível
+introduzir dados manualmente ou escolhidos a partir de uma lista (busca textual).</p>
+
+<div class='dicas-de-uso-ferramenta'>
+    <a class="btn btn-primary">Exportar Eventos</a>
+</div>
+
+<p>Opção para gerar os fenômenos dos satélites de Júpiter para o mês escolhido. O arquivo "<b>satelites-jupiter.pdf</b>"
+é gerado e automaticamente realizado uma cópia (download). Neste arquivo consta a
+data, instante observável, Azimute (<b>Az</b>) e Altura (<b>H</b>) de Júpiter, tipo de fenômeno, satélite
+envolvido no fenômeno e a duração dos eventos:</p>
+
+<ul>
+	<li>Ocultações dos satélites por Júpiter</li>
+	<li>Trânsito dos satélites pelo disco de Júpiter</li>
+	<li>Eclipses dos satélites pela sombra de Júpiter</li>
+	<li>Trânsito da sombra dos satélites pelo disco de Júpiter</li>
+</ul>
+
+<p><b>Nota:</b> A duração do evento é exibida apenas para eventos que tem início e fim no mesmo dia devido a uma limitação de performance do programa.</p>
+
+<h3>Área de resultados da tela (Canto inferior esquerdo)</h3>
+
+<div>Eventos do dia <span rel="tooltip" title="Ajuda" data-placement="top right" data-toggle="tooltip" id="eventos-do-dia-help" data-html="true"><i class="glyphicon glyphicon-question-sign"></i></span></div>
+
+<p>O programa sempre inicia utilizando a data e hora local, com base no relógio do computador.</p>
+
+<p>Passando o mouse sobre a ícone <i class="glyphicon glyphicon-question-sign"></i> pode-se visualizar os resultados na tela.</p>
+
+<p><i id="play-terra-help" class="glyphicon glyphicon-play terra-ligado jlink"></i> Este botão mostra a trajetória dos satélites ao longo do mês escolhido pelo usuário.</p>
+
+<p>Quando ativado, o botão <i id="foco-terra-help" class="glyphicon glyphicon-eye-open terra-ligado jlink"></i> permite visualizar este sistema de satélites de dois
+	modos:</p>
+	
+<ul>
+	<li>Vista da Terra</li>
+	<li>Vista Livre</li>
+</ul>
+
+<p>Na opção Vista Livre chama-se a atenção para a possibilidade do sistema de Júpiter ser visto por vários ângulos e em fase, o que não é possível observar da Terra. Em outras palavras, a visualização funciona como se o observador estivesse ao redor de Júpiter.</p>
+
+<div class="dicas-de-uso-ferramenta noselect">
+    <input class="bs-slider-helper" data-slider-tooltip="hide" type="text" data-slider-min="0" data-slider-max="2000" data-slider-step="1" data-slider-value="200" />
+</div>
+
+<p>A escala deslizante permite avançar ou recuar no tempo, dentro do período escolhido pelo usuário.</p>
+
+<p>Os nomes dos quatro satélites galileanos IO, Europa, Ganimedes e Calisto são apresentados em
+cores, para que possam ser associados às linhas que descrevem graficamente os seus movimentos
+orbitais aparentes aproximados.</p>
+
+<script th:inline='javascript'>
+    /*<![CDATA[*/
+    $(document).ready(function () {
+        $('.bs-slider-helper').bootstrapSlider();
+
+        $('#dataju-datepicker-ajuda')
+                .datepicker({
+                    orientation: "top",
+                    format: 'dd/mm/yyyy',
+                    language: 'pt-BR',
+                    autoclose: true,
+                    startDate: "01/01/1900",
+                    endDate: "31/12/2020"
+                });
+    });
+    /*]]>*/
+</script>
+
+<h3>Funções do Mouse</h3>
+
+<ul>
+    <li><b>Botão Esquerdo:</b> com este botão pode-se deslocar (rotação) a imagem do
+        sistema.</li>
+    <li><b>Botão Direito:</b> para mover o plano do horizonte, sobre o qual está o
+        observador, manter este o botão pressionado e arraste.</li>
+    <li><b>Botão de rolagem:</b> o programa permite aproximar ou afastar a imagem,
+        bastando para isso girar este botão.</li>
+</ul>
