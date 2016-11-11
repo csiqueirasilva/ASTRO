@@ -156,10 +156,10 @@
 <div id="print-pdf" class="hidden"></div>
 
 <div id="parent-slider-data" class="parent-bs-slider noselect">
-    <div id="satelite-label-io">Io</div>
-    <div id="satelite-label-europa">Europa</div>
-    <div id="satelite-label-ganymede">Ganímede</div>
-    <div id="satelite-label-callisto">Calisto</div>
+    <div id="satelite-label-io">Io (Período Orbital: 1d 18h 27m 21,6s)</div>
+    <div id="satelite-label-europa">Europa (Período Orbital: 3d 13h 13m 42,0s)</div>
+    <div id="satelite-label-ganymede">Ganímede (Período Orbital: 7d 03h 42m 33,4s)</div>
+    <div id="satelite-label-callisto">Calisto (Período Orbital: 16d 16h 32m 11,2s)</div>
     <div class="label-data-slider"></div>
     <div class="label-eventos-slider">Eventos do dia <span rel='tooltip' title="" data-placement="top right" data-toggle="tooltip" id="eventos-do-dia" data-html="true"><i class="glyphicon glyphicon-question-sign"></i></span></div>
     <div id="eventos-do-dia-hidden" class="hidden"></div>
@@ -535,7 +535,7 @@
 
                     transits.push({
                         t: solarTransitTimes.rising,
-                        text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Nascer)</span>",
+                        text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Nascer) - LESTE</span>",
                         body: ON_DAED.ASTRO.SolarSystemBody.SUN
                     });
 
@@ -547,7 +547,7 @@
 
                     transits.push({
                         t: solarTransitTimes.setting,
-                        text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Ocaso)</span>",
+                        text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Ocaso) - OESTE</span>",
                         body: ON_DAED.ASTRO.SolarSystemBody.SUN
                     });
 
@@ -562,7 +562,7 @@
 
                     transits.push({
                         t: jupiterRising,
-                        text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Nascer)</span>",
+                        text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Nascer) - LESTE</span>",
                         body: ON_DAED.ASTRO.SolarSystemBody.JUPITER
                     });
 
@@ -574,7 +574,7 @@
 
                     transits.push({
                         t: jupiterSetting,
-                        text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Ocaso)</span>",
+                        text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Ocaso) - OESTE</span>",
                         body: ON_DAED.ASTRO.SolarSystemBody.JUPITER
                     });
 
