@@ -410,11 +410,17 @@
 
                 var jd = ON_DAED.ASTRO.getJulianFromUnix(ev.date);
 
+				var horizontalCoords = getObjectPosition(ON_DAED.ASTRO.SolarSystemBody.JUPITER, jd);
+
                 ret += getEventTimestamp(ON_DAED.ASTRO.SolarSystemBody.JUPITER, jd) + " " + tipo + " (" + movimento + "): " + b1 + " sobre " + b2;
 
                 if(ev.duration) {
                     ret += " (Duração: " + ev.duration + ")";
                 }
+
+				if(horizontalCoords.altitude < 0) {
+					ret += " - NÃO VISÍVEL";
+				}
 
                 ret += "</div>";
 
@@ -890,6 +896,25 @@
 
                 var maxEventsPerPage = 3;
 
+				var rad = Math.PI / 180;
+
+                var localLatitude = parseFloat($('#igrf-latitude-hidden').val()) * rad;
+                var localLongitude = parseFloat($('#igrf-longitude-hidden').val()) * rad;
+
+				var lat = ON_DAED.tempoSideral(localLatitude, true);
+				var lon = ON_DAED.tempoSideral(localLongitude, true);
+				
+				ret += '<h1>Eventos das Luas de Galileu (Júpiter)</h1>';
+		
+				ret += '<div style="height: 80; text-align: center;"><img style="text-align: center; width: 100%; height: 100%;" src="imgs/logo-on.jpg" /></div>';
+
+				ret += '<h3>Longitude Local: ' + lon + '</h3>';
+				ret += '<h3>Latitude Local: ' + lat + '</h3>';
+
+				ret += '<p>É importante notar que o Azimute (<b>Az</b>) pode ser usado como referência aproximada dos pontos cardeais. Quando esse ângulo for entre 315º e 45º, a posição estará aproximadamente na direção Norte. Já quando o ângulo estiver entre 45º e 135º, a posição estará aproximadamente na direção Leste. Para a direção Sul o ângulo de Azimute deve ser entre 135º e 225º e para a direção Oeste o ângulo está entre 225º e 315º.</p>';
+		
+				ret += '<!-- ADD_PAGE -->';
+
                 for (var i = 0; i < diasRef; i++) {
                     var jd = refJD + i + 0.5;
                     var eventString = timeDataFromJulian(jd);
@@ -902,8 +927,9 @@
                     }
                 }
 
-                printDoc.fromHTML(ret, 5, 0, {'width': 200});
-                printDoc.save('satelites-jupiter.pdf');
+                printDoc.fromHTML(ret, 5, 0, {'width': 200}, function() {
+					printDoc.save('satelites-jupiter.pdf');				
+				});
             }
 
             window.printPDF = printPDF;
