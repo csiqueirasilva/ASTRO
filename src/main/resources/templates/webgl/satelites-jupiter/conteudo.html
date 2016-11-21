@@ -372,7 +372,7 @@
                 var b1, b2;
                 var jup = "Júpiter";
 
-                var ret = "<div>";
+                var ret = "<div class='evento-satelite-markup'>";
 
                 switch (ev.sat) {
                     case "1":
@@ -428,11 +428,11 @@
                     ret += " (Duração: " + ev.duration + ")";
                 }
 
-				if(horizontalCoords.altitude < 0) {
-					ret += " - NÃO VISÍVEL";
-				}
-
                 ret += "</div>";
+
+				if(horizontalCoords.altitude < 0) {
+					ret = "";
+				}
 
                 return ret;
             }
@@ -475,7 +475,7 @@
                 var idx3 = dt3.toISOString().slice(0, 10).replace(/-/g, '');
                 var events3 = timeData[idx3].slice(0);
 
-                var ret = '<h2>Eventos de ' + ON_DAED.formatarDataJuliana(jd, fuso).substr(0, 10) + '</h2><div>';
+                var ret = '<h2>%%dd%% em ' + ON_DAED.formatarDataJuliana(jd, fuso).substr(0, 10) + '</h2><div>';
 
                 var dateRef = dt2.getUTCDate();
 
@@ -600,10 +600,13 @@
 
                     var lastHourFrac = 0;
 
+                    var count = 0;
+
                     for (var i = 0; i < events.length; i++) {
                         var ev = events[i];
                         var eventStr = formatEventoSatelite(ev);
-                        var hourString = eventStr.substr(6, 8);
+                        var jd = ON_DAED.ASTRO.getJulianFromUnix(ev.date);
+                        var hourString = ON_DAED.formatarDataJuliana(jd, fuso).substr(14);
                         var hourFrac = (parseInt(hourString.substr(0, 2)) + parseInt(hourString.substr(3, 2)) / 60) / 24;
 
                         for (var j = transits.length - 1; j >= 0; j--) {
@@ -617,8 +620,11 @@
                             }
                         }
 
+                        if(eventStr !== "") {
+                            count++;
+                        }
+                        
                         ret += eventStr;
-
                         lastHourFrac = hourFrac;
                     }
 
@@ -637,6 +643,13 @@
                     ret += "Não há eventos para a data selecionada";
                 }
 
+                var msgCount = ' eventos';
+
+                if(count === 1) {
+                    msgCount = ' evento';
+                }
+
+                ret = ret.replace('%%dd%%', count + msgCount);
 
                 ret += '</div>';
 
@@ -943,15 +956,55 @@
             var logoPdf = imgToDataURL('logo-pdf');
             var rodapePdf = imgToDataURL('rodape-pdf');
             
+            function getMes(mes) {
+                var ref = [
+                    "Janeiro",
+                    "Fevereiro",
+                    "Março",
+                    "Abril",
+                    "Maio",
+                    "Junho",
+                    "Julho",
+                    "Agosto",
+                    "Setembro",
+                    "Outubro",
+                    "Novembro",
+                    "Dezembro"
+                ];
+                
+                return ref[mes - 1];
+            }
+            
             function printPDF() {
                 
                 $('#btn-exportar-eventos').prop('disabled', true);
                 
                 var printDoc = new jsPDF();
 
-                var ret = "";
+                var dtVal = $('#dataju-datepicker-de-local').val().split('/');
 
-                var maxEventsPerPage = 3;
+                var mes = getMes(dtVal[1]);
+                var ano = dtVal[2];
+                        
+                var maxEventsPerPage = 4;
+                        
+                var eventoBuff = "";
+
+                for (var i = 0; i < diasRef; i++) {
+                    var jd = refJD + i + 0.5;
+                    var eventString = timeDataFromJulian(jd);
+                    eventString = eventString.replace('<div>', '');
+                    eventString = eventString.replace(/color:[ ]?.{7};/g, '');
+                    eventString = eventString.substr(0, eventString.length - 6);
+                    eventoBuff += eventString;
+                    if ((i - maxEventsPerPage + 1) % maxEventsPerPage === 0 && i !== diasRef - 1) {
+                        eventoBuff += "<!-- ADD_PAGE -->";
+                    }
+                }
+
+                var totalEventos = eventoBuff.match(/evento-satelite-markup/g || []).length;
+
+                var ret = "";
 
 				var rad = Math.PI / 180;
 
@@ -961,9 +1014,13 @@
 				var lat = ON_DAED.tempoSideral(localLatitude, true);
 				var lon = ON_DAED.tempoSideral(localLongitude, true);
 				
-				ret += '<h1>Eventos das Luas de Galileu (Júpiter)</h1>';
+				ret += '<h1>Eventos das Luas de Galileu</h1>';
+                
+                ret += '<h3>Io, Europa, Ganímedes e Calisto</h3>';
+                
+                ret += '<h4>' + totalEventos + ' eventos observáveis em ' + mes + ' de ' + ano + '.</h4>';
 
-                for(var i = 0; i < 60; i++) {
+                for(var i = 0; i < 50; i++) {
                     ret += '<br />';
                 }
                 
@@ -971,29 +1028,21 @@
                     ret += '<h3>Local: ' + cidadeEscolhida + '</h3>';
                 }
 
-				ret += '<h3>Longitude: ' + lon + ' Leste</h3>';
-				ret += '<h3>Latitude: ' + lat + ' Norte</h3>';
+				ret += '<h3>Longitude: ' + lon + ' (Leste positivo)</h3>';
+				ret += '<h3>Latitude: ' + lat + ' (Norte positivo)</h3>';
 
                 ret += '<h3>Fuso Horário: ' + $('#info-fuso-horario').val() + ' GMT</h3>';
-				ret += '<h3>Horário de Verão ' + $('#input-horario-verao').is(':checked') ? '' : 'não ' + 'vigente</h3>';
+				ret += '<h3>Horário de Verão ' + ($('#input-horario-verao').is(':checked') ? '' : 'não ') + 'vigente</h3>';
 
 
 				ret += '<p>É importante notar que o Azimute (<b>Az</b>) pode ser usado como referência aproximada dos pontos cardeais. Quando esse ângulo for entre 315º e 45º, a posição estará aproximadamente na direção Norte. Já quando o ângulo estiver entre 45º e 135º, a posição estará aproximadamente na direção Leste. Para a direção Sul o ângulo de Azimute deve ser entre 135º e 225º e para a direção Oeste o ângulo está entre 225º e 315º.</p>';
 		
-				ret += '<!-- ADD_PAGE -->';
+                ret += '<p>Apenas eventos observáveis para a localidade indicada são exibidos nesse documento.</p>';
+        
+				ret += '<!-- ADD_PAGE --><br /><br />';
 
-                for (var i = 0; i < diasRef; i++) {
-                    var jd = refJD + i + 0.5;
-                    var eventString = timeDataFromJulian(jd);
-                    eventString = eventString.replace('<div>', '');
-                    eventString = eventString.replace(/color:[ ]?.{7};/g, '');
-                    eventString = eventString.substr(0, eventString.length - 6);
-                    ret += eventString;
-                    if ((i - maxEventsPerPage + 1) % maxEventsPerPage === 0 && i !== diasRef - 1) {
-                        ret += "<!-- ADD_PAGE -->";
-                    }
-                }
-
+                ret += eventoBuff;
+        
                 var pageWidth = 200;
 
                 printDoc.fromHTML(ret, 5, 0, {'width': pageWidth}, function() {
@@ -1003,19 +1052,21 @@
                     var logo = $('#main-canvas')[0];
                     var logoData = logo.toDataURL();
                     
-                    var w = pageWidth * 0.9;
-                    var h = parseInt((w / logo.width) * logo.height);
+                    var w = 180;
+                    var h = 103;
                     
                     var fontSize = 14;
                     
+                    var baseAltura = 45;
+                    
                     printDoc.setFontSize(fontSize);
-                    printDoc.addImage(logoData, pageWidth * 0.05, 30, w, h);
-                    printDoc.text(pageWidth * 0.05, 30 + h + (fontSize / 2) * 1.1 * 2, "Imagem do software no momento da geração desse documento");
-                    printDoc.text(pageWidth * 0.05, 30 + h + (fontSize / 2) * 1.1 * 3, "Gerado em https://daed.on.br/astro/satelites-jupiter");
+                    printDoc.addImage(logoData, pageWidth * 0.05, baseAltura, w, h);
+                    printDoc.text(pageWidth * 0.05, baseAltura + h + (fontSize / 2) * 1.1 * 2, "Captura de tela do software no momento da criação desse documento");
+                    printDoc.text(pageWidth * 0.05, baseAltura + h + (fontSize / 2) * 1.1 * 3, "Gerado em https://daed.on.br/astro/satelites-jupiter");
                     
                     w = pageWidth;
                     h = parseInt((w / rodapePdf.width) * rodapePdf.height);
-                    printDoc.addImage(rodapePdf.data, 0, 255, w, h);
+                    printDoc.addImage(rodapePdf.data, 0, 260, w, h);
                     
 					printDoc.save('satelites-jupiter.pdf');
                     
