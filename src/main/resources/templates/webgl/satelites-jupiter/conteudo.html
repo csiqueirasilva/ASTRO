@@ -29,7 +29,7 @@
     Configurar Data e Local
 </button>
 
-<button type="button" id="btn-exportar-eventos" onclick="printPDF()" class="btn btn-primary btn-lg ui-observacao-horizontal">
+<button type="button" id="btn-exportar-eventos" class="btn btn-primary btn-lg ui-observacao-horizontal">
     Exportar eventos
 </button>
 
@@ -151,6 +151,9 @@
     </div>
 </div>
 
+<img id="rodape-pdf" src="imgs/magnetismo-terrestre-rodape.png" style="display: none;" />
+<img id="logo-pdf" src="imgs/logo-on.jpg" style="display: none;" />
+
 <div id="foco-msg" style="display: none;"></div>
 
 <div id="print-pdf" class="hidden"></div>
@@ -170,6 +173,8 @@
 <script th:inline='javascript'>
     /*<![CDATA[*/
     (function () {
+
+        var cidadeEscolhida = null;
 
         $.getJSON('lib/on-daed-js/CID-ALL.json', function (data) {
 
@@ -218,6 +223,7 @@
             function labelCidade(nome) {
                 $('#label-cidade').html(nome);
                 $('#label-cidade-form').html(nome);
+                cidadeEscolhida = nome;
                 $('#label-cidade-form').show();
             }
 
@@ -259,10 +265,12 @@
                     });
 
             $('#igrf-latitude-hidden').change(function () {
+                cidadeEscolhida = null;
                 $('#label-cidade-form').hide();
             });
 
             $('#igrf-longitude-hidden').change(function () {
+                cidadeEscolhida = null;
                 $('#label-cidade-form').hide();
             });
 
@@ -720,6 +728,11 @@
                 }, 5000);
             }
 
+            $('#btn-exportar-eventos').bind('click', function () {
+                $(this).prop('disabled', true);
+                printPDF(); 
+            });
+
             $('#foco-terra').bind('click', function () {
                 var ativoClass = 'glyphicon-eye-close terra-desligado';
                 var inativoClass = 'glyphicon-eye-open terra-ligado';
@@ -877,10 +890,13 @@
 
                     posicaoJupiter.cameraLocked = false;
 
-                    window.setTimeout(function () {
-                        $('#foco-terra').trigger('click');
-                        $('#loading-satelites').hide();
-                    }, 1000);
+                    var loadIt = window.setInterval(function () {
+                        if(document.hasFocus()) {
+                            $('#foco-terra').trigger('click');
+                            $('#loading-satelites').hide();
+                            clearInterval(loadIt);
+                        }
+                    }, 100);
                 });
             }
 
@@ -888,8 +904,32 @@
                 var dt = new Date();
                 setModelDate(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate(), dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
             });
-
+            
+            function imgToDataURL(id) {
+                var img = document.getElementById(id);
+                var ret = null;
+                if(img) {
+                    var canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    ret = {
+                        data: canvas.toDataURL(),
+                        width: img.width,
+                        height: img.height
+                    };
+                }
+                return ret;
+            } 
+            
+            var logoPdf = imgToDataURL('logo-pdf');
+            var rodapePdf = imgToDataURL('rodape-pdf');
+            
             function printPDF() {
+                
+                $('#btn-exportar-eventos').prop('disabled', true);
+                
                 var printDoc = new jsPDF();
 
                 var ret = "";
@@ -905,11 +945,21 @@
 				var lon = ON_DAED.tempoSideral(localLongitude, true);
 				
 				ret += '<h1>Eventos das Luas de Galileu (Júpiter)</h1>';
-		
-				ret += '<div style="height: 80; text-align: center;"><img style="text-align: center; width: 100%; height: 100%;" src="imgs/logo-on.jpg" /></div>';
 
-				ret += '<h3>Longitude Local: ' + lon + '</h3>';
-				ret += '<h3>Latitude Local: ' + lat + '</h3>';
+                for(var i = 0; i < 60; i++) {
+                    ret += '<br />';
+                }
+                
+                if(cidadeEscolhida !== null) {
+                    ret += '<h3>Local: ' + cidadeEscolhida + '</h3>';
+                }
+
+				ret += '<h3>Longitude: ' + lon + ' Leste</h3>';
+				ret += '<h3>Latitude: ' + lat + ' Norte</h3>';
+
+                ret += '<h3>Fuso Horário: ' + $('#info-fuso-horario').val() + ' GMT</h3>';
+				ret += '<h3>Horário de Verão ' + $('#input-horario-verao').is(':checked') ? '' : 'não ' + 'vigente</h3>';
+
 
 				ret += '<p>É importante notar que o Azimute (<b>Az</b>) pode ser usado como referência aproximada dos pontos cardeais. Quando esse ângulo for entre 315º e 45º, a posição estará aproximadamente na direção Norte. Já quando o ângulo estiver entre 45º e 135º, a posição estará aproximadamente na direção Leste. Para a direção Sul o ângulo de Azimute deve ser entre 135º e 225º e para a direção Oeste o ângulo está entre 225º e 315º.</p>';
 		
@@ -927,9 +977,36 @@
                     }
                 }
 
-                printDoc.fromHTML(ret, 5, 0, {'width': 200}, function() {
-					printDoc.save('satelites-jupiter.pdf');				
-				});
+                var pageWidth = 200;
+
+                printDoc.fromHTML(ret, 5, 0, {'width': pageWidth}, function() {
+                    
+                    printDoc.setPage(1);
+
+                    var logo = $('#main-canvas')[0];
+                    var logoData = logo.toDataURL();
+                    
+                    var w = pageWidth * 0.9;
+                    var h = parseInt((w / logo.width) * logo.height);
+                    
+                    var fontSize = 14;
+                    
+                    printDoc.setFontSize(fontSize);
+                    printDoc.addImage(logoData, pageWidth * 0.05, 30, w, h);
+                    printDoc.text(pageWidth * 0.05, 30 + h + (fontSize / 2) * 1.1 * 2, "Imagem do software no momento da geração desse documento");
+                    printDoc.text(pageWidth * 0.05, 30 + h + (fontSize / 2) * 1.1 * 3, "Gerado em https://daed.on.br/astro/satelites-jupiter");
+                    
+                    w = pageWidth;
+                    h = parseInt((w / rodapePdf.width) * rodapePdf.height);
+                    printDoc.addImage(rodapePdf.data, 0, 255, w, h);
+                    
+					printDoc.save('satelites-jupiter.pdf');
+                    
+                    window.setTimeout(function() {
+                        $('#btn-exportar-eventos').prop('disabled', false);                        
+                    }, 1000);
+                    
+    			});
             }
 
             window.printPDF = printPDF;
