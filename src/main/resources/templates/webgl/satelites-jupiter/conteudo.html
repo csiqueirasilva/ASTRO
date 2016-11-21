@@ -33,6 +33,8 @@
     Exportar eventos
 </button>
 
+<button type="button" id="btn-toggle-orbita" class="btn btn-primary btn-lg ui-observacao-horizontal">Desligar Órbitas</button>
+
 <div class="modal fade ui-observacao-horizontal" id="cidade-form" tabindex="-1" role="dialog" aria-labelledby="Localizar Cidade" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -727,6 +729,21 @@
                     focoMsgTo = null;
                 }, 5000);
             }
+
+            $('#btn-toggle-orbita').bind('click', function() {
+                var t = $(this).text();
+                
+                var offText = 'Desligar Órbitas';
+                var onText = 'Ligar Órbitas';
+                
+                if(t === offText) {
+                    $(this).html(onText);
+                    posicaoJupiter.tracer.visible = false;
+                } else {
+                    $(this).html(offText);
+                    posicaoJupiter.tracer.visible = true;
+                }
+            });
 
             $('#btn-exportar-eventos').bind('click', function () {
                 $(this).prop('disabled', true);
