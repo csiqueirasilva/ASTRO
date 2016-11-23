@@ -1014,30 +1014,37 @@
 				var lat = ON_DAED.tempoSideral(localLatitude, true);
 				var lon = ON_DAED.tempoSideral(localLongitude, true);
 				
-				ret += '<h1>Eventos das Luas de Galileu</h1>';
+				ret += '<h1>Eventos das Luas de Galileu (Júpiter-Satélites)</h1>';
                 
-                ret += '<h3>Io, Europa, Ganímedes e Calisto</h3>';
+                ret += '<h3>(Io, Europa, Ganímedes e Calisto)</h3>';
                 
                 ret += '<h4>' + totalEventos + ' eventos observáveis em ' + mes + ' de ' + ano + '.</h4>';
 
-                for(var i = 0; i < 50; i++) {
+                for(var i = 0; i < 49; i++) {
                     ret += '<br />';
                 }
                 
                 if(cidadeEscolhida !== null) {
-                    ret += '<h3>Local: ' + cidadeEscolhida + '</h3>';
+                    ret += '<h3 style="margin: 0;">Local: ' + cidadeEscolhida + '</h3>';
                 }
 
-				ret += '<h3>Longitude: ' + lon + ' (Leste positivo)</h3>';
-				ret += '<h3>Latitude: ' + lat + ' (Norte positivo)</h3>';
+				ret += '<h3 style="margin: 0;">Longitude: ' + lon + ' (Leste positivo)</h3>';
+				ret += '<h3 style="margin: 0;">Latitude: ' + lat + ' (Norte positivo)</h3>';
 
-                ret += '<h3>Fuso Horário: ' + $('#info-fuso-horario').val() + ' GMT</h3>';
-				ret += '<h3>Horário de Verão ' + ($('#input-horario-verao').is(':checked') ? '' : 'não ') + 'vigente</h3>';
+                ret += '<h3 style="margin: 0;">Fuso Horário: ' + $('#info-fuso-horario').val() + ' GMT</h3>';
+				ret += '<h3 style="margin: 0;">Horário de Verão vigente: <b>' + ($('#input-horario-verao').is(':checked') ? 'sim' : 'não ') + '</b></h3>';
 
 
-				ret += '<p>É importante notar que o Azimute (<b>Az</b>) pode ser usado como referência aproximada dos pontos cardeais. Quando esse ângulo for entre 315º e 45º, a posição estará aproximadamente na direção Norte. Já quando o ângulo estiver entre 45º e 135º, a posição estará aproximadamente na direção Leste. Para a direção Sul o ângulo de Azimute deve ser entre 135º e 225º e para a direção Oeste o ângulo está entre 225º e 315º.</p>';
+				ret += '<p>O ângulo Azimute (<b>Az</b>) pode ser usado como referência aproximada dos pontos cardeais para localizar a posição do sistema dos satélites galileanos de Júpiter:</p>';
+
+				ret += '<div>- Azimute entre 315º e 45º ~ direção Norte</div>';
+				ret += '<div>- Azimute entre 135º e 225º ~ direção Sul</div>';
+				ret += '<div>- Azimute entre 45º e 135º ~ direção Leste (Nascer do Sol)</div>';
+				ret += '<div>- Azimute entre 225º e 315º ~ direção Oeste (Ocaso do Sol)</div>';
+
+				ret += '<p>Nota: A altura <b>H</b>, medida a partir do horizonte do observador, também auxilia na localização do planeta.</p>';
 		
-                ret += '<p>Apenas eventos observáveis para a localidade indicada são exibidos nesse documento.</p>';
+                ret += '<p>Apenas eventos acima do horizonte para a localidade indicada são exibidos nesse documento.</p>';
         
 				ret += '<!-- ADD_PAGE --><br /><br />';
 
@@ -1066,7 +1073,7 @@
                     
                     w = pageWidth;
                     h = parseInt((w / rodapePdf.width) * rodapePdf.height);
-                    printDoc.addImage(rodapePdf.data, 0, 260, w, h);
+                    printDoc.addImage(rodapePdf.data, 0, 266, w, h);
                     
 					printDoc.save('satelites-jupiter.pdf');
                     

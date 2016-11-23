@@ -15,12 +15,6 @@ Além de detectar as coordenadas geográficas locais automaticamente do computad
 introduzir dados manualmente ou escolhidos a partir de uma lista (busca textual).</p>
 
 <div class='dicas-de-uso-ferramenta'>
-    <a class="btn btn-primary">Desligar Órbitas</a>
-</div>
-
-<p>Este botão permite desligar/ligar as linhas de representação das órbitas dos satélites de Júpiter.</p>
-
-<div class='dicas-de-uso-ferramenta'>
     <a class="btn btn-primary">Exportar Eventos</a>
 </div>
 
@@ -28,8 +22,6 @@ introduzir dados manualmente ou escolhidos a partir de uma lista (busca textual)
 é gerado e automaticamente realizado uma cópia (download). Neste arquivo consta a
 data, instante observável, Azimute (<b>Az</b>) e Altura (<b>H</b>) de Júpiter, tipo de fenômeno, satélite
 envolvido no fenômeno e a duração dos eventos:</p>
-
-<p>É importante notar que o Azimute (<b>Az</b>) pode ser usado como referência aproximada dos pontos cardeais. Quando esse ângulo for entre 315º e 45º, a posição estará aproximadamente na direção Norte. Já quando o ângulo estiver entre 45º e 135º, a posição estará aproximadamente na direção Leste. Para a direção Sul o ângulo de Azimute deve ser entre 135º e 225º e para a direção Oeste o ângulo está entre 225º e 315º.</p>
 
 <ul>
 	<li>Ocultações dos satélites por Júpiter</li>
@@ -39,6 +31,23 @@ envolvido no fenômeno e a duração dos eventos:</p>
 </ul>
 
 <p><b>Nota:</b> A duração do evento é exibida apenas para eventos que tem início e fim no mesmo dia devido a uma limitação de performance do programa.</p>
+
+<p>O ângulo Azimute (<b>Az</b>) pode ser usado como referência aproximada dos pontos cardeais para localizar a posição do sistema dos satélites galileanos de Júpiter:</p>
+
+<ul>
+	<li>Azimute entre 315º e 45º ~ direção Norte</li>
+	<li>Azimute entre 135º e 225º ~ direção Sul</li>
+	<li>Azimute entre 45º e 135º   ~ direção Leste (Nascer do Sol)</li>
+	<li>Azimute entre 225º e 315º ~ direção Oeste (Ocaso do Sol)</li>
+</ul>
+
+<p>Nota: A altura <b>H</b>, medida a partir do horizonte do observador, também auxilia na localização do planeta.</p>
+
+<div class='dicas-de-uso-ferramenta'>
+    <a class="btn btn-primary">Desligar Órbitas</a>
+</div>
+
+<p>Este botão permite desligar/ligar as linhas de representação das órbitas dos satélites de Júpiter.</p>
 
 <h3>Área de resultados da tela (Canto inferior esquerdo)</h3>
 
@@ -58,7 +67,7 @@ envolvido no fenômeno e a duração dos eventos:</p>
 	<li>Vista Livre</li>
 </ul>
 
-<p>Na opção Vista Livre chama-se a atenção para a possibilidade do sistema de Júpiter ser visto por vários ângulos e em fase, o que não é possível observar da Terra. Em outras palavras, a visualização funciona como se o observador estivesse ao redor de Júpiter.</p>
+<p>Na opção Vista Livre chama-se a atenção para a possibilidade do sistema de Júpiter ser visto de vários ângulos e em fase, o que não é possível observar da Terra. Em outras palavras, a visualização funciona como se o observador estivesse na vizinhança (ou região próxima) de Júpiter.</p>
 
 <div class="dicas-de-uso-ferramenta noselect">
     <input class="bs-slider-helper" data-slider-tooltip="hide" type="text" data-slider-min="0" data-slider-max="2000" data-slider-step="1" data-slider-value="200" />
