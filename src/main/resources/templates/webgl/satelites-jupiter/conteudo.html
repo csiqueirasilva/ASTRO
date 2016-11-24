@@ -937,6 +937,7 @@
 							if($('#foco-terra').hasClass('glyphicon-eye-open')) {
 								$('#foco-terra').trigger('click');
 							}
+							posicaoJupiter.setSunCameraPos();
 							$('#loading-satelites').hide();
 							$('#loading-satelites').html("Carregando posições!");
 							clearInterval(loadIt);
