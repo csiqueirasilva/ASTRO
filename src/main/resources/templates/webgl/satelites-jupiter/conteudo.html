@@ -69,7 +69,7 @@
 
                 <div class='igrf-divisao'>
 
-                    <h4>Data <span title="Referência: J2000" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></h4>
+                    <h4>Data <span title="Referência: J2000 - Use qualquer dia entre os anos 2000 e 2079" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></h4>
 
                     <input readonly="readonly" class="form-control input-centralizado jlink dataju-datepicker" name="data-gregoriana-de-local" size="16" type="text" id="dataju-datepicker-de-local" value="12/02/2012" />
 
@@ -173,865 +173,880 @@
 </div>
 
 <script th:inline='javascript'>
-    /*<![CDATA[*/
-    (function () {
+	/*<![CDATA[*/
+	(function () {
 
-        var cidadeEscolhida = null;
+		var cidadeEscolhida = null;
+		var dataLocalDialogo = false;
 
-        $.getJSON('lib/on-daed-js/CID-ALL.json', function (data) {
+		$.getJSON('lib/on-daed-js/CID-ALL.json', function (data) {
 
-            $('#cidade-form').on('show.bs.modal', function () {
-                $('#busca-cidade-input').val('');
-                $('#info-local').modal('hide');
-                $('#busca-cidade-feedback').html("Digite a cidade");
-            });
+			$('#cidade-form').on('show.bs.modal', function () {
+				dataLocalDialogo = true;
+				$('#busca-cidade-input').val('');
+				$('#info-local').modal('hide');
+				$('#busca-cidade-feedback').html("Digite a cidade");
+			});
 
-            $('#cidade-form').on('hidden.bs.modal', function () {
-                $('#info-local').modal('show');
-            });
+			$('#cidade-form').on('hidden.bs.modal', function () {
+				dataLocalDialogo = false;
+				$('#info-local').modal('show');
+			});
 
-            var cidades = [];
+			var cidades = [];
 
-            for (var i in data) {
-                var estado = data[i];
-                for (var j = 0; j < estado.length; j++) {
-                    cidades.push({
-                        name: i + ' - ' + data[i][j].c,
-                        l: parseFloat(data[i][j].l),
-                        b: parseFloat(data[i][j].b)
-                    });
-                }
-            }
-
-            var buscaCidadeInput = $('#busca-cidade-input');
-
-            buscaCidadeInput.on('keyup', function () {
-                window.setTimeout(function () {
-                    if ($('ul.typeahead li:visible').length === 0 && buscaCidadeInput.val()) {
-                        $('#busca-cidade-feedback').html("Nenhuma cidade foi localizada");
-                    } else if (!buscaCidadeInput.val()) {
-                        $('#busca-cidade-feedback').html("Digite a cidade");
-                    } else if ($('ul.typeahead li:visible').length !== 0) {
-                        $('#busca-cidade-feedback').html("Escolha a cidade");
-                    } else {
-                        $('#busca-cidade-feedback').empty();
-                    }
-                }, 10);
-            });
-
-            buscaCidadeInput.typeahead({source: cidades,
-                autoSelect: true, items: 100});
-
-            function labelCidade(nome) {
-                $('#label-cidade').html(nome);
-                $('#label-cidade-form').html(nome);
-                cidadeEscolhida = nome;
-                $('#label-cidade-form').show();
-            }
-
-            buscaCidadeInput.change(function () {
-                var current = buscaCidadeInput.typeahead("getActive");
-                if (current) {
-                    // Some item from your model is active!
-                    if (current.name === buscaCidadeInput.val().toUpperCase()) {
-                        $('#igrf-longitude').anglepicker('value', current.l, true);
-                        $('#igrf-latitude').anglepicker('value', current.b * 2, true);
-                        labelCidade(current.name);
-                        $('#cidade-form').modal('hide');
-                    } else {
-                    }
-                } else {
-                    // new value
-                }
-            });
-
-            ON_DAED.numberInputMinMax('.input-numerico');
-
-            ON_DAED.addTempoSideralAnglepicker($('#igrf-latitude'), '#igrf-latitude');
-            ON_DAED.addTempoSideralAnglepicker($('#igrf-longitude'), '#igrf-longitude');
-
-            var date = new Date();
-
-            $('#dataju-datepicker-de-local')
-                    .val(date.getUTCDate() + '/' + (date.getUTCMonth() < 9 ? '0' + (date.getUTCMonth() + 1) : date.getUTCMonth() + 1) + '/' + date.getUTCFullYear())
-                    .datepicker({
-                        orientation: "top",
-                        format: 'dd/mm/yyyy',
-                        language: 'pt-BR',
-                        autoclose: true,
-                        startDate: "01/01/1900",
-                        endDate: "31/12/2020"
-                    }).on('changeDate',
-                    function (ev) {
-
-                    });
-
-            $('#igrf-latitude-hidden').change(function () {
-                cidadeEscolhida = null;
-                $('#label-cidade-form').hide();
-            });
-
-            $('#igrf-longitude-hidden').change(function () {
-                cidadeEscolhida = null;
-                $('#label-cidade-form').hide();
-            });
-
-            $('#info-fuso-horario').change(function () {
-                var v = parseInt($(this).val());
-                if (isNaN(v)) {
-                    $(this).val("0");
-                } else if (v > 12) {
-                    $(this).val("12");
-                } else if (v < -12) {
-                    $(this).val("-12");
-                }
-            });
-
-            function obterFusoHorario() {
-                return parseFloat($('#info-fuso-horario').val()) + ($('#input-horario-verao').is(':checked') ? 1 : 0);
-            }
-
-            (function () {
-
-                var fuso = ON_DAED.fusoOriginal();
-
-                $('#input-horario-verao').attr('checked', ON_DAED.horarioVerao() ? true : false);
-
-                $('#info-fuso-horario').val(fuso);
-
-                $('#info-local').on('hidden.modal.bs', function () {
-                    var dtVal = $('#dataju-datepicker-de-local').val().split('/');
-
-                    var fuso = obterFusoHorario();
-
-                    var dt = new Date(Date.UTC(dtVal[2], dtVal[1] - 1, dtVal[0], -fuso, 0, 0));
-
-                    setModelDate(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate(), dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
-                });
-
-            })();
-
-            /* SRC: http://stackoverflow.com/questions/3169786/clear-text-selection-with-javascript */
-            function clearTextSelection() {
-                if (window.getSelection) {
-                    if (window.getSelection().empty) {  // Chrome
-                        window.getSelection().empty();
-                    } else if (window.getSelection().removeAllRanges) {  // Firefox
-                        window.getSelection().removeAllRanges();
-                    }
-                } else if (document.selection) {  // IE?
-                    document.selection.empty();
-                }
-            }
-
-            $('.bs-slider').bootstrapSlider();
-
-            function getObjectPosition(body, jd) {
-
-                var obliquity = ON_DAED.ASTRO.getEclipticObliquity(jd);
-
-                var pos;
-
-                if (body === ON_DAED.ASTRO.SolarSystemBody.SUN) {
-                    pos = ON_DAED.ASTRO.getSolarCoordinates(jd);
-                } else {
-                    pos = ON_DAED.ASTRO.getSolarSystemBodyPosition(body, jd, obliquity.nutation.longitude);
-                }
-
-                var rad = Math.PI / 180;
-
-                var localLatitude = parseFloat($('#igrf-latitude-hidden').val()) * rad;
-                var localLongitude = -parseFloat($('#igrf-longitude-hidden').val()) * rad;
-
-                var horizontalCoords = ON_DAED.ASTRO.getTransformedCoordinates({
-                    from: ON_DAED["ASTRO"].CoordinateType.ECLIPTIC,
-                    to: ON_DAED["ASTRO"].CoordinateType.HORIZONTAL,
-                    localLatitude: localLatitude,
-                    localLongitude: localLongitude,
-                    julian: jd,
-                    latitude: pos.latitudeRadian,
-                    longitude: pos.longitudeRadian,
-                    obliquity: obliquity.obliquityRadian
-                });
-
-                return horizontalCoords;
-            }
-
-            function getEventTimestamp(body, jd, timeString) {
-                var fuso = obterFusoHorario();
-
-                var horizontalCoords = getObjectPosition(body, jd);
-
-                return "[" + (timeString ? timeString : ON_DAED.formatarDataJuliana(jd, fuso).substr(14)) + " Az: " + ON_DAED.tempoSideral(horizontalCoords.azimute, true) + " H: " + ON_DAED.tempoSideral(horizontalCoords.altitude, true) + "]";
-            }
-
-            function formatEventoSatelite(ev) {
-                var sat;
-                var tipo;
-                var movimento = ev.event;
-                var b1, b2;
-                var jup = "Júpiter";
-
-                var ret = "<div class='evento-satelite-markup'>";
-
-                switch (ev.sat) {
-                    case "1":
-                        sat = "Io";
-                        break;
-                    case "2":
-                        sat = "Europa";
-                        break;
-                    case "3":
-                        sat = "Ganímedes";
-                        break;
-                    case "4":
-                        sat = "Calisto";
-                }
-
-                var color = posJup.getSatelliteColors()[ev.sat];
-
-                sat = "<span style='font-weight: bold; color: " + color + ";'>" + sat + "</span>";
-                jup = "<span style='font-weight: bold; color: #ffa500;'>" + jup + "</span>";
-
-                switch (ev.type) {
-                    case "Ecl":
-                        tipo = "Sombra";
-                        b2 = sat;
-                        b1 = jup;
-                        break;
-                    case "Sha":
-                        tipo = "Sombra";
-                        b1 = sat;
-                        b2 = jup;
-                        break;
-                    case "Occ":
-                        tipo = "Ocultação";
-                        b2 = sat;
-                        b1 = jup;
-                        break;
-                    case "Tra":
-                        tipo = "Trânsito";
-                        b1 = sat;
-                        b2 = jup;
-                        break;
-                }
-
-                movimento = movimento === "start" ? "início" : "fim";
-
-                var jd = ON_DAED.ASTRO.getJulianFromUnix(ev.date);
-
-				var horizontalCoords = getObjectPosition(ON_DAED.ASTRO.SolarSystemBody.JUPITER, jd);
-
-                ret += getEventTimestamp(ON_DAED.ASTRO.SolarSystemBody.JUPITER, jd) + " " + tipo + " (" + movimento + "): " + b1 + " sobre " + b2;
-
-                if(ev.duration) {
-                    ret += " (Duração: " + ev.duration + ")";
-                }
-
-                ret += "</div>";
-
-				if(horizontalCoords.altitude < 0) {
-					ret = "";
+			for (var i in data) {
+				var estado = data[i];
+				for (var j = 0; j < estado.length; j++) {
+					cidades.push({
+						name: i + ' - ' + data[i][j].c,
+						l: parseFloat(data[i][j].l),
+						b: parseFloat(data[i][j].b)
+					});
 				}
+			}
+
+			var buscaCidadeInput = $('#busca-cidade-input');
+
+			buscaCidadeInput.on('keyup', function () {
+				window.setTimeout(function () {
+					if ($('ul.typeahead li:visible').length === 0 && buscaCidadeInput.val()) {
+						$('#busca-cidade-feedback').html("Nenhuma cidade foi localizada");
+					} else if (!buscaCidadeInput.val()) {
+						$('#busca-cidade-feedback').html("Digite a cidade");
+					} else if ($('ul.typeahead li:visible').length !== 0) {
+						$('#busca-cidade-feedback').html("Escolha a cidade");
+					} else {
+						$('#busca-cidade-feedback').empty();
+					}
+				}, 10);
+			});
+
+			buscaCidadeInput.typeahead({source: cidades,
+				autoSelect: true, items: 100});
+
+			function labelCidade(nome) {
+				$('#label-cidade').html(nome);
+				$('#label-cidade-form').html(nome);
+				cidadeEscolhida = nome;
+				$('#label-cidade-form').show();
+			}
+
+			buscaCidadeInput.change(function () {
+				var current = buscaCidadeInput.typeahead("getActive");
+				if (current) {
+					// Some item from your model is active!
+					if (current.name === buscaCidadeInput.val().toUpperCase()) {
+						$('#igrf-longitude').anglepicker('value', current.l, true);
+						$('#igrf-latitude').anglepicker('value', current.b * 2, true);
+						labelCidade(current.name);
+						$('#cidade-form').modal('hide');
+					} else {
+					}
+				} else {
+					// new value
+				}
+			});
+
+			ON_DAED.numberInputMinMax('.input-numerico');
+
+			ON_DAED.addTempoSideralAnglepicker($('#igrf-latitude'), '#igrf-latitude');
+			ON_DAED.addTempoSideralAnglepicker($('#igrf-longitude'), '#igrf-longitude');
+
+			var date = new Date();
+
+			$('#dataju-datepicker-de-local')
+				.val(date.getUTCDate() + '/' + (date.getUTCMonth() < 9 ? '0' + (date.getUTCMonth() + 1) : date.getUTCMonth() + 1) + '/' + date.getUTCFullYear())
+				.datepicker({
+					orientation: "top",
+					format: 'dd/mm/yyyy',
+					language: 'pt-BR',
+					autoclose: true,
+					startDate: "01/01/2000",
+					endDate: "31/12/2079"
+				}).on('changeDate',
+				function (ev) {
+
+				});
+
+			$('#igrf-latitude-hidden').change(function () {
+				cidadeEscolhida = null;
+				$('#label-cidade-form').hide();
+			});
+
+			$('#igrf-longitude-hidden').change(function () {
+				cidadeEscolhida = null;
+				$('#label-cidade-form').hide();
+			});
+
+			$('#info-fuso-horario').change(function () {
+				var v = parseInt($(this).val());
+				if (isNaN(v)) {
+					$(this).val("0");
+				} else if (v > 12) {
+					$(this).val("12");
+				} else if (v < -12) {
+					$(this).val("-12");
+				}
+			});
+
+			function obterFusoHorario() {
+				return parseFloat($('#info-fuso-horario').val()) + ($('#input-horario-verao').is(':checked') ? 1 : 0);
+			}
+
+			(function () {
+
+				var fuso = ON_DAED.fusoOriginal();
+
+				$('#input-horario-verao').attr('checked', ON_DAED.horarioVerao() ? true : false);
+
+				$('#info-fuso-horario').val(fuso);
+
+				$('#info-local').on('hidden.modal.bs', function () {
+					if (!dataLocalDialogo) {
+						var dtVal = $('#dataju-datepicker-de-local').val().split('/');
 
-                return ret;
-            }
+						var fuso = obterFusoHorario();
 
-            function fixTransitTimes(transit, fuso) {
+						var dt = new Date(Date.UTC(dtVal[2], dtVal[1] - 1, dtVal[0], -fuso, 0, 0));
 
-                var correcaoMinutos = 0.00235;
+						setModelDate(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate(), dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
+					}
+				});
 
-                if (transit.rising !== null) {
-                    transit.rising = (transit.rising + fuso / 24 + correcaoMinutos);
-                    if (transit.rising < 0 || transit.rising > 1)
-                        transit.rising = null;
-                }
+			})();
 
-                if (transit.transit !== null) {
-                    transit.transit = (transit.transit + fuso / 24);
-                    if (transit.transit < 0 || transit.transit > 1)
-                        transit.transit = null;
-                }
+			/* SRC: http://stackoverflow.com/questions/3169786/clear-text-selection-with-javascript */
+			function clearTextSelection() {
+				if (window.getSelection) {
+					if (window.getSelection().empty) {  // Chrome
+						window.getSelection().empty();
+					} else if (window.getSelection().removeAllRanges) {  // Firefox
+						window.getSelection().removeAllRanges();
+					}
+				} else if (document.selection) {  // IE?
+					document.selection.empty();
+				}
+			}
 
-                if (transit.setting !== null) {
-                    transit.setting = (transit.setting + fuso / 24 - correcaoMinutos);
-                    if (transit.setting < 0 || transit.setting > 1)
-                        transit.setting = null;
-                }
-            }
+			$('.bs-slider').bootstrapSlider();
 
-            function timeDataFromJulian(jd) {
-                var fuso = obterFusoHorario();
+			function getObjectPosition(body, jd) {
 
-                var dt1 = ON_DAED.ASTRO.getDateFromJulian(jd - 1 - (1 / 24) * fuso);
-                var idx1 = dt1.toISOString().slice(0, 10).replace(/-/g, '');
-                var events1 = timeData[idx1].slice(0);
+				var obliquity = ON_DAED.ASTRO.getEclipticObliquity(jd);
 
-                var dt2 = ON_DAED.ASTRO.getDateFromJulian(jd - (1 / 24) * fuso);
-                var idx2 = dt2.toISOString().slice(0, 10).replace(/-/g, '');
-                var events2 = timeData[idx2].slice(0);
+				var pos;
 
-                var dt3 = ON_DAED.ASTRO.getDateFromJulian(jd + 1 - (1 / 24) * fuso);
-                var idx3 = dt3.toISOString().slice(0, 10).replace(/-/g, '');
-                var events3 = timeData[idx3].slice(0);
-
-                var ret = '<h2>%%dd%% em ' + ON_DAED.formatarDataJuliana(jd, fuso).substr(0, 10) + '</h2><div>';
-
-                var dateRef = dt2.getUTCDate();
-
-                for (var i = events1.length - 1; i >= 0; i--) {
-                    var dt = new Date(events1[i].date);
-                    dt.setHours(dt.getHours() + fuso);
-                    var utcDate = dt.getUTCDate();
-                    if (utcDate !== dateRef) {
-                        events1.splice(i, 1);
-                    }
-                }
-
-                for (var i = events2.length - 1; i >= 0; i--) {
-                    var dt = new Date(events2[i].date);
-                    dt.setHours(dt.getHours() + fuso);
-                    var utcDate = dt.getUTCDate();
-                    if (utcDate !== dateRef) {
-                        events2.splice(i, 1);
-                    }
-                }
-
-                for (var i = events3.length - 1; i >= 0; i--) {
-                    var dt = new Date(events3[i].date);
-                    dt.setHours(dt.getHours() + fuso);
-                    var utcDate = dt.getUTCDate();
-                    if (utcDate !== dateRef) {
-                        events3.splice(i, 1);
-                    }
-                }
-
-                var events = events1.concat(events2).concat(events3);
-
-                for(var i = 0; i < events.length; i++) {
-                    
-                    if(events[i].event === "start" && !events[i].duration) {
-                        var sat = events[i].sat;
-                        var type = events[i].type;
-                        var found = false;
-                        for(var j = i + 1; !found && j < events.length; j++) {
-                            if(events[j].sat === sat && 
-                                    (
-                                        (events[j].type === type && events[j].event === "end") ||
-                                        (type === "Ecl" && events[j].type === "Occ" && events[j].event === "end")
-                                    )
-                                ) {
-                            
-                                var dur = events[j].date - events[i].date;
-                                
-                                dur /= 1000;
-                                
-                                var hora = parseInt(dur / 3600);
-                                var min = parseInt((dur % 3600) / 60);
-                                var sec = parseInt(dur % 60);
-                                
-                                events[i].duration = ON_DAED.formatarHora(hora, min, sec);
-                                found = true;
-                            }
-                        }
-                    }
-                }
-
-                if (events.length > 0) {
-                    var rad = Math.PI / 180;
-                    var localLatitude = parseFloat($('#igrf-latitude-hidden').val()) * rad;
-                    var localLongitude = -parseFloat($('#igrf-longitude-hidden').val()) * rad;
-                    var solarTransitTimes = ON_DAED.ASTRO.getTransit(localLongitude, localLatitude, jd, ON_DAED["ASTRO"].SolarSystemBody.SUN);
-                    var jupiterTransitTimes = ON_DAED.ASTRO.getTransit(localLongitude, localLatitude, jd, ON_DAED["ASTRO"].SolarSystemBody.JUPITER);
-
-                    fixTransitTimes(solarTransitTimes, fuso);
-                    fixTransitTimes(jupiterTransitTimes, fuso);
-
-                    var transits = [];
-
-                    transits.push({
-                        t: solarTransitTimes.rising,
-                        text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Nascer)</span>",
-                        body: ON_DAED.ASTRO.SolarSystemBody.SUN
-                    });
-
-                    transits.push({
-                        t: solarTransitTimes.transit,
-                        text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Passagem Meridiana)</span>",
-                        body: ON_DAED.ASTRO.SolarSystemBody.SUN
-                    });
-
-                    transits.push({
-                        t: solarTransitTimes.setting,
-                        text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Ocaso)</span>",
-                        body: ON_DAED.ASTRO.SolarSystemBody.SUN
-                    });
-
-                    var jupiterRising = jupiterTransitTimes.rising;
-
-                    var oldJupiterTransit = ON_DAED.ASTRO.getTransit(localLongitude, localLatitude, jd - 1, ON_DAED["ASTRO"].SolarSystemBody.JUPITER);
-
-                    fixTransitTimes(oldJupiterTransit, fuso);
-
-                    var jupiterTransit = jupiterRising < jupiterTransitTimes.transit ? jupiterTransitTimes.transit : oldJupiterTransit.transit;
-                    var jupiterSetting = jupiterRising < jupiterTransitTimes.setting ? jupiterTransitTimes.setting : oldJupiterTransit.setting;
-
-                    transits.push({
-                        t: jupiterRising,
-                        text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Nascer)</span>",
-                        body: ON_DAED.ASTRO.SolarSystemBody.JUPITER
-                    });
-
-                    transits.push({
-                        t: jupiterTransit,
-                        text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Passagem Meridiana)</span>",
-                        body: ON_DAED.ASTRO.SolarSystemBody.JUPITER
-                    });
-
-                    transits.push({
-                        t: jupiterSetting,
-                        text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Ocaso)</span>",
-                        body: ON_DAED.ASTRO.SolarSystemBody.JUPITER
-                    });
-
-                    transits.sort(function (a, b) {
-                        return b.t - a.t;
-                    });
-
-                    var lastHourFrac = 0;
-
-                    var count = 0;
-
-                    for (var i = 0; i < events.length; i++) {
-                        var ev = events[i];
-                        var eventStr = formatEventoSatelite(ev);
-                        var jd = ON_DAED.ASTRO.getJulianFromUnix(ev.date);
-                        var hourString = ON_DAED.formatarDataJuliana(jd, fuso).substr(14);
-                        var hourFrac = (parseInt(hourString.substr(0, 2)) + parseInt(hourString.substr(3, 2)) / 60) / 24;
-
-                        for (var j = transits.length - 1; j >= 0; j--) {
-                            if (transits[j].t !== null && lastHourFrac <= transits[j].t && transits[j].t <= hourFrac) {
-                                var transit = transits.splice(j, 1)[0];
-                                var h = parseInt(transit.t * 24);
-                                var m = parseInt(((transit.t * 24) % 1) * 60);
-                                var s = parseInt(((((transit.t * 24) % 1) * 60) % 1) * 60);
-
-                                ret += "<div>" + getEventTimestamp(transit.body, parseInt(jd) + 0.5 + transit.t - fuso / 24, ON_DAED.formatarHora(h, m, s)) + " " + transit.text + "</div>";
-                            }
-                        }
-
-                        if(eventStr !== "") {
-                            count++;
-                        }
-                        
-                        ret += eventStr;
-                        lastHourFrac = hourFrac;
-                    }
-
-                    for (var i = transits.length - 1; i >= 0; i--) {
-                        if (transits[i].t !== null) {
-                            var transit = transits[i];
-                            var h = parseInt(transit.t * 24);
-                            var m = parseInt(((transit.t * 24) % 1) * 60);
-                            var s = parseInt(((((transit.t * 24) % 1) * 60) % 1) * 60);
-
-                            ret += "<div>" + getEventTimestamp(transit.body, parseInt(jd) + 0.5 + transit.t - fuso / 24, ON_DAED.formatarHora(h, m, s)) + " " + transit.text + "</div>";
-                        }
-                    }
-
-                } else {
-                    ret += "Não há eventos para a data selecionada";
-                }
-
-                var msgCount = ' eventos';
-
-                if(count === 1) {
-                    msgCount = ' evento';
-                }
-
-                ret = ret.replace('%%dd%%', count + msgCount);
-
-                ret += '</div>';
-
-                return ret;
-            }
-
-            var sliderFact = 100000000;
-
-            var animateYear = null;
-
-            function stopAnimateYear() {
-                window.clearInterval(animateYear);
-                animateYear = null;
-                $('input#slider-data').bootstrapSlider('enable');
-                var ativoClass = 'glyphicon-pause terra-desligado';
-                var inativoClass = 'glyphicon-play terra-ligado';
-
-                $('#play-terra').removeClass(ativoClass);
-                $('#play-terra').addClass(inativoClass);
-            }
-
-            function startAnimateYear() {
-                if (animateYear === null) {
-                    var t = $('input#slider-data').bootstrapSlider('getValue');
-                    $('input#slider-data').bootstrapSlider('disable');
-                    var max = $('input#slider-data').bootstrapSlider('getAttribute', 'max');
-                    animateYear = window.setInterval(function () {
-                        t += sliderFact / 50;
-                        $('input#slider-data').bootstrapSlider('setValue', t, true);
-                        if (t >= max) {
-                            stopAnimateYear();
-                        }
-                    }, 20);
-                }
-            }
-
-            function sliderBtn(slideEvt) {
-                var value = parseInt(slideEvt.value);
-
-                if (isNaN(value)) {
-                    value = parseInt($(this).attr('data-slider-value'));
-                }
-
-                var cb = $('#' + this.id).data('cb');
-                cb(value);
-
-                var displayValue = refJD + value / sliderFact;
-
-                $(this).data('JD', displayValue);
-
-                var fuso = obterFusoHorario();
-
-                displayValue = ON_DAED.formatarDataJuliana(displayValue, fuso);
-
-                var q = $('#' + this.id);
-
-                q.siblings('.label-data-slider').html(displayValue);
-                $('#eventos-do-dia-hidden').html(timeDataFromJulian($(this).data('JD')));
-
-                clearTextSelection();
-            }
-
-            $('.bs-slider').on('slideStop', sliderBtn);
-            $('.bs-slider').on('slide', sliderBtn);
-
-            $('.parent-bs-slider').bind('mouseup', clearTextSelection);
-
-            $('.campo-de-observacao').bind('mouseup', clearTextSelection);
-
-            $('#slider-data').data('cb', function (value) {
-                var t = value / sliderFact;
-                posicaoJupiter.traceLines(t);
-            });
-
-            $('#velocidade-translacao-terra').data('cb', function (value) {
-                //observacaoSistemaSolar.setVelocidadeRotacao(value / 10000);
-            });
-
-            $('#velocidade-rotacao-terra').data('cb', function (value) {
-                //linhasDeForca.setVelocidadeRotacao(value / 10000);
-            });
-
-            var focoMsgTo = null;
-
-            function focoMsg (msg) {
-                clearTimeout(focoMsgTo);
-                $('#foco-msg').html(msg).show();
-                focoMsgTo = window.setTimeout(function() {
-                    $('#foco-msg').hide();
-                    focoMsgTo = null;
-                }, 5000);
-            }
-
-            $('#btn-toggle-orbita').bind('click', function() {
-                var t = $(this).text();
-                
-                var offText = 'Desligar Órbitas';
-                var onText = 'Ligar Órbitas';
-                
-                if(t === offText) {
-                    $(this).html(onText);
-                    posicaoJupiter.tracer.visible = false;
-                } else {
-                    $(this).html(offText);
-                    posicaoJupiter.tracer.visible = true;
-                }
-            });
-
-            $('#btn-exportar-eventos').bind('click', function () {
-                $(this).prop('disabled', true);
-                printPDF(); 
-            });
-
-            $('#foco-terra').bind('click', function () {
-                var ativoClass = 'glyphicon-eye-close terra-desligado';
-                var inativoClass = 'glyphicon-eye-open terra-ligado';
-
-                $(this).toggleClass(ativoClass);
-                $(this).toggleClass(inativoClass);
-
-                posicaoJupiter.cameraLocked = !posicaoJupiter.cameraLocked;
-                if (posicaoJupiter.cameraLocked) {
-                    posicaoJupiter.setSunCameraPos();
-                    focoMsg('Vista da Terra');
-                } else {
-                    focoMsg('Vista livre');
-                }
-            });
-
-            $('#play-terra').bind('click', function () {
-                var ativoClass = 'glyphicon-pause terra-desligado';
-                var inativoClass = 'glyphicon-play terra-ligado';
-
-                $(this).toggleClass(ativoClass);
-                $(this).toggleClass(inativoClass);
-
-                if (animateYear === null) {
-                    startAnimateYear();
-                } else {
-                    stopAnimateYear();
-                }
-            });
-
-            $('#eventos-do-dia').tooltip({
-                html: true,
-                container: "body",
-                placement: "top",
-                title: function () {
-                    return $('#eventos-do-dia-hidden').html();
-                }
-            });
-
-            var posicaoJupiter;
-            var control;
-            var timeData = null;
-            var refJD = 0;
-            var diasRef = 0;
-
-            function fetchTimeData(mes, ano, callback) {
-
-                $('input#slider-data').bootstrapSlider('disable');
-
-                var jd = ON_DAED.ASTRO.getJulianFromGregorian(1, mes, ano, 0, 0, 0, 0);
-                diasRef = ON_DAED.qtdDiasMes(ano, mes);
-
-                $.getJSON('lib/jupiter-satellite-events-json/export/' + ano + '.json', function (data) {
-                    timeData = data;
-
-                    $.getJSON('horizons/jupiter-satellites-model', {jd: jd}, function (posData) {
-
-                        posicaoJupiter.updateFromData(posData);
-                        refJD = jd;
-
-                        $('input#slider-data').trigger('slide');
-                        $('input#slider-data').bootstrapSlider('enable');
-
-                        if (callback instanceof Function) {
-                            callback();
-                        }
-                    });
-                });
-
-            }
-
-            ON_DAED["3D"].create(function (scene, camera) {
-
-                var wrapperJupiter = new THREE.Object3D();
-
-                posicaoJupiter = new ON_DAED["3D"].JupiterSatelites(wrapperJupiter, control);
-
-                scene.add(wrapperJupiter);
-
-                posicaoJupiter.traceLines(0);
-
-                posicaoJupiter.setCameraDataCallback(function () {
-                    var lat = parseFloat($('#igrf-latitude-hidden').val());
-                    var long = parseFloat($('#igrf-longitude-hidden').val());
-                    var jd = $('input#slider-data').data('JD');
-
-                    return {
-                        lat: lat,
-                        long: long,
-                        jd: jd
-                    };
-                });
-
-                window.posJup = posicaoJupiter;
-
-            }, function (cameraControl, renderer, scene, camera, stats, clock) {
-
-                if (($('#campo-de-observacao canvas').is(':hover') || posicaoJupiter.cameraLocked) && !$('.modal').is(':visible')) {
-                    cameraControl.enabled = true;
-                    cameraControl.update(clock.getDelta());
-                } else {
-                    cameraControl.enabled = false;
-                }
-
-                ON_DAED["3D"].update(camera);
-                renderer.render(scene, camera);
-            }, document.getElementById('campo-de-observacao'),
-                    function (camera, renderer, scene, stats) {
-                        control = new THREE.OrbitControls(camera);
-                        control.maxDistance = 125000;
-                        control.minDistance = 1000;
-                        return control;
-                    });
-
-            $('#load-modal').data('beforeReady').push(function () {
-                //$('input#slider-data').trigger('slideStop');
-
-                var satColors = posicaoJupiter.getSatelliteColors();
-
-                $('#satelite-label-io').css({color: satColors['1']});
-                $('#satelite-label-europa').css({color: satColors['2']});
-                $('#satelite-label-ganymede').css({color: satColors['3']});
-                $('#satelite-label-callisto').css({color: satColors['4']});
-
-                window.navigator.geolocation.getCurrentPosition(function (pos) {
-                    $('#igrf-longitude').anglepicker("value", pos.coords.longitude);
-                    $('#igrf-latitude').anglepicker("value", pos.coords.latitude * 2);
-                },
-                        function (err) {
-                            console.log("Erro ao obter coordenadas geográficas. Informe-as manualmente.");
-                            console.log(err);
-                        },
-                        {maximumAge: 60000, timeout: 5000, enableHighAccuracy: true});
-
-            });
-
-            function setModelDate(ano, mes, dia, hora, min, sec) {
-
-                $('#loading-satelites').show();
-
-                fetchTimeData(mes, ano, function () {
-                    var t = ON_DAED.diaDoMesFloat(dia, hora, min, sec);
-
-                    var horario = $('#hora-minuto-segundo-row').children('input').map(function (k, v) {
-                        return parseFloat($(v).val());
-                    });
-
-                    t += (horario[0] + horario[1] / 60 + horario[2] / 3600) / 24;
-
-                    $('input#slider-data').bootstrapSlider('setAttribute', 'max', (ON_DAED.qtdDiasMes(ano, mes) + 1) * sliderFact);
-                    $('input#slider-data').bootstrapSlider('setValue', t * sliderFact, true);
-                    posicaoJupiter.setSunCameraPos();
-                    posicaoJupiter.traceLines(t);
-                    posicaoJupiter.started = true;
-
-                    posicaoJupiter.cameraLocked = false;
-
-                    var loadIt = window.setInterval(function () {
-                        if(document.hasFocus()) {
-                            $('#foco-terra').trigger('click');
-                            $('#loading-satelites').hide();
-                            clearInterval(loadIt);
-                        }
-                    }, 100);
-                });
-            }
-
-            $('#load-modal').data('beforeReady').push(function () {
-                var dt = new Date();
-                setModelDate(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate(), dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
-            });
-            
-            function imgToDataURL(id) {
-                var img = document.getElementById(id);
-                var ret = null;
-                if(img) {
-                    var canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    var ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    ret = {
-                        data: canvas.toDataURL(),
-                        width: img.width,
-                        height: img.height
-                    };
-                }
-                return ret;
-            } 
-            
-            var logoPdf = imgToDataURL('logo-pdf');
-            var rodapePdf = imgToDataURL('rodape-pdf');
-            
-            function getMes(mes) {
-                var ref = [
-                    "Janeiro",
-                    "Fevereiro",
-                    "Março",
-                    "Abril",
-                    "Maio",
-                    "Junho",
-                    "Julho",
-                    "Agosto",
-                    "Setembro",
-                    "Outubro",
-                    "Novembro",
-                    "Dezembro"
-                ];
-                
-                return ref[mes - 1];
-            }
-            
-            function printPDF() {
-                
-                $('#btn-exportar-eventos').prop('disabled', true);
-                
-                var printDoc = new jsPDF();
-
-                var dtVal = $('#dataju-datepicker-de-local').val().split('/');
-
-                var mes = getMes(dtVal[1]);
-                var ano = dtVal[2];
-                        
-                var maxEventsPerPage = 4;
-                        
-                var eventoBuff = "";
-
-                for (var i = 0; i < diasRef; i++) {
-                    var jd = refJD + i + 0.5;
-                    var eventString = timeDataFromJulian(jd);
-                    eventString = eventString.replace('<div>', '');
-                    eventString = eventString.replace(/color:[ ]?.{7};/g, '');
-                    eventString = eventString.substr(0, eventString.length - 6);
-                    eventoBuff += eventString;
-                    if ((i - maxEventsPerPage + 1) % maxEventsPerPage === 0 && i !== diasRef - 1) {
-                        eventoBuff += "<!-- ADD_PAGE -->";
-                    }
-                }
-
-                var totalEventos = eventoBuff.match(/evento-satelite-markup/g || []).length;
-
-                var ret = "";
+				if (body === ON_DAED.ASTRO.SolarSystemBody.SUN) {
+					pos = ON_DAED.ASTRO.getSolarCoordinates(jd);
+				} else {
+					pos = ON_DAED.ASTRO.getSolarSystemBodyPosition(body, jd, obliquity.nutation.longitude);
+				}
 
 				var rad = Math.PI / 180;
 
-                var localLatitude = parseFloat($('#igrf-latitude-hidden').val()) * rad;
-                var localLongitude = parseFloat($('#igrf-longitude-hidden').val()) * rad;
+				var localLatitude = parseFloat($('#igrf-latitude-hidden').val()) * rad;
+				var localLongitude = -parseFloat($('#igrf-longitude-hidden').val()) * rad;
+
+				var horizontalCoords = ON_DAED.ASTRO.getTransformedCoordinates({
+					from: ON_DAED["ASTRO"].CoordinateType.ECLIPTIC,
+					to: ON_DAED["ASTRO"].CoordinateType.HORIZONTAL,
+					localLatitude: localLatitude,
+					localLongitude: localLongitude,
+					julian: jd,
+					latitude: pos.latitudeRadian,
+					longitude: pos.longitudeRadian,
+					obliquity: obliquity.obliquityRadian
+				});
+
+				return horizontalCoords;
+			}
+
+			function getEventTimestamp(body, jd, timeString) {
+				var fuso = obterFusoHorario();
+
+				var horizontalCoords = getObjectPosition(body, jd);
+
+				return "[" + (timeString ? timeString : ON_DAED.formatarDataJuliana(jd, fuso).substr(14)) + " Az: " + ON_DAED.tempoSideral(horizontalCoords.azimute, true) + " H: " + ON_DAED.tempoSideral(horizontalCoords.altitude, true) + "]";
+			}
+
+			function formatEventoSatelite(ev) {
+				var sat;
+				var tipo;
+				var movimento = ev.event;
+				var b1, b2;
+				var jup = "Júpiter";
+
+				var ret = "<div class='evento-satelite-markup'>";
+
+				switch (ev.sat) {
+					case "1":
+						sat = "Io";
+						break;
+					case "2":
+						sat = "Europa";
+						break;
+					case "3":
+						sat = "Ganímedes";
+						break;
+					case "4":
+						sat = "Calisto";
+				}
+
+				var color = posJup.getSatelliteColors()[ev.sat];
+
+				sat = "<span style='font-weight: bold; color: " + color + ";'>" + sat + "</span>";
+				jup = "<span style='font-weight: bold; color: #ffa500;'>" + jup + "</span>";
+
+				switch (ev.type) {
+					case "Ecl":
+						tipo = "Sombra";
+						b2 = sat;
+						b1 = jup;
+						break;
+					case "Sha":
+						tipo = "Sombra";
+						b1 = sat;
+						b2 = jup;
+						break;
+					case "Occ":
+						tipo = "Ocultação";
+						b2 = sat;
+						b1 = jup;
+						break;
+					case "Tra":
+						tipo = "Trânsito";
+						b1 = sat;
+						b2 = jup;
+						break;
+				}
+
+				movimento = movimento === "start" ? "início" : "fim";
+
+				var jd = ON_DAED.ASTRO.getJulianFromUnix(ev.date);
+
+				var horizontalCoords = getObjectPosition(ON_DAED.ASTRO.SolarSystemBody.JUPITER, jd);
+
+				ret += getEventTimestamp(ON_DAED.ASTRO.SolarSystemBody.JUPITER, jd) + " " + tipo + " (" + movimento + "): " + b1 + " sobre " + b2;
+
+				if (ev.duration) {
+					ret += " (Duração: " + ev.duration + ")";
+				}
+
+				ret += "</div>";
+
+				if (horizontalCoords.altitude < 0) {
+					ret = "";
+				}
+
+				return ret;
+			}
+
+			function fixTransitTimes(transit, fuso) {
+
+				var correcaoMinutos = 0.00235;
+
+				if (transit.rising !== null) {
+					transit.rising = (transit.rising + fuso / 24 + correcaoMinutos);
+					if (transit.rising < 0 || transit.rising > 1)
+						transit.rising = null;
+				}
+
+				if (transit.transit !== null) {
+					transit.transit = (transit.transit + fuso / 24);
+					if (transit.transit < 0 || transit.transit > 1)
+						transit.transit = null;
+				}
+
+				if (transit.setting !== null) {
+					transit.setting = (transit.setting + fuso / 24 - correcaoMinutos);
+					if (transit.setting < 0 || transit.setting > 1)
+						transit.setting = null;
+				}
+			}
+
+			function timeDataFromJulian(jd) {
+				var fuso = obterFusoHorario();
+
+				var dt1 = ON_DAED.ASTRO.getDateFromJulian(jd - 1 - (1 / 24) * fuso);
+				var idx1 = dt1.toISOString().slice(0, 10).replace(/-/g, '');
+				var events1 = timeData[idx1].slice(0);
+
+				var dt2 = ON_DAED.ASTRO.getDateFromJulian(jd - (1 / 24) * fuso);
+				var idx2 = dt2.toISOString().slice(0, 10).replace(/-/g, '');
+				var events2 = timeData[idx2].slice(0);
+
+				var dt3 = ON_DAED.ASTRO.getDateFromJulian(jd + 1 - (1 / 24) * fuso);
+				var idx3 = dt3.toISOString().slice(0, 10).replace(/-/g, '');
+				var events3 = timeData[idx3].slice(0);
+
+				var ret = '<h2>%%dd%% em ' + ON_DAED.formatarDataJuliana(jd, fuso).substr(0, 10) + '</h2><div>';
+
+				var dateRef = dt2.getUTCDate();
+
+				for (var i = events1.length - 1; i >= 0; i--) {
+					var dt = new Date(events1[i].date);
+					dt.setHours(dt.getHours() + fuso);
+					var utcDate = dt.getUTCDate();
+					if (utcDate !== dateRef) {
+						events1.splice(i, 1);
+					}
+				}
+
+				for (var i = events2.length - 1; i >= 0; i--) {
+					var dt = new Date(events2[i].date);
+					dt.setHours(dt.getHours() + fuso);
+					var utcDate = dt.getUTCDate();
+					if (utcDate !== dateRef) {
+						events2.splice(i, 1);
+					}
+				}
+
+				for (var i = events3.length - 1; i >= 0; i--) {
+					var dt = new Date(events3[i].date);
+					dt.setHours(dt.getHours() + fuso);
+					var utcDate = dt.getUTCDate();
+					if (utcDate !== dateRef) {
+						events3.splice(i, 1);
+					}
+				}
+
+				var events = events1.concat(events2).concat(events3);
+
+				for (var i = 0; i < events.length; i++) {
+
+					if (events[i].event === "start" && !events[i].duration) {
+						var sat = events[i].sat;
+						var type = events[i].type;
+						var found = false;
+						for (var j = i + 1; !found && j < events.length; j++) {
+							if (events[j].sat === sat &&
+								(
+									(events[j].type === type && events[j].event === "end") ||
+									(type === "Ecl" && events[j].type === "Occ" && events[j].event === "end")
+									)
+								) {
+
+								var dur = events[j].date - events[i].date;
+
+								dur /= 1000;
+
+								var hora = parseInt(dur / 3600);
+								var min = parseInt((dur % 3600) / 60);
+								var sec = parseInt(dur % 60);
+
+								events[i].duration = ON_DAED.formatarHora(hora, min, sec);
+								found = true;
+							}
+						}
+					}
+				}
+
+				if (events.length > 0) {
+					var rad = Math.PI / 180;
+					var localLatitude = parseFloat($('#igrf-latitude-hidden').val()) * rad;
+					var localLongitude = -parseFloat($('#igrf-longitude-hidden').val()) * rad;
+					var solarTransitTimes = ON_DAED.ASTRO.getTransit(localLongitude, localLatitude, jd, ON_DAED["ASTRO"].SolarSystemBody.SUN);
+					var jupiterTransitTimes = ON_DAED.ASTRO.getTransit(localLongitude, localLatitude, jd, ON_DAED["ASTRO"].SolarSystemBody.JUPITER);
+
+					fixTransitTimes(solarTransitTimes, fuso);
+					fixTransitTimes(jupiterTransitTimes, fuso);
+
+					var transits = [];
+
+					transits.push({
+						t: solarTransitTimes.rising,
+						text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Nascer)</span>",
+						body: ON_DAED.ASTRO.SolarSystemBody.SUN
+					});
+
+					transits.push({
+						t: solarTransitTimes.transit,
+						text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Passagem Meridiana)</span>",
+						body: ON_DAED.ASTRO.SolarSystemBody.SUN
+					});
+
+					transits.push({
+						t: solarTransitTimes.setting,
+						text: "<span style='font-weight: bold; color: #ffff00;'>Sol (Ocaso)</span>",
+						body: ON_DAED.ASTRO.SolarSystemBody.SUN
+					});
+
+					var jupiterRising = jupiterTransitTimes.rising;
+
+					var oldJupiterTransit = ON_DAED.ASTRO.getTransit(localLongitude, localLatitude, jd - 1, ON_DAED["ASTRO"].SolarSystemBody.JUPITER);
+
+					fixTransitTimes(oldJupiterTransit, fuso);
+
+					var jupiterTransit = jupiterRising < jupiterTransitTimes.transit ? jupiterTransitTimes.transit : oldJupiterTransit.transit;
+					var jupiterSetting = jupiterRising < jupiterTransitTimes.setting ? jupiterTransitTimes.setting : oldJupiterTransit.setting;
+
+					transits.push({
+						t: jupiterRising,
+						text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Nascer)</span>",
+						body: ON_DAED.ASTRO.SolarSystemBody.JUPITER
+					});
+
+					transits.push({
+						t: jupiterTransit,
+						text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Passagem Meridiana)</span>",
+						body: ON_DAED.ASTRO.SolarSystemBody.JUPITER
+					});
+
+					transits.push({
+						t: jupiterSetting,
+						text: "<span style='font-weight: bold; color: #ffa500;'>Júpiter (Ocaso)</span>",
+						body: ON_DAED.ASTRO.SolarSystemBody.JUPITER
+					});
+
+					transits.sort(function (a, b) {
+						return b.t - a.t;
+					});
+
+					var lastHourFrac = 0;
+
+					var count = 0;
+
+					for (var i = 0; i < events.length; i++) {
+						var ev = events[i];
+						var eventStr = formatEventoSatelite(ev);
+						var jd = ON_DAED.ASTRO.getJulianFromUnix(ev.date);
+						var hourString = ON_DAED.formatarDataJuliana(jd, fuso).substr(14);
+						var hourFrac = (parseInt(hourString.substr(0, 2)) + parseInt(hourString.substr(3, 2)) / 60) / 24;
+
+						for (var j = transits.length - 1; j >= 0; j--) {
+							if (transits[j].t !== null && lastHourFrac <= transits[j].t && transits[j].t <= hourFrac) {
+								var transit = transits.splice(j, 1)[0];
+								var h = parseInt(transit.t * 24);
+								var m = parseInt(((transit.t * 24) % 1) * 60);
+								var s = parseInt(((((transit.t * 24) % 1) * 60) % 1) * 60);
+
+								ret += "<div>" + getEventTimestamp(transit.body, parseInt(jd) + 0.5 + transit.t - fuso / 24, ON_DAED.formatarHora(h, m, s)) + " " + transit.text + "</div>";
+							}
+						}
+
+						if (eventStr !== "") {
+							count++;
+						}
+
+						ret += eventStr;
+						lastHourFrac = hourFrac;
+					}
+
+					for (var i = transits.length - 1; i >= 0; i--) {
+						if (transits[i].t !== null) {
+							var transit = transits[i];
+							var h = parseInt(transit.t * 24);
+							var m = parseInt(((transit.t * 24) % 1) * 60);
+							var s = parseInt(((((transit.t * 24) % 1) * 60) % 1) * 60);
+
+							ret += "<div>" + getEventTimestamp(transit.body, parseInt(jd) + 0.5 + transit.t - fuso / 24, ON_DAED.formatarHora(h, m, s)) + " " + transit.text + "</div>";
+						}
+					}
+
+				} else {
+					ret += "Não há eventos para a data selecionada";
+				}
+
+				var msgCount = ' eventos';
+
+				if (count === 1) {
+					msgCount = ' evento';
+				}
+
+				ret = ret.replace('%%dd%%', count + msgCount);
+
+				ret += '</div>';
+
+				return ret;
+			}
+
+			var sliderFact = 100000000;
+
+			var animateYear = null;
+
+			function stopAnimateYear() {
+				window.clearInterval(animateYear);
+				animateYear = null;
+				$('input#slider-data').bootstrapSlider('enable');
+				var ativoClass = 'glyphicon-pause terra-desligado';
+				var inativoClass = 'glyphicon-play terra-ligado';
+
+				$('#play-terra').removeClass(ativoClass);
+				$('#play-terra').addClass(inativoClass);
+			}
+
+			function startAnimateYear() {
+				if (animateYear === null) {
+					var t = $('input#slider-data').bootstrapSlider('getValue');
+					$('input#slider-data').bootstrapSlider('disable');
+					var max = $('input#slider-data').bootstrapSlider('getAttribute', 'max');
+					animateYear = window.setInterval(function () {
+						t += sliderFact / 50;
+						$('input#slider-data').bootstrapSlider('setValue', t, true);
+						if (t >= max) {
+							stopAnimateYear();
+						}
+					}, 20);
+				}
+			}
+
+			function sliderBtn(slideEvt) {
+				var value = parseInt(slideEvt.value);
+
+				if (isNaN(value)) {
+					value = parseInt($(this).attr('data-slider-value'));
+				}
+
+				var cb = $('#' + this.id).data('cb');
+				cb(value);
+
+				var displayValue = refJD + value / sliderFact;
+
+				$(this).data('JD', displayValue);
+
+				var fuso = obterFusoHorario();
+
+				displayValue = ON_DAED.formatarDataJuliana(displayValue, fuso);
+
+				var q = $('#' + this.id);
+
+				q.siblings('.label-data-slider').html(displayValue);
+				$('#eventos-do-dia-hidden').html(timeDataFromJulian($(this).data('JD')));
+
+				clearTextSelection();
+			}
+
+			$('.bs-slider').on('slideStop', sliderBtn);
+			$('.bs-slider').on('slide', sliderBtn);
+
+			$('.parent-bs-slider').bind('mouseup', clearTextSelection);
+
+			$('.campo-de-observacao').bind('mouseup', clearTextSelection);
+
+			$('#slider-data').data('cb', function (value) {
+				var t = value / sliderFact;
+				posicaoJupiter.traceLines(t);
+			});
+
+			$('#velocidade-translacao-terra').data('cb', function (value) {
+				//observacaoSistemaSolar.setVelocidadeRotacao(value / 10000);
+			});
+
+			$('#velocidade-rotacao-terra').data('cb', function (value) {
+				//linhasDeForca.setVelocidadeRotacao(value / 10000);
+			});
+
+			var focoMsgTo = null;
+
+			function focoMsg(msg) {
+				clearTimeout(focoMsgTo);
+				$('#foco-msg').html(msg).show();
+				focoMsgTo = window.setTimeout(function () {
+					$('#foco-msg').hide();
+					focoMsgTo = null;
+				}, 5000);
+			}
+
+			$('#btn-toggle-orbita').bind('click', function () {
+				var t = $(this).text();
+
+				var offText = 'Desligar Órbitas';
+				var onText = 'Ligar Órbitas';
+
+				if (t === offText) {
+					$(this).html(onText);
+					posicaoJupiter.tracer.visible = false;
+				} else {
+					$(this).html(offText);
+					posicaoJupiter.tracer.visible = true;
+				}
+			});
+
+			$('#btn-exportar-eventos').bind('click', function () {
+				$(this).prop('disabled', true);
+				printPDF();
+			});
+
+			$('#foco-terra').bind('click', function () {
+				var ativoClass = 'glyphicon-eye-close terra-desligado';
+				var inativoClass = 'glyphicon-eye-open terra-ligado';
+
+				$(this).toggleClass(ativoClass);
+				$(this).toggleClass(inativoClass);
+
+				posicaoJupiter.cameraLocked = !posicaoJupiter.cameraLocked;
+				if (posicaoJupiter.cameraLocked) {
+					posicaoJupiter.setSunCameraPos();
+					focoMsg('Vista da Terra');
+				} else {
+					focoMsg('Vista livre');
+				}
+			});
+
+			$('#play-terra').bind('click', function () {
+				var ativoClass = 'glyphicon-pause terra-desligado';
+				var inativoClass = 'glyphicon-play terra-ligado';
+
+				$(this).toggleClass(ativoClass);
+				$(this).toggleClass(inativoClass);
+
+				if (animateYear === null) {
+					startAnimateYear();
+				} else {
+					stopAnimateYear();
+				}
+			});
+
+			$('#eventos-do-dia').tooltip({
+				html: true,
+				container: "body",
+				placement: "top",
+				title: function () {
+					return $('#eventos-do-dia-hidden').html();
+				}
+			});
+
+			var posicaoJupiter;
+			var control;
+			var timeData = null;
+			var refJD = 0;
+			var diasRef = 0;
+
+			function fetchTimeData(mes, ano, callback) {
+
+				$('input#slider-data').bootstrapSlider('disable');
+
+				var jd = ON_DAED.ASTRO.getJulianFromGregorian(1, mes, ano, 0, 0, 0, 0);
+				diasRef = ON_DAED.qtdDiasMes(ano, mes);
+
+				$.getJSON('lib/jupiter-satellite-events-json/export/' + ano + '.json', function (data) {
+					timeData = data;
+
+					$.getJSON('horizons/jupiter-satellites-model', {jd: jd}, function (posData) {
+
+						posicaoJupiter.updateFromData(posData);
+						refJD = jd;
+
+						$('input#slider-data').trigger('slide');
+						$('input#slider-data').bootstrapSlider('enable');
+
+						if (callback instanceof Function) {
+							callback();
+						}
+					});
+				});
+
+			}
+
+			ON_DAED["3D"].create(function (scene, camera) {
+
+				var wrapperJupiter = new THREE.Object3D();
+
+				posicaoJupiter = new ON_DAED["3D"].JupiterSatelites(wrapperJupiter, control);
+
+				scene.add(wrapperJupiter);
+
+				posicaoJupiter.traceLines(0);
+
+				posicaoJupiter.setCameraDataCallback(function () {
+					var lat = parseFloat($('#igrf-latitude-hidden').val());
+					var long = parseFloat($('#igrf-longitude-hidden').val());
+					var jd = $('input#slider-data').data('JD');
+
+					return {
+						lat: lat,
+						long: long,
+						jd: jd
+					};
+				});
+
+				window.posJup = posicaoJupiter;
+
+			}, function (cameraControl, renderer, scene, camera, stats, clock) {
+
+				if (($('#campo-de-observacao canvas').is(':hover') || posicaoJupiter.cameraLocked) && !$('.modal').is(':visible')) {
+					cameraControl.enabled = true;
+					cameraControl.update(clock.getDelta());
+				} else {
+					cameraControl.enabled = false;
+				}
+
+				ON_DAED["3D"].update(camera);
+				renderer.render(scene, camera);
+			}, document.getElementById('campo-de-observacao'),
+				function (camera, renderer, scene, stats) {
+					control = new THREE.OrbitControls(camera);
+					control.maxDistance = 125000;
+					control.minDistance = 1000;
+					return control;
+				});
+
+			$('#load-modal').data('beforeReady').push(function () {
+				//$('input#slider-data').trigger('slideStop');
+
+				var satColors = posicaoJupiter.getSatelliteColors();
+
+				$('#satelite-label-io').css({color: satColors['1']});
+				$('#satelite-label-europa').css({color: satColors['2']});
+				$('#satelite-label-ganymede').css({color: satColors['3']});
+				$('#satelite-label-callisto').css({color: satColors['4']});
+
+				window.navigator.geolocation.getCurrentPosition(function (pos) {
+					$('#igrf-longitude').anglepicker("value", pos.coords.longitude);
+					$('#igrf-latitude').anglepicker("value", pos.coords.latitude * 2);
+				},
+					function (err) {
+						console.log("Erro ao obter coordenadas geográficas. Informe-as manualmente.");
+						console.log(err);
+					},
+					{maximumAge: 60000, timeout: 5000, enableHighAccuracy: true});
+
+			});
+			
+			function setModelDate(ano, mes, dia, hora, min, sec) {
+
+				$('#loading-satelites').show();
+
+				fetchTimeData(mes, ano, function () {
+					var t = ON_DAED.diaDoMesFloat(dia, hora, min, sec);
+
+					var horario = $('#hora-minuto-segundo-row').children('input').map(function (k, v) {
+						return parseFloat($(v).val());
+					});
+
+					t += (horario[0] + horario[1] / 60 + horario[2] / 3600) / 24;
+
+					$('input#slider-data').bootstrapSlider('setAttribute', 'max', (ON_DAED.qtdDiasMes(ano, mes) + 1) * sliderFact);
+					$('input#slider-data').bootstrapSlider('setValue', t * sliderFact, true);
+					posicaoJupiter.setSunCameraPos();
+					posicaoJupiter.traceLines(t);
+					posicaoJupiter.started = true;
+
+					var timeAcc = 0;
+
+					var loadIt = window.setInterval(function () {
+
+						timeAcc += 100;
+
+						if(timeAcc > 30000) {
+							$('#loading-satelites').html("Clique para exibir o conteúdo");
+						}
+
+						if (document.hasFocus()) {
+							if($('#foco-terra').hasClass('glyphicon-eye-open')) {
+								$('#foco-terra').trigger('click');
+							}
+							$('#loading-satelites').hide();
+							$('#loading-satelites').html("Carregando posições!");
+							clearInterval(loadIt);
+						}
+						
+					}, 100);
+				});
+			}
+
+			$('#load-modal').data('beforeReady').push(function () {
+				var dt = new Date();
+				setModelDate(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate(), dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
+			});
+
+			function imgToDataURL(id) {
+				var img = document.getElementById(id);
+				var ret = null;
+				if (img) {
+					var canvas = document.createElement('canvas');
+					canvas.width = img.width;
+					canvas.height = img.height;
+					var ctx = canvas.getContext('2d');
+					ctx.drawImage(img, 0, 0);
+					ret = {
+						data: canvas.toDataURL(),
+						width: img.width,
+						height: img.height
+					};
+				}
+				return ret;
+			}
+
+			var rodapePdf = imgToDataURL('rodape-pdf');
+
+			function getMes(mes) {
+				var ref = [
+					"Janeiro",
+					"Fevereiro",
+					"Março",
+					"Abril",
+					"Maio",
+					"Junho",
+					"Julho",
+					"Agosto",
+					"Setembro",
+					"Outubro",
+					"Novembro",
+					"Dezembro"
+				];
+
+				return ref[mes - 1];
+			}
+
+			function printPDF() {
+
+				$('#btn-exportar-eventos').prop('disabled', true);
+
+				var printDoc = new jsPDF();
+
+				var dtVal = $('#dataju-datepicker-de-local').val().split('/');
+
+				var mes = getMes(dtVal[1]);
+				var ano = dtVal[2];
+
+				var maxEventsPerPage = 4;
+
+				var eventoBuff = "";
+
+				for (var i = 0; i < diasRef; i++) {
+					var jd = refJD + i + 0.5;
+					var eventString = timeDataFromJulian(jd);
+					eventString = eventString.replace('<div>', '');
+					eventString = eventString.replace(/color:[ ]?.{7};/g, '');
+					eventString = eventString.substr(0, eventString.length - 6);
+					eventoBuff += eventString;
+					if ((i - maxEventsPerPage + 1) % maxEventsPerPage === 0 && i !== diasRef - 1) {
+						eventoBuff += "<!-- ADD_PAGE -->";
+					}
+				}
+
+				var totalEventos = eventoBuff.match(/evento-satelite-markup/g || []).length;
+
+				var ret = "";
+
+				var rad = Math.PI / 180;
+
+				var localLatitude = parseFloat($('#igrf-latitude-hidden').val()) * rad;
+				var localLongitude = parseFloat($('#igrf-longitude-hidden').val()) * rad;
 
 				var lat = ON_DAED.tempoSideral(localLatitude, true);
 				var lon = ON_DAED.tempoSideral(localLongitude, true);
-				
-				ret += '<h1>Eventos das Luas de Galileu (Júpiter-Satélites)</h1>';
-                
-                ret += '<h3>(Io, Europa, Ganímedes e Calisto)</h3>';
-                
-                ret += '<h4>' + totalEventos + ' eventos observáveis em ' + mes + ' de ' + ano + '.</h4>';
 
-                for(var i = 0; i < 49; i++) {
-                    ret += '<br />';
-                }
-                
-                if(cidadeEscolhida !== null) {
-                    ret += '<h3 style="margin: 0;">Local: ' + cidadeEscolhida + '</h3>';
-                }
+				ret += '<h1>Eventos das Luas de Galileu (Júpiter-Satélites)</h1>';
+
+				ret += '<h3>(Io, Europa, Ganímedes e Calisto)</h3>';
+
+				ret += '<h4>' + totalEventos + ' eventos observáveis em ' + mes + ' de ' + ano + '.</h4>';
+
+				for (var i = 0; i < 49; i++) {
+					ret += '<br />';
+				}
+
+				if (cidadeEscolhida !== null) {
+					ret += '<h3 style="margin: 0;">Local: ' + cidadeEscolhida + '</h3>';
+				}
 
 				ret += '<h3 style="margin: 0;">Longitude: ' + lon + ' (Leste positivo)</h3>';
 				ret += '<h3 style="margin: 0;">Latitude: ' + lat + ' (Norte positivo)</h3>';
 
-                ret += '<h3 style="margin: 0;">Fuso Horário: ' + $('#info-fuso-horario').val() + ' GMT</h3>';
+				ret += '<h3 style="margin: 0;">Fuso Horário: ' + $('#info-fuso-horario').val() + ' GMT</h3>';
 				ret += '<h3 style="margin: 0;">Horário de Verão vigente: <b>' + ($('#input-horario-verao').is(':checked') ? 'sim' : 'não ') + '</b></h3>';
 
 
@@ -1043,51 +1058,51 @@
 				ret += '<div>- Azimute entre 225º e 315º ~ direção Oeste (Ocaso do Sol)</div>';
 
 				ret += '<p>Nota: A altura <b>H</b>, medida a partir do horizonte do observador, também auxilia na localização do planeta.</p>';
-		
-                ret += '<p>Apenas eventos acima do horizonte para a localidade indicada são exibidos nesse documento.</p>';
-        
+
+				ret += '<p>Apenas eventos acima do horizonte para a localidade indicada são exibidos nesse documento.</p>';
+
 				ret += '<!-- ADD_PAGE --><br /><br />';
 
-                ret += eventoBuff;
-        
-                var pageWidth = 200;
+				ret += eventoBuff;
 
-                printDoc.fromHTML(ret, 5, 0, {'width': pageWidth}, function() {
-                    
-                    printDoc.setPage(1);
+				var pageWidth = 200;
 
-                    var logo = $('#main-canvas')[0];
-                    var logoData = logo.toDataURL();
-                    
-                    var w = 180;
-                    var h = 103;
-                    
-                    var fontSize = 14;
-                    
-                    var baseAltura = 45;
-                    
-                    printDoc.setFontSize(fontSize);
-                    printDoc.addImage(logoData, pageWidth * 0.05, baseAltura, w, h);
-                    printDoc.text(pageWidth * 0.05, baseAltura + h + (fontSize / 2) * 1.1 * 2, "Captura de tela do software no momento da criação desse documento");
-                    printDoc.text(pageWidth * 0.05, baseAltura + h + (fontSize / 2) * 1.1 * 3, "Gerado em https://daed.on.br/astro/satelites-jupiter");
-                    
-                    w = pageWidth;
-                    h = parseInt((w / rodapePdf.width) * rodapePdf.height);
-                    printDoc.addImage(rodapePdf.data, 0, 266, w, h);
-                    
+				printDoc.fromHTML(ret, 5, 0, {'width': pageWidth}, function () {
+
+					printDoc.setPage(1);
+
+					var logo = $('#main-canvas')[0];
+					var logoData = logo.toDataURL();
+
+					var w = 180;
+					var h = 103;
+
+					var fontSize = 14;
+
+					var baseAltura = 45;
+
+					printDoc.setFontSize(fontSize);
+					printDoc.addImage(logoData, pageWidth * 0.05, baseAltura, w, h);
+					printDoc.text(pageWidth * 0.05, baseAltura + h + (fontSize / 2) * 1.1 * 2, "Captura de tela do software no momento da criação desse documento");
+					printDoc.text(pageWidth * 0.05, baseAltura + h + (fontSize / 2) * 1.1 * 3, "Gerado em https://daed.on.br/astro/satelites-jupiter");
+
+					w = pageWidth;
+					h = parseInt((w / rodapePdf.width) * rodapePdf.height);
+					printDoc.addImage(rodapePdf.data, 0, 266, w, h);
+
 					printDoc.save('satelites-jupiter.pdf');
-                    
-                    window.setTimeout(function() {
-                        $('#btn-exportar-eventos').prop('disabled', false);                        
-                    }, 1000);
-                    
-    			});
-            }
 
-            window.printPDF = printPDF;
+					window.setTimeout(function () {
+						$('#btn-exportar-eventos').prop('disabled', false);
+					}, 1000);
 
-        });
+				});
+			}
 
-    })();
-    /*]]>*/
+			window.printPDF = printPDF;
+
+		});
+
+	})();
+	/*]]>*/
 </script>
