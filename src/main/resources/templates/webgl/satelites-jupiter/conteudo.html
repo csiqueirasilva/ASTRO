@@ -35,22 +35,6 @@
 
 <button type="button" id="btn-toggle-orbita" class="btn btn-primary btn-lg ui-observacao-horizontal">Desligar Órbitas</button>
 
-<div class="modal fade ui-observacao-horizontal" id="cidade-form" tabindex="-1" role="dialog" aria-labelledby="Localizar Cidade" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Localizar Cidade</h4>
-            </div>
-
-            <div class="modal-body">
-                <label id="busca-cidade-feedback"></label>
-                <input type="text" data-provide="typeahead" autocomplete="off" class="form-control" id="busca-cidade-input"/>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="modal fade ui-observacao-horizontal" id="info-local" tabindex="-1" role="dialog" aria-labelledby="Informações de Data e Local" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -69,7 +53,7 @@
 
                 <div class='igrf-divisao'>
 
-                    <h4>Data <span title="Referência: J2000 - Use qualquer dia entre os anos 2000 e 2079" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></h4>
+                    <h4>Data <span title="Referência: J2000 - Use qualquer data entre os anos 2000 e 2079" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></h4>
 
                     <input readonly="readonly" class="form-control input-centralizado jlink dataju-datepicker" name="data-gregoriana-de-local" size="16" type="text" id="dataju-datepicker-de-local" value="12/02/2012" />
 
@@ -813,6 +797,35 @@
 			var refJD = 0;
 			var diasRef = 0;
 
+			function xhrFactory() {
+				var xhr = new window.XMLHttpRequest();
+
+				// Upload progress
+				xhr.upload.addEventListener("progress", function (evt) {
+					if (evt.lengthComputable) {
+						var percentComplete = evt.loaded / evt.total;
+						//Do something with upload progress
+						console.log(percentComplete);
+					}
+				}, false);
+
+				// Download progress
+				xhr.addEventListener("progress", function (evt) {
+					if (evt.lengthComputable) {
+						var percentComplete = evt.loaded / evt.total;
+						// Do something with download progress
+						console.log(percentComplete);
+					}
+				}, false);
+
+				return xhr;
+			}
+
+			function xhrError() {
+				alert("Erro ao carregar os dados da aplicação!");
+				reload();
+			}
+
 			function fetchTimeData(mes, ano, callback) {
 
 				$('input#slider-data').bootstrapSlider('disable');
@@ -820,21 +833,39 @@
 				var jd = ON_DAED.ASTRO.getJulianFromGregorian(1, mes, ano, 0, 0, 0, 0);
 				diasRef = ON_DAED.qtdDiasMes(ano, mes);
 
-				$.getJSON('lib/jupiter-satellite-events-json/export/' + ano + '.json', function (data) {
-					timeData = data;
+				$.ajax({
+					url: 'lib/jupiter-satellite-events-json/export/' + ano + '.json',
+					xhr: xhrFactory,
+					dataType: "JSON",
+					type: "GET",
+					success: function (data) {
+						timeData = data;
 
-					$.getJSON('horizons/jupiter-satellites-model', {jd: jd}, function (posData) {
+						$.ajax({
+							url: 'horizons/jupiter-satellites-model',
+							xhr: xhrFactory,
+							dataType: "JSON",
+							type: "GET",
+							data: {jd: jd},
+							success: function (posData) {
 
-						posicaoJupiter.updateFromData(posData);
-						refJD = jd;
+								posicaoJupiter.updateFromData(posData);
+								refJD = jd;
 
-						$('input#slider-data').trigger('slide');
-						$('input#slider-data').bootstrapSlider('enable');
+								$('input#slider-data').trigger('slide');
+								$('input#slider-data').bootstrapSlider('enable');
 
-						if (callback instanceof Function) {
-							callback();
-						}
-					});
+								if (callback instanceof Function) {
+									callback();
+								}
+								
+								$('#loading-satelites').html("Clique para exibir o conteúdo");
+							},
+							error: xhrError
+						});
+						
+					},
+					error: xhrError
 				});
 
 			}
@@ -903,7 +934,7 @@
 					{maximumAge: 60000, timeout: 5000, enableHighAccuracy: true});
 
 			});
-			
+
 			function setModelDate(ano, mes, dia, hora, min, sec) {
 
 				$('#loading-satelites').show();
@@ -923,18 +954,10 @@
 					posicaoJupiter.traceLines(t);
 					posicaoJupiter.started = true;
 
-					var timeAcc = 0;
-
 					var loadIt = window.setInterval(function () {
 
-						timeAcc += 100;
-
-						if(timeAcc > 30000) {
-							$('#loading-satelites').html("Clique para exibir o conteúdo");
-						}
-
 						if (document.hasFocus()) {
-							if($('#foco-terra').hasClass('glyphicon-eye-open')) {
+							if ($('#foco-terra').hasClass('glyphicon-eye-open')) {
 								$('#foco-terra').trigger('click');
 							}
 							posicaoJupiter.setSunCameraPos();
@@ -942,7 +965,7 @@
 							$('#loading-satelites').html("Carregando posições!");
 							clearInterval(loadIt);
 						}
-						
+
 					}, 100);
 				});
 			}

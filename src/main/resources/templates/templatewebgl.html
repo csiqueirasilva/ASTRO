@@ -69,20 +69,20 @@
         <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet" type="text/css"/>
 
         <script>
-            (function (i, s, o, g, r, a, m) {
-                i['GoogleAnalyticsObject'] = r;
-                i[r] = i[r] || function () {
-                    (i[r].q = i[r].q || []).push(arguments)
-                }, i[r].l = 1 * new Date();
-                a = s.createElement(o),
-                        m = s.getElementsByTagName(o)[0];
-                a.async = 1;
-                a.src = g;
-                m.parentNode.insertBefore(a, m)
-            })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+			(function (i, s, o, g, r, a, m) {
+				i['GoogleAnalyticsObject'] = r;
+				i[r] = i[r] || function () {
+					(i[r].q = i[r].q || []).push(arguments)
+				}, i[r].l = 1 * new Date();
+				a = s.createElement(o),
+					m = s.getElementsByTagName(o)[0];
+				a.async = 1;
+				a.src = g;
+				m.parentNode.insertBefore(a, m)
+			})(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
-            ga('create', 'UA-22359689-5', 'auto');
-            ga('send', 'pageview');
+			ga('create', 'UA-22359689-5', 'auto');
+			ga('send', 'pageview');
         </script>
 
         <style>
@@ -91,7 +91,7 @@
                 max-height: 150px;
                 overflow-y: auto;
             }
-            
+
             .astro-dialog-label {
                 text-align: center; font-weight: bold;
             }
@@ -382,11 +382,11 @@
     <body class="noselect">
 
         <script>
-            /*<![CDATA[*/
-            if (!ON_DAED.WEBGL_SUPPORT) {
-                window.location.href = document.URL + "/../";
-            }
-            /*]]>*/
+			/*<![CDATA[*/
+			if (!ON_DAED.WEBGL_SUPPORT) {
+				window.location.href = document.URL + "/../";
+			}
+			/*]]>*/
         </script>
 
         <div th:include="'webgl/' + ${conteudo} + '/css'">
@@ -440,7 +440,12 @@
                         <h4 class="modal-title">Dicas de Uso</h4>
                     </div>
 
-                    <div class="modal-body" th:include="'webgl/' + ${conteudo} + '/ajuda'">
+                    <div class="modal-body">
+						<div th:include="'webgl/' + ${conteudo} + '/ajuda'">
+						</div>
+						<h3>Tela Cheia</h3>
+
+						<p>Alguns navegadores possuem o recurso de exibir o programa em tela cheia. Para visualizar o programa nesse modo, utilize a tecla F11 do teclado.</p>
                     </div>
                 </div>
             </div>
@@ -496,187 +501,204 @@
             </div>
         </div>
 
+		<!-- LOCALIZAR CIDADE -->
+		<div class="modal fade ui-observacao-horizontal" id="cidade-form" tabindex="-1" role="dialog" aria-labelledby="Localizar Cidade" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title">Localizar Cidade</h4>
+					</div>
+
+					<div class="modal-body">
+						<label id="busca-cidade-feedback"></label>&nbsp;<span title="Utilize o scroll do mouse (roda) para pesquisar cidades na lista" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span>
+						<input type="text" data-provide="typeahead" autocomplete="off" class="form-control" id="busca-cidade-input"/>
+					</div>
+				</div>
+			</div>
+		</div>
+
         <script th:inline="javascript">
-            /*<![CDATA[*/
-            (function () {
+			/*<![CDATA[*/
+			(function () {
 
-                var textures = [];
-                var models = [];
-                var modelosIt = -1;
+				var textures = [];
+				var models = [];
+				var modelosIt = -1;
 
-                $('#load-modal').data('beforeReady', []);
-                $('#load-modal').data('texturas', textures);
-                $('#load-modal').data('modelos', models);
+				$('#load-modal').data('beforeReady', []);
+				$('#load-modal').data('texturas', textures);
+				$('#load-modal').data('modelos', models);
 
-                THREE.ImageUtils.loadTextureOriginal = THREE.ImageUtils.loadTexture;
+				THREE.ImageUtils.loadTextureOriginal = THREE.ImageUtils.loadTexture;
 
-                THREE.ImageUtils.loadTexture = function (path) {
-                    var texture = THREE.ImageUtils.loadTextureOriginal(path);
+				THREE.ImageUtils.loadTexture = function (path) {
+					var texture = THREE.ImageUtils.loadTextureOriginal(path);
 
-                    textures.push(texture);
+					textures.push(texture);
 
-                    return texture;
-                };
+					return texture;
+				};
 
-                $('#load-modal').data('loadOBJMTL', function (managerName, objFile, mtlFile, cb) {
-                    models[++modelosIt] = false;
+				$('#load-modal').data('loadOBJMTL', function (managerName, objFile, mtlFile, cb) {
+					models[++modelosIt] = false;
 
-                    (function () {
+					(function () {
 
-                        var modelLoadId = modelosIt;
+						var modelLoadId = modelosIt;
 
-                        var loader = new THREE.OBJMTLLoader(ON_DAED["3D"].createManager(managerName));
+						var loader = new THREE.OBJMTLLoader(ON_DAED["3D"].createManager(managerName));
 
-                        loader.load(objFile, mtlFile, function (object) {
-                            cb(object);
-                            models[modelLoadId] = true;
-                        });
+						loader.load(objFile, mtlFile, function (object) {
+							cb(object);
+							models[modelLoadId] = true;
+						});
 
-                    })();
+					})();
 
-                });
+				});
 
-            })();
-            /*]]>*/
+			})();
+			/*]]>*/
         </script>
 
         <div id="canvas-wrapper" class="hidden" th:include="'webgl/' + ${conteudo} + '/conteudo'">
         </div>
 
         <script th:inline="javascript">
-            /*<![CDATA[*/
-            $(document).ready(function () {
+			/*<![CDATA[*/
+			$(document).ready(function () {
 
 				$('.ui-astro-tooltip').tooltip();
 
-                function setEsconderPrimeiroAcesso() {
-                    localStorage.esconderPrimeiroAcesso = $('#primeiro-acesso-lembrar').is(':checked');
-                }
+				function setEsconderPrimeiroAcesso() {
+					localStorage.esconderPrimeiroAcesso = $('#primeiro-acesso-lembrar').is(':checked');
+				}
 
-                $('#primeiro-acesso-tour').click(function () {
-                    setEsconderPrimeiroAcesso();
-                    $.when($('#primeiro-acesso-overlay').remove())
-                            .then(
-                                    introJs()
-                                    .setOptions({disableInteraction: true, 'prevLabel': 'Anterior', 'nextLabel': 'Próximo', 'skipLabel': 'Encerrar', doneLabel: 'Concluir', 'tooltipPosition': 'bottom', showBullets: false, showProgress: false, showStepNumbers: false}).start()
-                                    );
-                });
+				$('#primeiro-acesso-tour').click(function () {
+					setEsconderPrimeiroAcesso();
+					$.when($('#primeiro-acesso-overlay').remove())
+						.then(
+							introJs()
+							.setOptions({disableInteraction: true, 'prevLabel': 'Anterior', 'nextLabel': 'Próximo', 'skipLabel': 'Encerrar', doneLabel: 'Concluir', 'tooltipPosition': 'bottom', showBullets: false, showProgress: false, showStepNumbers: false}).start()
+							);
+				});
 
-                $('#primeiro-acesso-fechar').click(function () {
-                    setEsconderPrimeiroAcesso();
-                    $('#primeiro-acesso-overlay').remove();
-                });
+				$('#primeiro-acesso-fechar').click(function () {
+					setEsconderPrimeiroAcesso();
+					$('#primeiro-acesso-overlay').remove();
+				});
 
-                var overflowY = $('body').css('overflow-y');
+				var overflowY = $('body').css('overflow-y');
 
-                $('.modal').on('show.bs.modal', function () {
-                    $('body').css({'overflow-y': 'auto'});
-                    $('body').toggleClass('noselect');
-                    $('.hover-label-text').hide();
-                });
+				$('.modal').on('show.bs.modal', function () {
+					$('body').css({'overflow-y': 'auto'});
+					$('body').toggleClass('noselect');
+					$('.hover-label-text').hide();
+				});
 
-                $('.modal').on('hide.bs.modal', function () {
-                    $('body').css({'overflow-y': overflowY});
-                    $('body').toggleClass('noselect');
-                    $('.hover-label-text').show();
-                    window.scrollTo(0, 0);
-                });
+				$('.modal').on('hide.bs.modal', function () {
+					$('body').css({'overflow-y': overflowY});
+					$('body').toggleClass('noselect');
+					$('.hover-label-text').show();
+					window.scrollTo(0, 0);
+				});
 
-                function resizeLoadModal() {
-                    var loadModal = $('#load-modal');
-                    var $dialog = loadModal.find(".modal-dialog");
-                    var offset = ($(window).height() - 120) / 2;
-                    $dialog.css("margin-top", offset);
-                }
+				function resizeLoadModal() {
+					var loadModal = $('#load-modal');
+					var $dialog = loadModal.find(".modal-dialog");
+					var offset = ($(window).height() - 120) / 2;
+					$dialog.css("margin-top", offset);
+				}
 
-                resizeLoadModal();
+				resizeLoadModal();
 
-                $('#load-modal .modal-dialog').hide().removeClass('hidden').fadeIn(5);
+				$('#load-modal .modal-dialog').hide().removeClass('hidden').fadeIn(5);
 
-                $(window).bind("resize", resizeLoadModal);
+				$(window).bind("resize", resizeLoadModal);
 
-                var conteudoCarregado = false;
+				var conteudoCarregado = false;
 
-                $(window).load(function () {
-                    conteudoCarregado = true;
-                });
+				$(window).load(function () {
+					conteudoCarregado = true;
+				});
 
-                var texturasCounter = 0;
-                var texturas = $('#load-modal').data('texturas');
-                var texturasMax = texturas.length;
-                var modelosCounter = 0;
-                var modelos = $('#load-modal').data('modelos');
-                var modelosMax = modelos.length;
+				var texturasCounter = 0;
+				var texturas = $('#load-modal').data('texturas');
+				var texturasMax = texturas.length;
+				var modelosCounter = 0;
+				var modelos = $('#load-modal').data('modelos');
+				var modelosMax = modelos.length;
 
-                var loadInterval = window.setInterval(function () {
+				var loadInterval = window.setInterval(function () {
 
-                    texturasMax = Math.max(texturasMax, texturas.length);
-                    modelosMax = Math.max(modelosMax, modelos.length);
+					texturasMax = Math.max(texturasMax, texturas.length);
+					modelosMax = Math.max(modelosMax, modelos.length);
 
-                    $('#load-modal-counter').html(texturasCounter + modelosCounter);
-                    $('#load-modal-counter-max').html(texturasMax + modelosMax);
+					$('#load-modal-counter').html(texturasCounter + modelosCounter);
+					$('#load-modal-counter-max').html(texturasMax + modelosMax);
 
-                    for (var i = modelos.length - 1; i >= 0; i--) {
-                        if (modelos[i]) {
-                            modelos.splice(i, 1);
-                            modelosCounter++;
-                        }
-                    }
+					for (var i = modelos.length - 1; i >= 0; i--) {
+						if (modelos[i]) {
+							modelos.splice(i, 1);
+							modelosCounter++;
+						}
+					}
 
-                    for (var i = texturas.length - 1; i >= 0; i--) {
-                        if (texturas[i].image && texturas[i].image.complete) {
-                            texturas.splice(i, 1);
-                            texturasCounter++;
-                        }
-                    }
+					for (var i = texturas.length - 1; i >= 0; i--) {
+						if (texturas[i].image && texturas[i].image.complete) {
+							texturas.splice(i, 1);
+							texturasCounter++;
+						}
+					}
 
-                    if (modelosCounter === modelosMax && texturasCounter === texturasMax && ON_DAED['3D'].START_RENDER !== null && conteudoCarregado === true) {
-                        $('#load-modal-counter').html(texturasCounter + modelosCounter);
+					if (modelosCounter === modelosMax && texturasCounter === texturasMax && ON_DAED['3D'].START_RENDER !== null && conteudoCarregado === true) {
+						$('#load-modal-counter').html(texturasCounter + modelosCounter);
 
-                        window.clearInterval(loadInterval);
-                        window.setTimeout(function () {
-                            $(window).unbind("resize", resizeLoadModal);
+						window.clearInterval(loadInterval);
+						window.setTimeout(function () {
+							$(window).unbind("resize", resizeLoadModal);
 
-                            $('.ui-astro-icon').removeClass('hidden');
-                            $('#canvas-wrapper').removeClass('hidden');
+							$('.ui-astro-icon').removeClass('hidden');
+							$('#canvas-wrapper').removeClass('hidden');
 
-                            window.setTimeout(function () {
-                                if (ON_DAED['3D'].START_RENDER instanceof Function) {
-                                    ON_DAED['3D'].START_RENDER();
-                                }
+							window.setTimeout(function () {
+								if (ON_DAED['3D'].START_RENDER instanceof Function) {
+									ON_DAED['3D'].START_RENDER();
+								}
 
-                                $(window).trigger('resize');
+								$(window).trigger('resize');
 
-                                if (window.onresize instanceof Function) {
-                                    window.onresize();
-                                }
+								if (window.onresize instanceof Function) {
+									window.onresize();
+								}
 
-                                var beforeReady = $('#load-modal').data('beforeReady');
+								var beforeReady = $('#load-modal').data('beforeReady');
 
-                                for (var i = 0; i < beforeReady.length; i++) {
-                                    beforeReady[i]();
-                                }
+								for (var i = 0; i < beforeReady.length; i++) {
+									beforeReady[i]();
+								}
 
-                                if (localStorage.esconderPrimeiroAcesso === undefined || localStorage.esconderPrimeiroAcesso === "false") {
-                                    $('#primeiro-acesso-overlay').show();
-                                } else {
-                                    $('#primeiro-acesso-overlay').remove();
-                                }
+								if (localStorage.esconderPrimeiroAcesso === undefined || localStorage.esconderPrimeiroAcesso === "false") {
+									$('#primeiro-acesso-overlay').show();
+								} else {
+									$('#primeiro-acesso-overlay').remove();
+								}
 
-                                window.setTimeout(function () {
-                                    $('#load-modal').fadeOut(500, function () {
-                                        $(this).remove();
-                                    });
-                                }, 750);
+								window.setTimeout(function () {
+									$('#load-modal').fadeOut(500, function () {
+										$(this).remove();
+									});
+								}, 750);
 
-                            }, 500);
+							}, 500);
 
-                        }, 500);
-                    }
-                }, 100);
+						}, 500);
+					}
+				}, 100);
 
-            });
-            /*]]>*/
+			});
+			/*]]>*/
         </script>
 
     </body>
