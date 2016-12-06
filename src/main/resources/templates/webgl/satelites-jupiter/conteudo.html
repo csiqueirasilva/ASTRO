@@ -278,6 +278,33 @@
 				return parseFloat($('#info-fuso-horario').val()) + ($('#input-horario-verao').is(':checked') ? 1 : 0);
 			}
 
+			$($('#hora-minuto-segundo-row').children('input')[0]).change(function () {
+				var val = $(this).val();
+				if (isNaN(val) || val < 0) {
+					$(this).val(0);
+				} else if (val > 23) {
+					$(this).val(23);
+				}
+			});
+
+			$($('#hora-minuto-segundo-row').children('input')[1]).change(function () {
+				var val = $(this).val();
+				if (isNaN(val) || val < 0) {
+					$(this).val(0);
+				} else if (val > 59) {
+					$(this).val(59);
+				}
+			});
+
+			$($('#hora-minuto-segundo-row').children('input')[2]).change(function () {
+				var val = $(this).val();
+				if (isNaN(val) || val < 0) {
+					$(this).val(0);
+				} else if (val > 59) {
+					$(this).val(59);
+				}
+			});
+
 			(function () {
 
 				var fuso = ON_DAED.fusoOriginal();
@@ -294,7 +321,22 @@
 
 						var dt = new Date(Date.UTC(dtVal[2], dtVal[1] - 1, dtVal[0], -fuso, 0, 0));
 
-						setModelDate(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate(), dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
+						var cod = (dt.getUTCMonth() + 1).toString() + "/" + (dt.getUTCFullYear());
+						if (cod !== mesCod) {
+							mesCod = cod;
+							setModelDate(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate(), dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
+						} else {
+							var t = ON_DAED.diaDoMesFloat(dt.getUTCDate(), dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
+
+							var horario = $('#hora-minuto-segundo-row').children('input').map(function (k, v) {
+								return parseFloat($(v).val());
+							});
+
+							t += (horario[0] + horario[1] / 60 + horario[2] / 3600) / 24;
+
+							$('input#slider-data').bootstrapSlider('setValue', t * sliderFact, true);
+							posicaoJupiter.traceLines(t);
+						}
 					}
 				});
 
@@ -711,6 +753,33 @@
 			$('#slider-data').data('cb', function (value) {
 				var t = value / sliderFact;
 				posicaoJupiter.traceLines(t);
+
+				var fuso = obterFusoHorario();
+
+				t += (1 / 24) * fuso;
+
+				var dia = parseInt(t + 1);
+
+				$('#dataju-datepicker-de-local')
+					.val((dia <= 9 ? '0' + dia.toString() : dia) + '/' + mesCod);
+
+				var horas = parseInt((t % 1) * 24);
+				var horasResto = ((t % 1) * 24) % 1;
+				var min = parseInt(horasResto * 60);
+				var minResto = horasResto * 60 - min;
+				var sec = parseInt(minResto * 60);
+
+/*				var horasResultante = horas + fuso;
+
+				if (horasResultante < 0) {
+					horasResultante += 24;
+				} else if (horasResultante > 23) {
+					horasResultante -= 24;
+				}*/
+
+				$('#hora-minuto-segundo-row').children('input')[0].value = horas;
+				$('#hora-minuto-segundo-row').children('input')[1].value = min;
+				$('#hora-minuto-segundo-row').children('input')[2].value = sec;
 			});
 
 			$('#velocidade-translacao-terra').data('cb', function (value) {
@@ -858,12 +927,12 @@
 								if (callback instanceof Function) {
 									callback();
 								}
-								
+
 								$('#loading-satelites').html("Clique para exibir o conteúdo");
 							},
 							error: xhrError
 						});
-						
+
 					},
 					error: xhrError
 				});
@@ -970,9 +1039,18 @@
 				});
 			}
 
+			var mesCod = null;
+
 			$('#load-modal').data('beforeReady').push(function () {
 				var dt = new Date();
-				setModelDate(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate(), dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
+				mesCod = (dt.getUTCMonth() + 1).toString() + "/" + (dt.getUTCFullYear());
+				var horasResultante = dt.getUTCHours() - obterFusoHorario();
+				if (horasResultante < 0) {
+					horasResultante += 24;
+				} else if (horasResultante > 23) {
+					horasResultante -= 24;
+				}
+				setModelDate(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate(), horasResultante, dt.getUTCMinutes(), dt.getUTCSeconds());
 			});
 
 			function imgToDataURL(id) {
