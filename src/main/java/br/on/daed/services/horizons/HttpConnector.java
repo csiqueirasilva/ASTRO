@@ -31,7 +31,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class HttpConnector {
 
-	private final String HORIZONS_BATCH_URL = "http://ssd.jpl.nasa.gov/horizons_batch.cgi";
+	private final String HORIZONS_BATCH_URL = "https://ssd.jpl.nasa.gov/horizons_batch.cgi";
 
 	private final Pattern HORIZONS_DATA_PATTERN = Pattern.compile("(?:\\$\\$SOE)(?<data>[^$]*)");
 	private final Pattern HORIZONS_ORBITAL_DATA_PATTERN = Pattern.compile("(?:(EC|OM|N |A |QR|W |MA|AD|IN|Tp|TA|PR)=[ ]*)([^ ]*)");
