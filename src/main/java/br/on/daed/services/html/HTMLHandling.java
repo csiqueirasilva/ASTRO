@@ -67,6 +67,21 @@ public class HTMLHandling {
 
     private static final String MARES_REF_URL = "http://www.mar.mil.br/dhn/chm/box-previsao-mare/tabuas/index.htm";
 
+	public static Integer getMareYear() {
+		Integer ret = null;
+		
+		try {
+			Document d = Jsoup.parse(new URL(MARES_REF_URL), 1000);
+			Elements yearOption = d.getElementsByAttributeValue("name", "cboAno");
+			Element selectYear = yearOption.first().child(0);
+			ret = Integer.parseInt(selectYear.text());
+		} catch (Exception e) {
+			ret = 2016; // defaults to 2016 if cant find the year
+		}
+		
+		return ret;
+	}
+	
     public static TreeSet<PortoData> getMareOptions() {
         TreeSet<PortoData> ret = null;
 

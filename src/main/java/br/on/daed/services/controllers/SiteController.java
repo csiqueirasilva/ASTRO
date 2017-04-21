@@ -142,6 +142,7 @@ public class SiteController {
 
     @RequestMapping("/mares")
     public String mares(ModelMap map) {
+		map.addAttribute("maxAnoTabuas", HTMLHandling.getMareYear());
         return setWebGLTemplate(map, "mares");
     }
 
