@@ -35,7 +35,7 @@ public class HttpConnector {
 
 	private final Pattern HORIZONS_DATA_PATTERN = Pattern.compile("(?:\\$\\$SOE)(?<data>[^$]*)");
 	private final Pattern HORIZONS_ORBITAL_DATA_PATTERN = Pattern.compile("(?:(EC|OM|N |A |QR|W |MA|AD|IN|Tp|TA|PR)=[ ]*)([^ ]*)");
-	private final Pattern HORIZONS_CARTESIAN_DATA_PATTERN = Pattern.compile("((?:[ ]+)[0-9.E+-]+){3}");
+	private final Pattern HORIZONS_CARTESIAN_DATA_PATTERN = Pattern.compile("(?:(X|Y|Z|VX|VY|VZ)[ ]*=[ ]*)([0-9.E+-]+)");
 
 	// optional data
 	private final Pattern HORIZONS_GM_PATTERN = Pattern.compile("(?:^|\\s)+GM(?:\\s*\\,?\\s*\\(?)(?<unit>[0-9^]+)?(?:[a-z^0-9- /]+)?(?:\\)?(?:[a-z^0-9- /]+)?\\s*)?=\\s*(?<gm>\\S+)(?:$|\\s{2,})");
@@ -140,25 +140,17 @@ public class HttpConnector {
 
 		Matcher m = HORIZONS_CARTESIAN_DATA_PATTERN.matcher(raw);
 
-		if (m.find()) {
+		while(ret != null && m.find() && m.groupCount() == 2) {
 
-			String[] split = m.group(0).split("[ ]+");
+			String data = m.group(2);
 
-			ret.add(split[1]);
-			ret.add(split[2]);
-			ret.add(split[3]);
-
-			if (m.find()) {
-				split = m.group(0).split("[ ]+");
-				ret.add(split[1]);
-				ret.add(split[2]);
-				ret.add(split[3]);
-			} else {
+			try {
+				Double.parseDouble(data);
+				ret.add(data);
+			} catch (Exception e) {
 				ret = null;
 			}
-
-		} else {
-			ret = null;
+			
 		}
 
 		return ret;
