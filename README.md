@@ -6,3 +6,7 @@ Repository of basic astronomy tools built while working under a [CNPQ](http://ww
 # Examples
 
 Library examples (with [Threejs](http://www.threejs.org)) can be found on the tools' main site.
+
+# Dependencies
+
+This project depends on JDK 1.8
