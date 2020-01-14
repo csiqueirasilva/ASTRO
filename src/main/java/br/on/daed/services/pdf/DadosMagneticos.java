@@ -25,7 +25,7 @@ import org.apache.commons.io.IOUtils;
 public class DadosMagneticos {
 
     private final static String[] TIPO_DADOS_MAGNETICOS = {"1", "2", "3"};
-    private final static Double[] ANO_MAGNETICO = {1900.00, 2021.00};
+    private final static Double[] ANO_MAGNETICO = {1900.00, 2030.0};
 
     public static byte[] gerarPDF(String ano, String tipo) throws IOException, InterruptedException, UnsupportedOperationException {
 
@@ -37,7 +37,7 @@ public class DadosMagneticos {
 
         byte[] ret = null;
 
-        if (anoDouble >= ANO_MAGNETICO[0] && anoDouble < ANO_MAGNETICO[1] && dados.contains(tipo)) {
+        if (anoDouble >= ANO_MAGNETICO[0] && anoDouble <= ANO_MAGNETICO[1] && dados.contains(tipo)) {
 
             do {
 
