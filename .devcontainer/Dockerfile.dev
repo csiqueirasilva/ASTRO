@@ -1,0 +1,21 @@
+# Dockerfile.dev
+FROM maven:3.6.3-jdk-8
+
+# Install Liberica JDK 8 full (JavaFX) + xdg-utils for desktop integration
+RUN apt-get update && \
+    apt-get install -y wget gnupg2 ca-certificates && \
+    wget -qO - https://download.bell-sw.com/pki/GPG-KEY-bellsoft | apt-key add - && \
+    echo "deb https://apt.bell-sw.com/ stable main" \
+      > /etc/apt/sources.list.d/bellsoft.list && \
+    apt-get update && \
+    apt-get install -y bellsoft-java8-full xdg-utils && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME=/usr/lib/jvm/bellsoft-java8-full-amd64
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+WORKDIR /app
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+COPY . .
+CMD ["sleep", "infinity"]

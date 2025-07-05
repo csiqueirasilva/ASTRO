@@ -98,7 +98,7 @@
         <option value="variacaoIntensidade">Variação Secular de Intensidade</option>
     </select>
 
-    <label class="margin-top-5">Data (1900 até 2020) <span title="A cada 5 anos os dados são atualizados" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></label>
+    <label class="margin-top-5">Data (1900 até 2030) <span title="A cada 5 anos os dados são atualizados" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></label>
 
     <input readonly="readonly" class="form-control input-centralizado jlink dataju-datepicker form-magnetico-input" name="data-gregoriana-de-local" size="16" type="text" id="dataju-datepicker-de-local" value="12/02/2012" />
 
@@ -230,7 +230,7 @@
 					language: 'pt-BR',
 					autoclose: true,
 					startDate: "01/01/1900",
-					endDate: "31/12/2020"
+					endDate: "31/12/2030"
 				}).on('changeDate',
 				function (ev) {
 					entradaData = getHiddenDate();
@@ -251,7 +251,7 @@
 			var latFinal = -90;
 			var lonInicial = -180;
 			var lonFinal = 180;
-			var entradaData = 2020.0;
+			var entradaData = 2030.0;
 			var valorMax,
 				valorMin;
 			var xs, ys;

@@ -1,0 +1,20 @@
+{
+    "name": "ASTRO Dev",
+    "build": {
+      "dockerfile": "Dockerfile.dev",
+      "context": ".."
+    },
+    "workspaceFolder": "/app",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "vscjava.vscode-java-pack",
+          "vscjava.vscode-maven",
+          "pivotal.vscode-spring-boot"
+        ]
+      }
+    },
+    "forwardPorts": [8080],
+    "postCreateCommand": "mvn spring-boot:run -Dspring-boot.run.profiles=dev"
+  }
