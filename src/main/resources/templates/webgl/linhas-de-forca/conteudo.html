@@ -37,7 +37,7 @@
                 <div id="label-cidade-form" style="display: none;">OBSERVATORIO NACIONAL</div>
 
                 <div class='igrf-divisao'>
-                    <h4>Data (1900 até 2025) <span title="A cada 5 anos os dados são atualizados" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></h4>
+                    <h4>Data (1900 até 2030) <span title="A cada 5 anos os dados são atualizados" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></h4>
 
                     <input readonly="readonly" class="form-control input-centralizado jlink dataju-datepicker" name="data-gregoriana-de-local" size="16" type="text" id="dataju-datepicker-de-local" value="12/02/2012" />
                 </div>
@@ -134,7 +134,7 @@
             <div class="modal-body">
 
                 <div class='igrf-divisao'>
-                    <h4>Data (1900 até 2025) <span title="A cada 5 anos os dados são atualizados" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></h4>
+                    <h4>Data (1900 até 2030) <span title="A cada 5 anos os dados são atualizados" data-placement="right" data-toggle="tooltip" class="ui-astro-tooltip"><i class="glyphicon glyphicon-question-sign"></i></span></h4>
 
                     <input readonly="readonly" class="form-control input-centralizado jlink dataju-datepicker" name="data-gregoriana-de" size="16" type="text" id="dataju-datepicker-de" value="12/02/2012" />
                 </div>
@@ -260,6 +260,8 @@
 
             var date = new Date();
 
+            const maxDate = 2030;
+
             $('#dataju-datepicker-de')
                     .val(date.getUTCDate() + '/' + (date.getUTCMonth() < 9 ? '0' + (date.getUTCMonth() + 1) : date.getUTCMonth() + 1) + '/' + date.getUTCFullYear())
                     .datepicker({
@@ -268,7 +270,7 @@
                         language: 'pt-BR',
                         autoclose: true,
                         startDate: "01/01/1900",
-                        endDate: "01/01/2025"
+                        endDate: `01/01/${maxDate}`
                     }).on('changeDate',
                     function (ev) {
                         setUrlPDF();
@@ -282,7 +284,7 @@
                         language: 'pt-BR',
                         autoclose: true,
                         startDate: "01/01/1900",
-                        endDate: "01/01/2025"
+                        endDate: `01/01/${maxDate}`
                     }).on('changeDate',
                     function (ev) {
                         obterDadosIGRF();
@@ -308,7 +310,7 @@
 
                 var ano = parseInt(split[2]) + (ON_DAED.diaDoAno(dt) / 365.25);
 
-                return ano;
+                return Math.min(maxDate, ano);
             }
 
             function setUrlPDF() {
