@@ -52,10 +52,11 @@ After startup the GUI will display something like:
 ASTRO
 
 IP: http://localhost:<random-port>
-[Open]
 ```
 
-Click **Open** or navigate manually to the printed URL to access the app.
+![](imgs/doc1.png?raw=true)
+
+Click **Abrir** or navigate manually to the printed URL to access the app.
 
 ## Building the WAR File
 
