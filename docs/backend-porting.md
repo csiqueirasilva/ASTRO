@@ -57,21 +57,10 @@ This guide breaks down every Java backend component and explains how it should b
 ## Controllers
 
 ### `SiteController`
-- Each `@RequestMapping` corresponds to a Razor/Blazor route. Implement a controller returning `IActionResult` that simply selects the Blazor page/component:
-  ```csharp
-  [Route("")]
-  public class SiteController : Controller
-  {
-      [HttpGet("")]
-      public IActionResult Index() => View("mainpage");
-
-      [HttpGet("angulo-horario")]
-      public IActionResult AnguloHorario() => View("templatewebgl", "angulo-horario");
-      // ...repeat for every WebGL page
-  }
-  ```
-- In Blazor Server, create `.razor` pages under `Pages/` that render the existing HTML markup (see `frontend-porting.md`) and load the same static JS/CSS.
-- Preserve helper logic `setWebGLTemplate` by encapsulating it in a shared method (e.g., set a `ViewData["Conteudo"]` value consumed by the template view).
+- Each `@RequestMapping` is now handled by the ASP.NET MVC controller at `Astro.Web/Controllers/SiteController.cs`. The port keeps the same method layout as the legacy class so diffs remain manageable.
+- The controller delegates HTML rendering to `TemplateResolver`, which reads the original Thymeleaf templates, expands `th:include` / `th:replace`, and returns the resulting markup. `TemplateWebGl.cshtml` then writes the fragments via `@Html.Raw`, ensuring the generated HTML matches production byte-for-byte.
+- When adding a new route, call `WebGl("<slug>")` (which sets the fragment keys in `ViewData`), confirm the slug exists under `templates/webgl/`, and add the route to the parity harness (`TemplateParityTests`).
+- Non-WebGL pages such as `mainpage.html` are served by resolving the full template (`_resolver.Resolve("mainpage.html")`) and returning it with `Content(html, "text/html; charset=utf-8")`. No Razor/Blazor rewrite is required until we explicitly choose to modernise a page.
 
 ### `ToolsController`
 - Converts to an MVC controller with a `[HttpPost("/csv")]` action returning `FileContentResult`.

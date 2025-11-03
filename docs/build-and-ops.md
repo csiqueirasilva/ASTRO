@@ -60,6 +60,7 @@ ASTRO.Net.sln
   dotnet test --configuration Release --no-build
   dotnet publish --configuration Release --no-build --output out
   ```
+- The parity suite (`TemplateParityTests`) reaches out to https://daed.on.br/astro/. Ensure CI runners have outbound HTTPS access; otherwise, skip the test via an environment variable only in sandboxed environments and record the decision in the migration log.
 - Add linting via `dotnet format` or Roslyn analyzers.
 - Integrate Playwright or Selenium tests to validate the Blazor-rendered pages against captured baselines from the Java app.
 
@@ -82,5 +83,6 @@ ASTRO.Net.sln
 - External tools (DISLIN generator) invoked successfully inside new container/host.
 - NASA Horizons integration verified with the same Julian day inputs.
 - CSV download still produces `export.csv` with header/body content identical to Java version.
+- `dotnet test` (parity suite) green against production snapshots for all WebGL tools and calendar utilities.
 
 Following this plan ensures the .NET 8 build/deployment story is production-ready and faithful to the current operational model.

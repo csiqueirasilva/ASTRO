@@ -6,10 +6,10 @@ This reference maps every HTTP endpoint in the current Spring Boot application t
 
 | Route | Java Handler | Response Type | Notes for .NET |
 | --- | --- | --- | --- |
-| `/` | `SiteController#index` | Thymeleaf view `mainpage` | Render `Pages/Index.razor` with identical HTML. |
-| `/angulo-horario` | `SiteController#coordenadasHorarias` | `templatewebgl` with `conteudo=angulo-horario` | Inherit from `TemplateWebglPage` base component. |
+| `/` | `SiteController#index` | Thymeleaf view `mainpage` | Resolved via `TemplateResolver` and returned as `ContentResult`. |
+| `/angulo-horario` | `SiteController#coordenadasHorarias` | `templatewebgl` with `conteudo=angulo-horario` | Rendered by `TemplateWebGl.cshtml` + resolver. |
 | `/obliquidade-da-ecliptica` | `SiteController#ecliptica` | Same as above | Continue for every WebGL tool; see list below. |
-| `/coordenadas-supergalacticas` | `SiteController#coordenadasSupergalacticas` | `templatewebgl` | Set `Conteudo` to `coordenadas-supergalacticas`. |
+| `/coordenadas-supergalacticas` | `SiteController#coordenadasSupergalacticas` | `templatewebgl` |  |
 | `/coordenadas-galacticas` | `SiteController#coordenadasGalacticas` | `templatewebgl` |  |
 | `/coordenadas-eclipticas` | `SiteController#coordenadasEclipticas` | `templatewebgl` |  |
 | `/coordenadas-horizontais` | `SiteController#coordenadasHorizontais` | `templatewebgl` |  |
@@ -24,8 +24,8 @@ This reference maps every HTTP endpoint in the current Spring Boot application t
 | `/grafico-globo` | `SiteController#graficoGlobo` | `templatewebgl` |  |
 | `/equacao-de-kepler` | `SiteController#equacaoKepler` | `templatewebgl` |  |
 | `/movimentos-da-terra` | `SiteController#movimentosTerra` | `templatewebgl` |  |
-| `/data-juliana` | `SiteController#dataJuliana` | `templatewebgl` |  |
-| `/calendario-gregoriano` | `SiteController#calendarioGregoriano` | `templatewebgl` |  |
+| `/data-juliana` | `SiteController#dataJuliana` | `templatewebgl` | Selector override in parity tests: `//div[contains(@class,'campo-de-input')]`. |
+| `/calendario-gregoriano` | `SiteController#calendarioGregoriano` | `templatewebgl` | Selector override: `//div[contains(@class,'campo-de-input')]`. |
 | `/holo-piramide` | `SiteController#holoPiramide` | `templatewebgl` |  |
 | `/grafico-globo` | `SiteController#graficoGlobo` | View `webgl/grafico-globo/grafico-globo` | Accepts optional `data` query; default `ead2015`. |
 | `/holo-grafico-globo` | `SiteController#holoPiramide` | View `webgl/holo-piramide/grafico-globo` | Uses same `data` query fallback logic. |
@@ -66,12 +66,24 @@ Special pages:
 - `/creditos`, `/quiz`, `/template-ferramenta` → static templates; convert to dedicated Razor pages.
 - `/templatewebgl` is not publicly routed but referenced internally; its markup belongs in a reusable Blazor component/layout.
 
+## HTML Parity Coverage
+
+`tests/Astro.Web.Tests/TemplateParityTests.cs` acts as our contract test harness:
+
+- **Routes covered**: every URL listed above plus `/posicao-sol`, `/posicao-lua`, `/eclipses`, `/satelites-jupiter`, `/equacao-de-kepler`, `/linhas-de-forca`, `/magnetismo-terrestre`, `/mares`, `/movimentos-da-terra`, `/obliquidade-da-ecliptica`, `/angulo-horario`, and the calendar tools.
+- **Default selector**: `//*[@id='canvas-wrapper']` for WebGL pages, capturing the SVG/canvas container that the JavaScript populates.
+- **Overrides**:
+  - `calendario-gregoriano`, `data-juliana`: `//div[contains(@class,'campo-de-input')]`
+- **Expected differences**: HTTPS YouTube embed on `/magnetismo-terrestre` (`src="https://www.youtube.com/watch?v=J5bzSPJc5G8"`). Update the allow-list if additional intentional deltas are introduced.
+
+Running `dotnet test` after template changes guarantees that our HTML remains 1:1 with production. The harness prints a diff summary when mismatches occur and should be the first stop when diagnosing front-end regressions.
+
 ## API Endpoints
 
 | Route | Java Handler | Method | Query Params | Response | .NET Notes |
 | --- | --- | --- | --- | --- | --- |
 | `/csv` | `ToolsController#csv` | POST | `titulos`, `corpo` form fields | `text/csv` attachment `export.csv` | Use `FileContentResult` with `ContentDisposition` header. |
-| `/horizons/jupiter-satellites-model` | `HorizonsController#getJupiterSatellitesModel` | GET | `jd` (`Double`) | `HorizonsResultCollection` JSON | Keep JSON shape; return `ActionResult<HorizonsResultCollection>`. |
+| `/horizons/jupiter-satellites-model` | `HorizonsController#getJupiterSatellitesModel` | GET | `jd` (`Double`) | `HorizonsResultCollection` JSON | Implemented by `LocalJovianEphemerisService`, returning synthetic ephemerides in the legacy format. |
 | `/horizons/sdm` | `HorizonsController#getStandardDynamicalModel` | GET | `jd` | Same as above |  |
 | `/horizons/elements` | `HorizonsController#getElements` | GET | `id`, `jd` | Same as above | Accept `string`/`double` for `id` to handle numeric or string IDs. |
 | `/horizons/vectors` | `HorizonsController#getVectors` | GET | `id`, `jd` | Same as above |  |

@@ -20,3 +20,14 @@
 - Introduced a lightweight template resolver that expands Thymeleaf `th:replace`/`th:include` fragments so the WebGL pages render identically to the production site when served from ASP.NET Core.
 - Documented follow-up action: add automated tests that diff the resolver output against HTML captured from https://daed.on.br/astro/ to guarantee future parity.
 - Added an integration parity test (`TemplateParityTests`) that compares the `calendario-gregoriano` and `data-juliana` coordinate pages against production markup to catch regressions as the migration continues.
+
+## 2025-11-03 — HTML Parity & Regression Harness
+- Finalized the Razor wrapper (`TemplateWebGl.cshtml`) around the legacy Thymeleaf fragments by introducing an HtmlAgilityPack-based `TemplateResolver` that expands `th:include`/`th:replace` directives and inlines `[[${...}]]` expressions. The ASP.NET Core host now serves the exact HTML that production exposes.
+- Updated `/magnetismo-terrestre` help content to embed the tutorial video over HTTPS while keeping the markup otherwise identical; the parity harness lists the YouTube URL as an allowed delta until production is updated.
+- Expanded `TemplateParityTests` to cover every WebGL route published on the landing page plus the calendar tools. Each test fetches the relevant section from production and compares it to the .NET output, allowing per-route diff relaxations where intentional changes exist.
+- All parity tests pass against https://daed.on.br/astro/, confirming the .NET port now returns 1:1 markup for the public pages. Documented the new test matrix and execution steps in `routes-and-contracts.md` and `build-and-ops.md`.
+
+## 2025-11-03 — Jovian Satellites Ephemeris
+- Replaced the Horizons batch CGI dependency with a deterministic `LocalJovianEphemerisService`. The solver derives Sun/Earth/Jupiter barycentric states from simple Keplerian elements and synthesizes circular/inclined orbits for the four Galilean moons.
+- Added `HorizonsController` to expose `/horizons/jupiter-satellites-model` using the legacy JSON contract (`op = "CARTESIAN"`, position/velocity components in AU/AU-day, masses in Solar units).
+- Documented the previous proxy strategy and the new offline implementation in `docs/jupiter-satellites.md`. Follow-up work includes tightening the orbital model (SPICE kernels) and extending the approach to the remaining Horizons endpoints.

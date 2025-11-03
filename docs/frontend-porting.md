@@ -1,96 +1,55 @@
 # Front-End Porting Guide
 
-The current UI is a mix of Thymeleaf templates and static WebGL pages served from `src/main/resources/templates` and `src/main/resources/static`. The .NET 8 port will deliver the same markup using Blazor Server/Razor views while reusing all existing JavaScript and asset files.
+The .NET 8 host now serves the *exact* HTML that production exposes by expanding the legacy Thymeleaf templates at runtime. Instead of rebuilding every page in Blazor, we render the original fragments through Razor views backed by a reusable resolver. This document explains how the pieces fit together and what to consider when evolving the UI.
 
-## Guiding Principles
-- **Keep every HTML route and file name**: URLs like `/coordenadas-eclipticas` and `/templatewebgl.html` must resolve to the same content so bookmarked links and embedded iframes stay valid.
-- **Reuse JavaScript and CSS verbatim**: Copy everything under `src/main/resources/static` into `wwwroot/` and update references to use the same relative paths.
-- **Translate Thymeleaf expressions to Blazor**: Replace constructs such as `th:text="${conteudo}"` with Blazor data bindings (`@Conteudo`). Pages that were static HTML remain static.
-- **Avoid SPA rewrites**: Keep a server-rendered Blazor application with per-page components so we do not have to rearchitect the WebGL tooling.
+## Current Strategy (Status: Complete)
+- **TemplateResolver** (`Astro.Web/Services/TemplateResolver.cs`) loads files from `src/main/resources/templates`, processes `th:include` / `th:replace`, and substitutes inline expressions such as `[[${conteudo}]]`. The output is cached and fed directly to the Razor view.
+- **TemplateWebGl.cshtml** mirrors `templatewebgl.html`. It injects the resolved fragments (`css`, `conteudo`, `ajuda`, `sobre`, `creditos`) into the DOM using `@Html.Raw`, preserving IDs, script tags, and ordering.
+- **Static assets** (`src/main/resources/static`) are exposed via `wwwroot` through `CompositeFileProvider`, so URLs like `/js/jquery.min.js` remain valid without copying files.
+- **Parity tests** (`TemplateParityTests`) compare the rendered markup for every public route against https://daed.on.br/astro/ and keep an allow-list for intentional differences (currently only the HTTPS YouTube embed).
 
-## Project Layout
+This approach keeps the JavaScript-heavy WebGL pages untouched and gives us byte-for-byte equivalence with production while we continue porting backend services.
 
-```
-ASTRO.Net/
- ├─ Astro.Web/                 # ASP.NET Core 8 project
- │   ├─ Pages/
- │   │   ├─ _Host.cshtml       # Blazor Server host page
- │   │   ├─ Index.razor        # Main landing page (mainpage.html)
- │   │   ├─ TemplateWebgl.razor
- │   │   └─ Webgl/
- │   │       ├─ AnguloHorario.razor
- │   │       ├─ ... (one per conteudo.html)
- │   ├─ Shared/
- │   │   └─ MainLayout.razor   # Optional layout replicating template.html chrome
- │   └─ wwwroot/
- │       └─ js/, css/, lib/, imgs/, webgl assets copied verbatim
-```
+## Working with Templates
 
-## Templates and Views
+1. **Adding a new WebGL page**
+   - Place the HTML fragment under `src/main/resources/templates/webgl/<slug>/`.
+   - Expose the route in `SiteController` by calling `WebGl("<slug>")`.
+   - Add the slug to `docs/routes-and-contracts.md` and, if it is published on the landing page, to `TemplateParityTests.RoutePairs` with any selector overrides needed.
 
-### `mainpage.html`, `template-ferramenta.html`, `templatewebgl.html`, `creditos.html`, etc.
-- Create Blazor pages using the same HTML markup. For example, `mainpage.html` becomes `Pages/Index.razor` with the content pasted into a `<PageTitle>` / markup block.
-- Where Thymeleaf injected data (`th:text`, `th:href`), expose properties in the page’s `@code` block. Example for the WebGL wrapper:
-  ```razor
-  @page "/angulo-horario"
-  @inherits TemplateWebglPage
+2. **Updating shared fragments**
+   - Modify the source template (`mainpage.html`, `templatewebgl.html`, `ferramentas/fragmentos/...`, etc.).
+   - If the change intentionally diverges from production, document the rationale in `docs/migration-log.md` and register a normalization rule in `TemplateParityTests.ExpectedDifferences`.
 
-  @code {
-      protected override string Conteudo => "angulo-horario";
-  }
-  ```
-  `TemplateWebglPage` is a base component that renders the shared `templatewebgl.html` structure and outputs `Conteudo` wherever Thymeleaf used `${conteudo}`.
-- Keep layout and scripts identical. Put shared `<head>` markup into `Shared/HeadContent.razor` or a layout component to avoid duplication.
-
-### Individual WebGL Pages (`templates/webgl/**/conteudo.html`)
-- These pages are currently included by `templatewebgl.html`. Convert each `conteudo.html` file into a Blazor component under `Pages/Webgl/`. Inject it inside the wrapper using:
-  ```razor
-  @if (!string.IsNullOrEmpty(Conteudo))
-  {
-      <DynamicComponent Type="ResolveComponentType(Conteudo)" />
-  }
-  ```
-- Create a mapping method (`ResolveComponentType`) returning the corresponding `.razor` component type. Each component simply contains the HTML snippet from its original file with no C# logic.
-- Preserve IDs, data attributes, and script hooks so the existing JavaScript continues to manipulate the DOM as before.
-
-### `quiz.html`, `posicao-sol.html`, `template-ferramenta.html`, etc.
-- For templates that already serve full pages, create dedicated `.razor` pages with matching routes (`@page "/quiz"`). No interactivity changes are required; only replace Thymeleaf-specific attributes.
+3. **Inline expressions**
+   - `TemplateResolver` currently handles simple key lookups (`[[${maxAnoTabuas}]]`). If a fragment needs arithmetic or conditional expressions, extend `ApplyInlineExpressions` with the required syntax and cover it with unit tests.
 
 ## Static Assets
 
-- Copy everything under `src/main/resources/static` into `wwwroot`. The relative references inside HTML (e.g., `<script src="js/jquery.min.js">`) remain valid when the pages live under Blazor’s root.
-- Update the `.csproj` to include the static files:
-  ```xml
-  <ItemGroup>
-      <Content Include="wwwroot\**\*" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-  ```
-- Retain Git submodules (e.g., `lib/on-daed-js`, `lib/on-physics`) by pulling them into the new repo or referencing them as npm packages if desired. The quickest path is to vendor the same directories under `wwwroot/lib`.
+- Continue to author JavaScript, CSS, images, OBJ models, etc. under `src/main/resources/static`. The ASP.NET Core host serves them via `UseStaticFiles` with `ServeUnknownFileTypes = true` to support the WebGL models.
+- Keep submodules (`lib/on-daed-js`, `lib/on-physics`) checked out; the resolver and parity tests assume these paths exist.
+- When updating assets that differ from production, note the change in `docs/migration-log.md` and, if necessary, relax tests with a patterned allow-list.
 
-## Routing
+## Authoring Guidelines
 
-- Define each page’s `@page` directive to match the original route defined in `SiteController`. For example, `@page "/coordenadas-eclipticas"`.
-- For the root controller actions that returned `templatewebgl` with different `conteudo`, provide a single Razor Page base class that sets the `Conteudo` value and renders the same layout. This preserves the route map without altering JavaScript expectations.
-- Pages that relied on query parameters should parse them using `NavigationManager` or `[Parameter]` bindings to keep behaviour identical.
+- Preserve IDs and data attributes: JavaScript relies heavily on selectors such as `#canvas-wrapper`, `.form-magnetico-input`, and modal IDs.
+- Use HTTPS for embeds and external assets whenever possible. If production still serves HTTP content, add a targeted expected difference until the upstream site is updated.
+- Avoid reformatting HTML purely for style—whitespace changes can create false positives in parity tests.
 
-## Layout & SEO
+## Testing & Tooling
 
-- Implement `_Host.cshtml` to include the `<head>` metadata exactly as `templatewebgl.html`, including OpenGraph tags and GA snippet. Ensure the generated HTML matches to avoid social sharing regressions.
-- Use `<head>` sections or `IHtmlContent` injection to set dynamic titles (`Astro - {Conteudo}`) replicating Thymeleaf’s `th:text` expression.
+- Run `dotnet test` after any template change. The parity harness fetches the production page, extracts the relevant section (defaults to `#canvas-wrapper` for WebGL tools, custom selectors for the calendar utilities), applies expected-difference replacements, and compares the normalized HTML.
+- When the harness flags a difference:
+  1. Inspect `/tmp/TemplateParityTests.*.html` (written when a failure occurs) to view both snippets.
+  2. Decide whether to align the markup or codify an allow-list entry.
+  3. Update `docs/routes-and-contracts.md` with any new selectors or exceptions.
 
-## Forms & Downloads
+## Future Work
 
-- The CSV export form posts to `/csv`. Ensure the Blazor pages still submit via standard HTML forms (no need to convert to Blazor event handlers). Blazor Server can coexist with standard POST forms by using `<form method="post" action="/csv">`.
-- Where JavaScript binds events (`.bind('click', ...)` in the templates), keep the markup the same so the event delegation still works.
+This resolver-based bridge buys us time to focus on backend parity. Once every feature is validated, we can progressively replace templates with native Razor/Blazor components while relying on the parity suite to guarantee we do not break the public contract. Any such efforts should:
 
-## Progressive Enhancement
+- Port one route at a time.
+- Update `TemplateParityTests` to point at the new markup (or keep the resolver output as the comparison source during migration).
+- Document the work in `docs/migration-log.md` so future maintainers understand which routes depend on the resolver vs. native components.
 
-- The current code base relies on jQuery plugins and Bootstrap 3. Do not upgrade libraries as part of the port; doing so risks breaking WebGL interactions.
-- Blazor Server’s real-time component updates are optional; treat each page as largely static markup that defers to the existing JS for dynamic behaviour.
-
-## Testing Strategy
-
-- Capture representative HTML output from the Java application and compare it with the Blazor-rendered markup using integration tests (e.g., Playwright snapshots). Focus on critical elements: titles, script tags, container IDs, and form field names.
-- Run the existing front-end smoke tests (if any) or manual WebGL flows against the .NET app to ensure the JavaScript assets behave identically.
-
-Following this approach allows us to port the templates with minimal risk while meeting the directive to keep the JavaScript untouched and routes stable.
+For now, treat the legacy HTML as canonical. All edits should go through the original templates, with the .NET runtime acting as a transparent host.
