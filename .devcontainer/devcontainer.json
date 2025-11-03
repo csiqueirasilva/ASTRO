@@ -11,10 +11,11 @@
         "extensions": [
           "vscjava.vscode-java-pack",
           "vscjava.vscode-maven",
-          "pivotal.vscode-spring-boot"
+          "pivotal.vscode-spring-boot",
+          "ms-dotnettools.csharp"
         ]
       }
     },
     "forwardPorts": [8080],
-    "postCreateCommand": "mvn spring-boot:run -Dspring-boot.run.profiles=dev"
+    "postCreateCommand": "bash -lc \"dotnet --info && java -version && mvn -version\""
   }
