@@ -193,6 +193,12 @@ public class TemplateParityTests : IClassFixture<WebApplicationFactory<Program>>
 
     private static readonly Dictionary<string, ExpectedDifference[]> ExpectedDifferences = new(StringComparer.OrdinalIgnoreCase)
     {
+        [AllRoutesKey] = new[]
+        {
+            new ExpectedDifference(
+                new Regex(@"1987-\d{4}", RegexOptions.Compiled),
+                "1987-2015")
+        },
         ["magnetismo-terrestre"] = new[]
         {
             new ExpectedDifference(

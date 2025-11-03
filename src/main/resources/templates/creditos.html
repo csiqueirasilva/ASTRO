@@ -59,7 +59,7 @@
     </div>
 
     <div id="creditos-copywrite">
-        <div>© 1987-2015 Todos os direitos reservados ao Observatório Nacional</div>
+        <div>© 1987-<span id="creditos-data-current-year">2015</span> Todos os direitos reservados ao Observatório Nacional</div>
     </div>
 
     <div id="creditos-juridico">As informações contidas no software ASTRO não podem ser utilizadas
@@ -68,3 +68,12 @@
         em bases de pesquisa.</div>
 
 </div>
+
+<script>
+    (function () {
+        var target = document.getElementById('creditos-data-current-year');
+        if (target) {
+            target.textContent = new Date().getFullYear();
+        }
+    })();
+</script>

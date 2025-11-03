@@ -337,7 +337,7 @@
                             </div>
 
                             <div class="modal-body" th:inline="text">
-                                <h1>ASTRO(1987-2015)</h1>
+                                <h1>ASTRO(1987-<span id="mainpage-data-current-year">2015</span>)</h1>
 
                                 <p>Em 1987 foi publicado um trabalho na série "Publicação Especial" do Observatório
                                     Nacional que consistia de um conjunto de subprogramas básicos de astronomia
@@ -455,6 +455,15 @@
 
                 </div>
             </div>
+
+            <script>
+                (function () {
+                    var target = document.getElementById('mainpage-data-current-year');
+                    if (target) {
+                        target.textContent = new Date().getFullYear();
+                    }
+                })();
+            </script>
 
             <script th:inline="javascript">
                 /*<![CDATA[*/
