@@ -58,7 +58,8 @@ ASTRO relies on several binaries, datasets, and third-party services. This docum
 ## Container & Environment Setup
 
 - The Dev Container installs DISLIN and configures symlinks. Mirror this in a new `.devcontainer` and Dockerfile based on the .NET 8 SDK image:
-  - Install DISLIN and copy `external-dependencies/declinacao-magnetica/dislin-11.5.linux.i586_64.deb`.
+- Install DISLIN and copy `external-dependencies/declinacao-magnetica/dislin-11.5.linux.i586_64.deb`.
+- Ensure Fortran runtime dependencies are present (`libgfortran5` and `libquadmath0` on Debian bookworm) so the `gerar` binary can load.
   - Run `dotnet restore` instead of `mvn dependency:go-offline`.
   - Keep the `/opt/declinacao-magnetica` symlink creation step.
 - Document any additional OS packages required by `HttpClient` (e.g., CA certificates) or by the JS build pipeline.
