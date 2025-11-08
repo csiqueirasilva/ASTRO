@@ -1,11 +1,11 @@
 [submodule "src/main/resources/static/lib/on-daed-js"]
-	path = src/main/resources/static/lib/on-daed-js
+	path = dotnet/Astro.Web/LegacyStatic/lib/on-daed-js
 	url = https://csiqueirasilva@github.com/csiqueirasilva/on-daed-js
 [submodule "src/main/resources/static/lib/on-physics"]
-	path = src/main/resources/static/lib/on-physics
+	path = dotnet/Astro.Web/LegacyStatic/lib/on-physics
 	url = https://csiqueirasilva@github.com/csiqueirasilva/on-physics
 [submodule "src/main/resources/static/lib/jupiter-satellite-events-json"]
-	path = src/main/resources/static/lib/jupiter-satellite-events-json
+	path = dotnet/Astro.Web/LegacyStatic/lib/jupiter-satellite-events-json
 	url = https://csiqueirasilva@github.com/csiqueirasilva/jupiter-satellite-events-json
 [submodule "docs/wiki"]
 	path = docs/wiki
