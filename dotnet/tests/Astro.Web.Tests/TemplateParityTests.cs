@@ -28,7 +28,7 @@ public class TemplateParityTests : IClassFixture<WebApplicationFactory<Program>>
         yield return new object[] { "posicao-sol", "posicao-sol" };
         yield return new object[] { "posicao-lua", "posicao-lua" };
         yield return new object[] { "eclipses", "eclipses" };
-        yield return new object[] { "satelites-jupiter", "satelites-jupiter" };
+        yield return new object[] { "old-satelites-jupiter", "satelites-jupiter" };
         yield return new object[] { "equacao-de-kepler", "equacao-de-kepler" };
         yield return new object[] { "linhas-de-forca", "linhas-de-forca" };
         yield return new object[] { "magnetismo-terrestre", "magnetismo-terrestre" };

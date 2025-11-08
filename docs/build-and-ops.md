@@ -8,8 +8,9 @@ Migrating to .NET 8 requires rethinking the build and runtime pipeline that curr
 ASTRO.Net.sln
  ├─ Astro.Web/          # ASP.NET Core 8 web host (Blazor Server + API)
  ├─ Astro.Domain/       # Optional class library for shared models/services
- ├─ Astro.Tools/        # Console utilities (orbit generator, data scrapers)
  └─ tests/              # xUnit or MSTest projects for regression coverage
+
+> Note: the former `Astro.Tools` console project was removed once the build began failing due to the lack of an entry point. Reintroduce it only when we have concrete offline tooling to ship alongside the web host.
 ```
 
 ## Build Toolchain

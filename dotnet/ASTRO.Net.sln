@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astro.Web", "Astro.Web\Astr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astro.Domain", "Astro.Domain\Astro.Domain.csproj", "{7B3BE8F1-2343-42CC-BFC6-0D2F75D73FAB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astro.Tools", "Astro.Tools\Astro.Tools.csproj", "{CB59528F-C87B-4722-82C7-22C83784885D}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CAFBAC01-B729-4ACC-9F37-8B9CD11AA7D1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Astro.Web.Tests", "tests\Astro.Web.Tests\Astro.Web.Tests.csproj", "{F29C3183-9722-455D-9425-051A50876628}"
@@ -30,10 +28,6 @@ Global
 		{7B3BE8F1-2343-42CC-BFC6-0D2F75D73FAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B3BE8F1-2343-42CC-BFC6-0D2F75D73FAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B3BE8F1-2343-42CC-BFC6-0D2F75D73FAB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CB59528F-C87B-4722-82C7-22C83784885D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CB59528F-C87B-4722-82C7-22C83784885D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CB59528F-C87B-4722-82C7-22C83784885D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CB59528F-C87B-4722-82C7-22C83784885D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F29C3183-9722-455D-9425-051A50876628}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F29C3183-9722-455D-9425-051A50876628}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F29C3183-9722-455D-9425-051A50876628}.Release|Any CPU.ActiveCfg = Release|Any CPU

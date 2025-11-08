@@ -28,6 +28,14 @@
 - All parity tests pass against https://daed.on.br/astro/, confirming the .NET port now returns 1:1 markup for the public pages. Documented the new test matrix and execution steps in `routes-and-contracts.md` and `build-and-ops.md`.
 
 ## 2025-11-03 — Jovian Satellites Ephemeris
-- Replaced the Horizons batch CGI dependency with a deterministic `LocalJovianEphemerisService`. The solver derives Sun/Earth/Jupiter barycentric states from simple Keplerian elements and synthesizes circular/inclined orbits for the four Galilean moons.
+- Initial .NET port replaced the Horizons batch CGI dependency with a deterministic `LocalJovianEphemerisService`. We have now superseded that approach with `HorizonsJovianEphemerisService`, which queries the official JPL Horizons service (through `IHorizonsClient`) and relays authoritative vectors for the Sun, Earth, and Galilean moons. Fixtures captured from Horizons provide offline unit-test verification.
 - Added `HorizonsController` to expose `/horizons/jupiter-satellites-model` using the legacy JSON contract (`op = "CARTESIAN"`, position/velocity components in AU/AU-day, masses in Solar units).
 - Documented the previous proxy strategy and the new offline implementation in `docs/jupiter-satellites.md`. Follow-up work includes tightening the orbital model (SPICE kernels) and extending the approach to the remaining Horizons endpoints.
+
+## 2025-11-05 — Jovian UI Migration Kick-off
+- Página original “Satélites de Júpiter” renomeada para `/old-satelites-jupiter` para preservar a experiência atual durante a migração.
+- `/satelites-jupiter` passa a exibir uma nova interface “v2” que inicializa um Worker (`lib/on-daed-js/workers/satelites-jupiter-worker.js`), registra uma linha do tempo de progresso e mostra um preview em canvas com dados sintéticos.
+- `docs/jupiter-satellites-refactor.md` atualizado com o mapeamento detalhado da implementação legada e os passos necessários para integrar o motor Stellarium Web SDK.
+
+## 2025-11-04 — Solution Cleanup
+- Removed the placeholder `Astro.Tools` console project from `ASTRO.Net.sln` after build failures revealed it never contained an entry point. The repository now builds (`dotnet build`) without extra steps. When we have concrete CLI utilities to ship, reintroduce them as a properly configured project with a `Main` method.

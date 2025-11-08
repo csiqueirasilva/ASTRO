@@ -617,11 +617,15 @@
 
 				$(window).bind("resize", resizeLoadModal);
 
-				var conteudoCarregado = false;
+			var conteudoCarregado = false;
 
-				$(window).load(function () {
+			if (document.readyState === 'complete') {
+				conteudoCarregado = true;
+			} else {
+				$(window).on('load', function () {
 					conteudoCarregado = true;
 				});
+			}
 
 				var texturasCounter = 0;
 				var texturas = $('#load-modal').data('texturas');
@@ -650,6 +654,10 @@
 							texturas.splice(i, 1);
 							texturasCounter++;
 						}
+					}
+
+					if (!conteudoCarregado && modelosCounter === modelosMax && texturasCounter === texturasMax) {
+						conteudoCarregado = true;
 					}
 
 					if (modelosCounter === modelosMax && texturasCounter === texturasMax && ON_DAED['3D'].START_RENDER !== null && conteudoCarregado === true) {

@@ -7,3 +7,6 @@
 [submodule "src/main/resources/static/lib/jupiter-satellite-events-json"]
 	path = src/main/resources/static/lib/jupiter-satellite-events-json
 	url = https://csiqueirasilva@github.com/csiqueirasilva/jupiter-satellite-events-json
+[submodule "docs/wiki"]
+	path = docs/wiki
+	url = git@github.com:csiqueirasilva/ASTRO.wiki.git

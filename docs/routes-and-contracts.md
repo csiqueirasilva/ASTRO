@@ -83,7 +83,8 @@ Running `dotnet test` after template changes guarantees that our HTML remains 1:
 | Route | Java Handler | Method | Query Params | Response | .NET Notes |
 | --- | --- | --- | --- | --- | --- |
 | `/csv` | `ToolsController#csv` | POST | `titulos`, `corpo` form fields | `text/csv` attachment `export.csv` | Use `FileContentResult` with `ContentDisposition` header. |
-| `/horizons/jupiter-satellites-model` | `HorizonsController#getJupiterSatellitesModel` | GET | `jd` (`Double`) | `HorizonsResultCollection` JSON | Implemented by `LocalJovianEphemerisService`, returning synthetic ephemerides in the legacy format. |
+| `/horizons/jupiter-satellites-model` | `HorizonsController#getJupiterSatellitesModel` | GET | `jd` (`Double`) | `HorizonsResultCollection` JSON | Powered by `HorizonsJovianEphemerisService`, which proxies JPL Horizons vectors and returns positions in AU/day. |
+| `/horizons/jupiter-satellites-track` | `HorizonsController#getJupiterSatellitesTrack` | GET | `jd`, `hoursBefore`, `hoursAfter`, `stepMinutes` | `JovianTrackResponse` JSON | Returns uma sequência de amostras (Sol + luas + Terra) ao redor do JD informado, já utilizada pelo worker da nova UI (`satelites-jupiter-v2`). |
 | `/horizons/sdm` | `HorizonsController#getStandardDynamicalModel` | GET | `jd` | Same as above |  |
 | `/horizons/elements` | `HorizonsController#getElements` | GET | `id`, `jd` | Same as above | Accept `string`/`double` for `id` to handle numeric or string IDs. |
 | `/horizons/vectors` | `HorizonsController#getVectors` | GET | `id`, `jd` | Same as above |  |

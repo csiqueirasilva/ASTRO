@@ -109,6 +109,9 @@ public class SiteController : Controller
     [HttpGet("satelites-jupiter")]
     public IActionResult SatelitesJupiter() => WebGl("satelites-jupiter");
 
+    [HttpGet("old-satelites-jupiter")]
+    public IActionResult OldSatelitesJupiter() => WebGl("old-satelites-jupiter");
+
     [HttpGet("linhas-de-forca")]
     public IActionResult LinhasDeForca() => WebGl("linhas-de-forca");
 

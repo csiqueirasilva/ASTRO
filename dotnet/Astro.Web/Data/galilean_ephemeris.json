@@ -1,0 +1,37 @@
+{
+  "start_julian_day": 2451544.5,
+  "end_julian_day": 2480764.458333333,
+  "step_days": 0.041666666666666664,
+  "bodies": [
+    {
+      "id": 10,
+      "name": "sun",
+      "records": 701280
+    },
+    {
+      "id": 399,
+      "name": "earth",
+      "records": 701280
+    },
+    {
+      "id": 501,
+      "name": "io",
+      "records": 701280
+    },
+    {
+      "id": 502,
+      "name": "europa",
+      "records": 701280
+    },
+    {
+      "id": 503,
+      "name": "ganymede",
+      "records": 701280
+    },
+    {
+      "id": 504,
+      "name": "callisto",
+      "records": 701280
+    }
+  ]
+}

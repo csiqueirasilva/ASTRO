@@ -26,4 +26,11 @@
     <ProjectReference Include="..\..\Astro.Web\Astro.Web.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\..\Astro.Web\Data\galilean_ephemeris.bin">
+      <Link>Data\galilean_ephemeris.bin</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
