@@ -404,7 +404,7 @@
 				return "[" + (timeString ? timeString : ON_DAED.formatarDataJuliana(jd, fuso).substr(14)) + " Az: " + ON_DAED.tempoSideral(horizontalCoords.azimute, true) + " H: " + ON_DAED.tempoSideral(horizontalCoords.altitude, true) + "]";
 			}
 
-			function formatEventoSatelite(ev) {
+			function formatEventoSatelite(ev, pularEventosAbaixoHorizonte = true) {
 				var sat;
 				var tipo;
 				var movimento = ev.event;
@@ -469,9 +469,11 @@
 
 				ret += "</div>";
 				
-				// pulamos eventos não visíveis do posição lat/lon configurada; quando o satelite ainda esta abaixo do solo
-				if (horizontalCoords.altitude < 0) {
-					ret = "";
+				if(pularEventosAbaixoHorizonte) {
+					// pulamos eventos não visíveis do posição lat/lon configurada; quando o satelite ainda esta abaixo do solo
+					if (horizontalCoords.altitude < 0) {
+						ret = "";
+					}
 				}
 
 				return ret;
@@ -500,7 +502,7 @@
 				}
 			}
 
-			function timeDataFromJulian(jd) {
+			function timeDataFromJulian(jd, pularEventosAbaixoHorizonte = true) {
 				var fuso = obterFusoHorario();
 
 				var dt1 = ON_DAED.ASTRO.getDateFromJulian(jd - 1 - (1 / 24) * fuso);
@@ -644,7 +646,7 @@
 
 					for (var i = 0; i < events.length; i++) {
 						var ev = events[i];
-						var eventStr = formatEventoSatelite(ev);
+						var eventStr = formatEventoSatelite(ev, pularEventosAbaixoHorizonte);
 						var jd = ON_DAED.ASTRO.getJulianFromUnix(ev.date);
 						var hourString = ON_DAED.formatarDataJuliana(jd, fuso).substr(14);
 						var hourFrac = (parseInt(hourString.substr(0, 2)) + parseInt(hourString.substr(3, 2)) / 60) / 24;
@@ -683,10 +685,10 @@
 					ret += "Não há eventos para a data selecionada";
 				}
 
-				var msgCount = ' eventos';
+				var msgCount = ' eventos observáveis';
 
 				if (count === 1) {
-					msgCount = ' evento';
+					msgCount = ' evento observável';
 				}
 
 				ret = ret.replace('%%dd%%', count + msgCount);
@@ -747,7 +749,7 @@
 				var q = $('#' + this.id);
 
 				q.siblings('.label-data-slider').html(displayValue);
-				$('#eventos-do-dia-hidden').html(timeDataFromJulian($(this).data('JD')));
+				$('#eventos-do-dia-hidden').html(timeDataFromJulian($(this).data('JD'), true));
 
 				clearTextSelection();
 			}
@@ -1127,7 +1129,7 @@
 
 				for (var i = 0; i < diasRef; i++) {
 					var jd = refJD + i + 0.5;
-					var eventString = timeDataFromJulian(jd);
+					var eventString = timeDataFromJulian(jd, false);
 					eventString = eventString.replace('<div>', '');
 					eventString = eventString.replace(/color:[ ]?.{7};/g, '');
 					eventString = eventString.substr(0, eventString.length - 6);
