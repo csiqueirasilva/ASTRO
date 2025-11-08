@@ -41,8 +41,14 @@ public class SiteController : Controller
         _magneticPdf = magneticPdf;
         _logger = logger;
         _webRootFiles = environment.WebRootFileProvider;
-        var templatesPath = Path.Combine(environment.ContentRootPath, "..", "..", "src", "main", "resources", "templates");
-        _templateFiles = Directory.Exists(templatesPath)
+        var templateCandidates = new[]
+        {
+            Path.Combine(environment.ContentRootPath, "LegacyTemplates"),
+            Path.Combine(environment.ContentRootPath, "..", "..", "src", "main", "resources", "templates")
+        };
+
+        var templatesPath = templateCandidates.FirstOrDefault(Directory.Exists);
+        _templateFiles = templatesPath is not null
             ? new PhysicalFileProvider(templatesPath)
             : new NullFileProvider();
         _resolver = new TemplateResolver(_templateFiles);

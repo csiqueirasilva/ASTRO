@@ -92,7 +92,7 @@ Running `dotnet test` after template changes guarantees that our HTML remains 1:
 
 ## Static Assets
 
-- All files under `src/main/resources/static` are served at `/` with relative paths (e.g., `/js/jquery.min.js`). Ensure `app.UseStaticFiles()` exposes identical URLs.
+- All files under `dotnet/Astro.Web/LegacyStatic` are served at `/` with relative paths (e.g., `/js/jquery.min.js`). Ensure `app.UseStaticFiles()` exposes identical URLs.
 - Submodule assets (`lib/on-daed-js/…`) must remain under `/lib/on-daed-js/` after the port.
 
 ## Downloadable Content

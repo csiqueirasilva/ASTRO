@@ -27,8 +27,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\..\src\main\resources\static\**\*">
+    <Content Remove="LegacyStatic\**\*" />
+    <Content Remove="LegacyTemplates\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="LegacyStatic\**\*">
       <Link>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="LegacyTemplates\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>

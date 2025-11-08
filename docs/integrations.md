@@ -40,8 +40,8 @@ ASTRO relies on several binaries, datasets, and third-party services. This docum
 
 ## Vendored JS Libraries / Submodules
 
-- The repo uses git submodules under `src/main/resources/static/lib/` (`on-daed-js`, `on-physics`, `jupiter-satellite-events-json`). In the .NET project:
-  - Either keep them as Git submodules anchored at the same commit or copy the generated assets into `wwwroot/lib`.
+- The repo uses git submodules under `dotnet/Astro.Web/LegacyStatic/lib/` (`on-daed-js`, `on-physics`, `jupiter-satellite-events-json`). In the .NET project:
+  - Keep them as Git submodules anchored at the same commit so `LegacyStatic` mirrors production assets, and let the build step link them into `wwwroot/lib`.
   - Update documentation on how to sync submodules for future updates.
 - Python helper `igrf-extractor.py` and JSON datasets (`igrf-v12.json` etc.) can remain unchanged; expose them from `wwwroot` or keep them in `App_Data` if they are server-only.
 
@@ -52,7 +52,7 @@ ASTRO relies on several binaries, datasets, and third-party services. This docum
 
 ## Configuration Management
 
-- Values currently stored in `application.properties` (ports, logging) move to `appsettings.json` and environment variables. Provide a migration table for every property.
+- Legacy `application.properties` / `log4j2.xml` now live under `external-dependencies/prior-java-version/src/main/resources` for archival purposes. All active configuration uses `appsettings.json` and environment variables. Provide a migration table for every property when porting settings from legacy files.
 - Sensitive configuration such as API tokens should be injected through `IConfiguration` or secret stores.
 
 ## Container & Environment Setup

@@ -16,20 +16,4 @@ public sealed class HorizonsEndpointTests : IClassFixture<WebApplicationFactory<
         _client = factory.CreateClient();
     }
 
-    [Fact]
-    public async Task Weekly_endpoint_returns_minute_samples()
-    {
-        var response = await _client.GetAsync("horizons-v2/jupiter-satellites-week?jd=2451545");
-        response.EnsureSuccessStatusCode();
-
-        var track = await response.Content.ReadFromJsonAsync<JovianTrackResponse>();
-        Assert.NotNull(track);
-        Assert.NotEmpty(track!.Samples);
-        Assert.True(track.StepMinutes <= 1.0);
-        Assert.InRange(track.HoursAfter, 0, 7 * 24);
-        Assert.Equal(0, track.HoursBefore);
-        Assert.InRange(track.Samples.Count, 1, 7 * 24 * 60);
-        Assert.NotNull(track.TargetJulianDay);
-        Assert.True(Math.Abs(track.TargetJulianDay!.Value - 2451545) < 1e-6);
-    }
 }

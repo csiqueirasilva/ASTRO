@@ -1,96 +1,67 @@
 # ASTRO
 
-## Basic Astronomy Tools
+Interactive astronomy visualizations and tools served by a modern ASP.NET Core application.  
+This repository now focuses exclusively on the .NET 8 implementation while preserving the
+previous Spring Boot codebase under `external-dependencies/prior-java-version/` for reference.
 
-Repository of basic astronomy tools built while working under a [CNPQ](http://www.cnpq.br)'s [PCI Scholarship](http://www.cnpq.br/web/guest/view/-/journal_content/56_INSTANCE_0oED/10157/25094) for [Brazil's National Observatory](http://www.on.br).
+## Repository layout
 
-## Dependencies
+| Path | Purpose |
+| --- | --- |
+| `dotnet/` | Main solution (`ASTRO.Net.sln`) containing the web site (`Astro.Web`) and supporting libraries/tests. |
+| `dotnet/Astro.Web/LegacyStatic` | Former `src/main/resources/static` assets relinked into `wwwroot` at build time. |
+| `dotnet/Astro.Web/LegacyTemplates` | Former Thymeleaf templates consumed directly by `SiteController`. |
+| `scripts/` | Utility scripts (e.g., `build_jovian_ephemeris.py` to regenerate satellite ephemerides). |
+| `docs/` | Markdown documentation plus the project wiki submodule. |
+| `external-dependencies/prior-java-version/` | Full Maven project tree, images, and auxiliary resources from the legacy Java app. |
 
-- JDK 1.8
-- Docker (for development container)
-- VS Code with Remote - Containers extension (optional)
-- Maven (or use the Maven Wrapper)
+## Requirements
 
-## Development
+- [.NET SDK 8.0](https://dotnet.microsoft.com/download)
+- Python 3.10+ (only when regenerating ephemeris datasets)
+- Git submodules (`git submodule update --init --recursive`)
+- Optional: Docker + VS Code Dev Containers if you prefer the provided `.devcontainer/`
 
-### Running the Development Container
-
-#### Using VS Code
-
-1. Ensure you have the **Remote - Containers** extension installed.
-2. Open this project folder in VS Code.
-3. Press `F1` and select **Remote-Containers: Open Folder in Container**.
-4. VS Code will build and launch the development container defined in `.devcontainer/`.
-
-#### Using the Dev Containers CLI
-
-```bash
-# Install the Dev Containers CLI (if not already installed)
-npm install -g @devcontainers/cli
-
-# From the project root
-devcontainer up
-```
-
-### Running in Development Mode
-
-The application starts a random available port on `localhost` and pops up a Swing GUI window indicating the URL.
-
-
+## Getting started
 
 ```bash
-# Start via Maven Wrapper
-./mvnw spring-boot:run
+# install submodules
+git submodule update --init --recursive
 
-# Or with local Maven
-mvn spring-boot:run
+# restore NuGet packages
+dotnet restore dotnet/ASTRO.Net.sln
 ```
 
-After startup the GUI will display something like:
-
-```
-ASTRO
-
-IP: http://localhost:<random-port>
-```
-
-![](imgs/doc1.png?raw=true)
-
-Click **Abrir** or navigate manually to the printed URL to access the app.
-
-## Building the WAR File
-
-To produce the deployable `.war` artifact:
+## Running the site locally
 
 ```bash
-# Clean and package the application
-mvn clean package
+dotnet run --project dotnet/Astro.Web/Astro.Web.csproj
 ```
 
-The WAR will be generated at `target/ASTRO-1.0-RC.war`.
+The development server listens on Kestrel’s default URLs (see console output, typically `https://localhost:5248`).
+Frontend changes under `dotnet/Astro.Web/LegacyStatic` and template edits under `dotnet/Astro.Web/LegacyTemplates`
+are picked up without restarting while the app runs in `dotnet watch run`.
 
-## Deployment
-
-### Deploying to Production
-
-> **Note:** `daed` is the hostname of the production server.
-
-Copy the WAR to the production server and deploy under Tomcat:
+## Tests
 
 ```bash
-# From your local machine (replace <your-user> with your SSH username)
-scp target/ASTRO-1.0-RC.war <your-user>@daed:/tmp/ASTRO.war
-
-# SSH into the production server
-ssh <your-user>@daed
-
-# Move the WAR into Tomcat's webapps directory
-cp /tmp/ASTRO.war /opt/tomcat/webapps/ASTRO.war
-
-# (Optional) Restart Tomcat if auto-deploy is disabled
-# sudo systemctl restart tomcat
+dotnet test dotnet/ASTRO.Net.sln
 ```
 
-## Examples
+Integration tests expect the precomputed Galilean ephemeris binary at `dotnet/Astro.Web/Data/galilean_ephemeris.bin`.
 
-Library examples (using [Three.js](http://www.threejs.org)) are available on the tools' main site.
+## Regenerating the Jovian ephemeris dataset
+
+```bash
+python3 scripts/build_jovian_ephemeris.py
+```
+
+The script queries NASA JPL Horizons, builds minute-resolution samples for Io, Europa, Ganymede, and Callisto,
+and rewrites `dotnet/Astro.Web/Data/galilean_ephemeris.bin`. Rebuild the solution afterwards so the fresh data is copied.
+
+## Legacy Java application
+
+The historic Spring Boot implementation (source, `pom.xml`, `gfx/`, `imgs/`, `orbitas/`, etc.) now lives entirely under
+`external-dependencies/prior-java-version/`. Nothing in the .NET solution references those files at build or runtime.
+To inspect or rebuild the legacy app you can work inside that directory with Maven without affecting the modern stack.
+
