@@ -16,11 +16,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Data\galilean_ephemeris.bin">
+    <Content Remove="Data\galilean_ephemeris.bin" />
+    <Content Remove="Data\galilean_ephemeris.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Data\galilean_ephemeris.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Update="Data\galilean_ephemeris.json">
+    <Content Include="Data\galilean_ephemeris.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>

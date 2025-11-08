@@ -42,6 +42,28 @@ The development server listens on Kestrel’s default URLs (see console output, 
 Frontend changes under `dotnet/Astro.Web/LegacyStatic` and template edits under `dotnet/Astro.Web/LegacyTemplates`
 are picked up without restarting while the app runs in `dotnet watch run`.
 
+## Running with Docker
+
+```bash
+cd devops
+docker compose up --build
+```
+
+The compose stack builds the image defined in `devops/Dockerfile`, boots it with `ASPNETCORE_ENVIRONMENT=Production`,
+and publishes the container’s `8080` port on `http://localhost:16160`. A named volume (`astro-data-protection`)
+persists ASP.NET Data Protection keys between runs so cookies remain valid across restarts. Stop with
+`docker compose down`. If you need an ad‑hoc shell while keeping the published port, prefer
+`docker compose run --service-ports astro-web`.
+
+> **Note:** the Docker build expects `dotnet/Astro.Web/Data/galilean_ephemeris.bin` to exist (generate it with
+> `python3 scripts/build_jovian_ephemeris.py` when necessary). The Dockerfile checks for this artifact and fails fast
+> if it is absent, preventing containers from starting without the Jovian dataset.
+
+During the build we also compile the Fortran program (`external-dependencies/declinacao-magnetica/CARTA.f`) inside a
+dedicated stage, install the DISLIN runtime plus its Fortran dependencies (`libgfortran5`, `libquadmath0`, etc.), and
+copy the resulting assets into `/opt/declinacao-magnetica`, so magnetic PDF generation works in the container without
+extra setup.
+
 ## Tests
 
 ```bash
@@ -64,4 +86,3 @@ and rewrites `dotnet/Astro.Web/Data/galilean_ephemeris.bin`. Rebuild the solutio
 The historic Spring Boot implementation (source, `pom.xml`, `gfx/`, `imgs/`, `orbitas/`, etc.) now lives entirely under
 `external-dependencies/prior-java-version/`. Nothing in the .NET solution references those files at build or runtime.
 To inspect or rebuild the legacy app you can work inside that directory with Maven without affecting the modern stack.
-

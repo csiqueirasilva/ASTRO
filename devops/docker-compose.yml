@@ -1,0 +1,17 @@
+name: astro
+services:
+  astro-web:
+    build:
+      context: ..
+      dockerfile: devops/Dockerfile
+    image: astro-web
+    container_name: astro-web
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    ports:
+      - "16160:8080"
+    volumes:
+      - astro-data-protection:/root/.aspnet/DataProtection-Keys
+
+volumes:
+  astro-data-protection:
