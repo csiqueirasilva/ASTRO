@@ -461,17 +461,23 @@
 
 				var horizontalCoords = getObjectPosition(ON_DAED.ASTRO.SolarSystemBody.JUPITER, jd);
 
+				var isBelowHorizon = horizontalCoords.altitude < 0;
+
 				ret += getEventTimestamp(ON_DAED.ASTRO.SolarSystemBody.JUPITER, jd) + " " + tipo + " (" + movimento + "): " + b1 + " sobre " + b2;
 
 				if (ev.duration) {
 					ret += " (Duração: " + ev.duration + ")";
 				}
 
+				if (!pularEventosAbaixoHorizonte && isBelowHorizon) {
+					ret += " <span class='evento-abaixo-horizonte'>*</span>";
+				}
+
 				ret += "</div>";
 				
 				if(pularEventosAbaixoHorizonte) {
 					// pulamos eventos não visíveis do posição lat/lon configurada; quando o satelite ainda esta abaixo do solo
-					if (horizontalCoords.altitude < 0) {
+					if (isBelowHorizon) {
 						ret = "";
 					}
 				}
@@ -1181,7 +1187,7 @@
 
 				ret += '<p>Nota: A altura <b>H</b>, medida a partir do horizonte do observador, também auxilia na localização do planeta.</p>';
 
-				ret += '<p>Apenas eventos acima do horizonte para a localidade indicada são exibidos nesse documento.</p>';
+				ret += '<p>Textos marcados com <b>*</b> não são visíveis no horizonte configurado (Latitude: ' + lat + ', Longitude: ' + lon + ').</p>';
 
 				ret += '<!-- ADD_PAGE --><br /><br />';
 
