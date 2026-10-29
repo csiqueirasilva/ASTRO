@@ -6,6 +6,7 @@ services:
       dockerfile: devops/Dockerfile
     image: astro-web
     container_name: astro-web
+    restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: Production
     ports:
