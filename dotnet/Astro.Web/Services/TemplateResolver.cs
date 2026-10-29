@@ -12,15 +12,21 @@ namespace Astro.Web.Services;
 public sealed class TemplateResolver
 {
     private static readonly Regex DirectiveRegex = new(
-        @"<(?<tag>[A-Za-z0-9:_-]+)(?<before>[^>]*)\s+th:(?<kind>replace|include)\s*=\s*['""](?<target>[^'""]+)['""](?<after>[^>]*)>(?<body>[\s\S]*?)</\k<tag>>",
-        RegexOptions.Compiled | RegexOptions.Singleline);
-
-    private static readonly Regex FragmentRegex = new(
-        @"<(?<tag>[A-Za-z0-9:_-]+)(?<before>[^>]*)\s+th:fragment\s*=\s*['""](?<name>[^'""]+)['""](?<after>[^>]*)>(?<body>[\s\S]*?)</\k<tag>>",
+        @"<(?<tag>[A-Za-z0-9:_-]+)(?<before>[^>]*)\s+th:(?<kind>replace|include)\s*=\s*(?<q>['""])(?<target>(?:(?!\k<q>)[\s\S])+)\k<q>(?<after>[^>]*)>(?<body>[\s\S]*?)</\k<tag>>",
         RegexOptions.Compiled | RegexOptions.Singleline);
 
     private static readonly Regex RemoveThAttributeRegex = new(
-        @"\s+th:[a-zA-Z0-9-]+\s*=\s*['""][^'""]*['""]",
+        @"\s+th:[a-zA-Z0-9-]+\s*=\s*(?<q>['""])(?:(?!\k<q>)[\s\S])*\k<q>",
+        RegexOptions.Compiled);
+
+    private static readonly Regex FragmentCallRegex = new(
+        @"^(?<name>[^(]+?)\s*\((?<args>[\s\S]*)\)$",
+        RegexOptions.Compiled);
+
+    private static readonly Regex ArgumentRegex = new(@"'(?<literal>[^']*)'|\$\{(?<variable>\w+)\}", RegexOptions.Compiled);
+
+    private static readonly Regex ThTextRegex = new(
+        @"<(?<tag>[A-Za-z0-9:_-]+)(?<before>[^>]*?)\s+th:text\s*=\s*(?<q>['""])\$\{(?<param>\w+)\}\k<q>(?<after>[^>]*)>[\s\S]*?</\k<tag>>",
         RegexOptions.Compiled);
 
     private readonly IFileProvider _fileProvider;
@@ -33,7 +39,7 @@ public sealed class TemplateResolver
 
     public string Resolve(string relativePath)
     {
-        return Resolve(relativePath, new HashSet<string>(StringComparer.OrdinalIgnoreCase), preserveThAttributes: false);
+        return Resolve(relativePath, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
     }
 
     public string ResolveExpression(string expression)
@@ -41,7 +47,7 @@ public sealed class TemplateResolver
         return ResolveTarget(expression.Trim(), new HashSet<string>(StringComparer.OrdinalIgnoreCase));
     }
 
-    private string Resolve(string relativePath, HashSet<string> stack, bool preserveThAttributes)
+    private string Resolve(string relativePath, HashSet<string> stack)
     {
         var normalized = NormalizePath(relativePath);
         if (!stack.Add(normalized))
@@ -58,11 +64,7 @@ public sealed class TemplateResolver
             }
 
             content = ProcessDirectives(content, stack);
-            if (!preserveThAttributes)
-            {
-                content = RemoveThAttributeRegex.Replace(content, string.Empty);
-            }
-            return content;
+            return RemoveThAttributeRegex.Replace(content, string.Empty);
         }
         finally
         {
@@ -70,7 +72,7 @@ public sealed class TemplateResolver
         }
     }
 
-    private string ProcessDirectives(string content, HashSet<string> stack)
+    private string ProcessDirectives(string content, HashSet<string> stack, IReadOnlyDictionary<string, string>? scope = null)
     {
         return DirectiveRegex.Replace(content, match =>
         {
@@ -80,7 +82,7 @@ public sealed class TemplateResolver
             var before = match.Groups["before"].Value;
             var after = match.Groups["after"].Value;
 
-            var resolved = ResolveTarget(target, stack, kind.Equals("include", StringComparison.OrdinalIgnoreCase));
+            var resolved = ResolveTarget(target, stack, kind.Equals("include", StringComparison.OrdinalIgnoreCase), scope);
 
             if (string.Equals(kind, "replace", StringComparison.OrdinalIgnoreCase))
             {
@@ -92,30 +94,72 @@ public sealed class TemplateResolver
         });
     }
 
-    private string ResolveTarget(string target, HashSet<string> stack, bool contentOnly = false)
+    private string ResolveTarget(string target, HashSet<string> stack, bool contentOnly = false, IReadOnlyDictionary<string, string>? scope = null)
     {
-        var path = target;
-        string? fragment = null;
-
         var separator = target.IndexOf("::", StringComparison.Ordinal);
-        if (separator >= 0)
+        if (separator < 0)
         {
-            path = target[..separator].Trim();
-            fragment = target[(separator + 2)..].Trim();
+            return Resolve(target, stack);
         }
 
-        var resolved = Resolve(path, stack, preserveThAttributes: fragment is not null);
+        var path = NormalizePath(target[..separator]);
+        var fragment = target[(separator + 2)..].Trim();
+        var arguments = new List<string>();
 
-        if (fragment is null)
+        var call = FragmentCallRegex.Match(fragment);
+        if (call.Success)
         {
-            return resolved;
+            fragment = call.Groups["name"].Value.Trim();
+            // Thymeleaf turns line breaks inside string literals into spaces.
+            arguments = ArgumentRegex.Matches(call.Groups["args"].Value)
+                .Select(m => m.Groups["literal"].Success
+                    ? Regex.Replace(m.Groups["literal"].Value, @"\r?\n", " ")
+                    : scope?.GetValueOrDefault(m.Groups["variable"].Value) ?? string.Empty)
+                .ToList();
         }
 
-        var fragmentMarkup = FindFragment(resolved, fragment, contentOnly);
-        return fragmentMarkup is null ? string.Empty : RemoveThAttributeRegex.Replace(fragmentMarkup, string.Empty);
+        if (!stack.Add(path))
+        {
+            throw new InvalidOperationException($"Cyclic template reference detected for '{path}'.");
+        }
+
+        try
+        {
+            var found = FindFragment(LoadFile(path), fragment, contentOnly);
+            if (found is null)
+            {
+                return string.Empty;
+            }
+
+            var (markup, parameters) = found.Value;
+            var bindings = parameters.Zip(arguments).ToDictionary(p => p.First, p => p.Second);
+            markup = ApplyParameters(markup, bindings);
+            markup = ProcessDirectives(markup, stack, bindings);
+            return RemoveThAttributeRegex.Replace(markup, string.Empty);
+        }
+        finally
+        {
+            stack.Remove(path);
+        }
     }
 
-    private static string? FindFragment(string content, string fragmentName, bool contentOnly)
+    private static string ApplyParameters(string markup, IReadOnlyDictionary<string, string> bindings)
+    {
+        // th:text='${param}' replaces the element body with the escaped value.
+        return ThTextRegex.Replace(markup, match =>
+        {
+            if (!bindings.TryGetValue(match.Groups["param"].Value, out var value))
+            {
+                return match.Value;
+            }
+
+            var tag = match.Groups["tag"].Value;
+            var escaped = value.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
+            return $"<{tag}{match.Groups["before"].Value}{match.Groups["after"].Value}>{escaped}</{tag}>";
+        });
+    }
+
+    private static (string Markup, string[] Parameters)? FindFragment(string content, string fragmentName, bool contentOnly)
     {
         var doc = new HtmlDocument();
         doc.LoadHtml(content);
@@ -129,10 +173,13 @@ public sealed class TemplateResolver
             }
 
             var fragmentId = attr.Value.Trim();
+            var parameters = Array.Empty<string>();
             var parenIndex = fragmentId.IndexOf('(');
             if (parenIndex >= 0)
             {
-                fragmentId = fragmentId[..parenIndex];
+                parameters = fragmentId[(parenIndex + 1)..].TrimEnd(')', ' ')
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                fragmentId = fragmentId[..parenIndex].Trim();
             }
 
             if (!string.Equals(fragmentId, fragmentName, StringComparison.Ordinal))
@@ -140,8 +187,7 @@ public sealed class TemplateResolver
                 continue;
             }
 
-            var markup = contentOnly ? node.InnerHtml : node.OuterHtml;
-            return markup;
+            return (contentOnly ? node.InnerHtml : node.OuterHtml, parameters);
         }
 
         return null;

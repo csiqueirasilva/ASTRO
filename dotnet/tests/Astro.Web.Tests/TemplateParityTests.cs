@@ -66,6 +66,20 @@ public class TemplateParityTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.True(!mismatches.Any(), string.Join(Environment.NewLine + Environment.NewLine, mismatches));
     }
 
+    [Fact]
+    public async Task Parameterized_fragments_render_their_arguments()
+    {
+        var html = await _localClient.GetStringAsync("coordenadas-galacticas");
+        var help = new HtmlDocument();
+        help.LoadHtml(html);
+        var modal = help.GetElementbyId("ajuda-texto-modal")?.InnerHtml ?? string.Empty;
+
+        Assert.Contains(@"<button type=""button"" class=""btn btn-primary"">Inserir Coordenadas</button>", modal);
+        Assert.Contains("as Coordenadas        Galácticas a partir", modal);
+        Assert.Contains("<span>Galáctico</span>", modal);
+        Assert.DoesNotContain("th:", modal);
+    }
+
     private static string? CompareSection(string localHtml, string remoteHtml, string routeKey, string xpath)
     {
         var localNode = SelectNode(localHtml, xpath);
@@ -185,10 +199,23 @@ public class TemplateParityTests : IClassFixture<WebApplicationFactory<Program>>
         "//*[@id='canvas-wrapper']"
     };
 
+    // These help texts come from parameterized Thymeleaf fragments.
+    private static readonly string[] WebGlWithHelpSections =
+    {
+        "//*[@id='canvas-wrapper']",
+        "//*[@id='ajuda-texto-modal']"
+    };
+
     private static readonly Dictionary<string, string[]> RouteSections = new(StringComparer.OrdinalIgnoreCase)
     {
         ["calendario-gregoriano"] = new[] { "//div[contains(@class,'campo-de-input')]" },
-        ["data-juliana"] = new[] { "//div[contains(@class,'campo-de-input')]" }
+        ["data-juliana"] = new[] { "//div[contains(@class,'campo-de-input')]" },
+        ["coordenadas-equatoriais"] = WebGlWithHelpSections,
+        ["coordenadas-horizontais"] = WebGlWithHelpSections,
+        ["coordenadas-eclipticas"] = WebGlWithHelpSections,
+        ["coordenadas-galacticas"] = WebGlWithHelpSections,
+        ["coordenadas-supergalacticas"] = WebGlWithHelpSections,
+        ["obliquidade-da-ecliptica"] = WebGlWithHelpSections
     };
 
     private static readonly Dictionary<string, ExpectedDifference[]> ExpectedDifferences = new(StringComparer.OrdinalIgnoreCase)
@@ -197,7 +224,15 @@ public class TemplateParityTests : IClassFixture<WebApplicationFactory<Program>>
         {
             new ExpectedDifference(
                 new Regex(@"1987-\d{4}", RegexOptions.Compiled),
-                "1987-2015")
+                "1987-2015"),
+            // Help links were moved to HTTPS in the templates.
+            new ExpectedDifference(
+                new Regex(@"http://pt\.wikipedia\.org", RegexOptions.Compiled),
+                "https://pt.wikipedia.org"),
+            // Thymeleaf normalizes the whitespace left before a tag's closing bracket.
+            new ExpectedDifference(
+                new Regex(@"\s+>", RegexOptions.Compiled),
+                ">")
         },
         ["magnetismo-terrestre"] = new[]
         {
