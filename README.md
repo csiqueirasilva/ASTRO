@@ -1,7 +1,7 @@
 # ASTRO
 
 Interactive astronomy visualizations and tools served by a modern ASP.NET Core application.  
-This repository now focuses exclusively on the .NET 8 implementation while preserving the
+This repository now focuses exclusively on the .NET 10 implementation while preserving the
 previous Spring Boot codebase under `external-dependencies/prior-java-version/` for reference.
 
 ## Repository layout
@@ -17,7 +17,7 @@ previous Spring Boot codebase under `external-dependencies/prior-java-version/` 
 
 ## Requirements
 
-- [.NET SDK 8.0](https://dotnet.microsoft.com/download)
+- [.NET SDK 10.0](https://dotnet.microsoft.com/download)
 - Python 3.10+ (only when regenerating ephemeris datasets)
 - Git submodules (`git submodule update --init --recursive`)
 - Optional: Docker + VS Code Dev Containers if you prefer the provided `.devcontainer/`

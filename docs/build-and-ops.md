@@ -38,7 +38,7 @@ ASTRO.Net.sln
 
 ## Containerization
 
-- Base image: `mcr.microsoft.com/dotnet/aspnet:8.0` for runtime, `mcr.microsoft.com/dotnet/sdk:8.0` for builds.
+- Base image: `mcr.microsoft.com/dotnet/aspnet:10.0` for runtime, `mcr.microsoft.com/dotnet/sdk:10.0` for builds.
 - Build steps:
   1. Copy solution + `*.csproj`, run `dotnet restore`.
   2. Copy src, run `dotnet publish -c Release -o /app/out`.
@@ -48,7 +48,7 @@ ASTRO.Net.sln
 
 ### Development Container
 
-- The `.devcontainer/Dockerfile.dev` now inherits from `mcr.microsoft.com/dotnet/sdk:8.0` and layers in BellSoft JDK 8, Maven, and the DISLIN 11.5 runtime so both the legacy Spring Boot app and the new ASP.NET Core project compile from the same environment.
+- The `.devcontainer/Dockerfile.dev` now inherits from `mcr.microsoft.com/dotnet/sdk:10.0` and layers in BellSoft JDK 8, Maven, and the DISLIN 11.5 runtime so both the legacy Spring Boot app and the new ASP.NET Core project compile from the same environment.
 - VS Code extensions include both the Java pack and `ms-dotnettools.csharp`. The `postCreateCommand` runs `dotnet --info`, `java -version`, and `mvn -version` to verify tool availability right after the container spins up.
 - Keep this image in sync with the production Dockerfile additions (DISLIN install, `/opt/declinacao-magnetica` symlink) to avoid “works on devcontainer” drift.
 

@@ -133,10 +133,10 @@ public sealed class CliMagneticPdfService : IMagneticPdfService
 
     private static async Task PipeStreamAsync(StreamReader reader, Action<string> log, CancellationToken cancellationToken)
     {
-        while (!reader.EndOfStream)
+        string? line;
+        while ((line = await reader.ReadLineAsync(cancellationToken)) is not null)
         {
-            var line = await reader.ReadLineAsync(cancellationToken);
-            if (!string.IsNullOrEmpty(line))
+            if (line.Length > 0)
             {
                 log(line);
             }

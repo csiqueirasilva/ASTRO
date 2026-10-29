@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy everything (the repo already contains only what the ASP.NET app needs).
@@ -10,7 +10,7 @@ RUN dotnet restore dotnet/ASTRO.Net.sln
 RUN dotnet publish dotnet/Astro.Web/Astro.Web.csproj -c Release -o /app/publish /p:UseAppHost=false
 RUN test -f /app/publish/Data/galilean_ephemeris.bin
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS magnetism-build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS magnetism-build
 WORKDIR /mag
 COPY external-dependencies/declinacao-magnetica /mag
 
@@ -19,7 +19,6 @@ RUN apt-get update && \
         gfortran \
         libxm4 \
         libgl1 \
-        libjpeg62-turbo \
         libmotif-common && \
     dpkg -i /mag/dislin-11.5.linux.i586_64.deb && \
     echo "/usr/local/dislin/lib" > /etc/ld.so.conf.d/dislin.conf && \
@@ -27,7 +26,7 @@ RUN apt-get update && \
     gfortran CARTA.f -o gerar -ldislin && \
     rm -rf /var/lib/apt/lists/*
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
 # Install DISLIN runtime dependencies and package
@@ -36,7 +35,6 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         libxm4 \
         libgl1 \
-        libjpeg62-turbo \
         libmotif-common \
         libgfortran5 \
         libquadmath0 && \
