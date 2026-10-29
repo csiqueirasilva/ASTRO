@@ -210,12 +210,11 @@ public class TemplateParityTests : IClassFixture<WebApplicationFactory<Program>>
     {
         ["calendario-gregoriano"] = new[] { "//div[contains(@class,'campo-de-input')]" },
         ["data-juliana"] = new[] { "//div[contains(@class,'campo-de-input')]" },
-        // The tide-table modal was retired, so /mares only shares its visualization controls and help with production.
+        // The tide-table modal was retired and the help text rewritten, so /mares only shares its visualization controls with production.
         ["mares"] = new[]
         {
             "//*[@id='parent-exibir-setas']",
-            "//*[@id='parent-mares-escala-mar']",
-            "//*[@id='ajuda-texto-modal']"
+            "//*[@id='parent-mares-escala-mar']"
         },
         ["coordenadas-equatoriais"] = WebGlWithHelpSections,
         ["coordenadas-horizontais"] = WebGlWithHelpSections,
