@@ -8,7 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddHttpClient<ITideTableService, HtmlTideTableService>();
 builder.Services.AddSingleton<IMagneticPdfService, CliMagneticPdfService>();
 builder.Services.AddSingleton<IJovianEphemerisService, LocalJovianEphemerisService>();
 

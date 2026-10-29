@@ -23,7 +23,6 @@ public class SiteController : Controller
     private const string OrbitasViewName = "orbitas";
     private const string GraficoDefault = "ead2015";
 
-    private readonly ITideTableService _tideTables;
     private readonly IMagneticPdfService _magneticPdf;
     private readonly IFileProvider _webRootFiles;
     private readonly ILogger<SiteController> _logger;
@@ -32,12 +31,10 @@ public class SiteController : Controller
     private readonly string? _creditosFragment;
 
     public SiteController(
-        ITideTableService tideTables,
         IMagneticPdfService magneticPdf,
         IWebHostEnvironment environment,
         ILogger<SiteController> logger)
     {
-        _tideTables = tideTables;
         _magneticPdf = magneticPdf;
         _logger = logger;
         _webRootFiles = environment.WebRootFileProvider;
@@ -145,65 +142,10 @@ public class SiteController : Controller
         return View("webgl/holo-piramide/grafico-globo-2");
     }
 
-    [HttpGet("tabua-mares")]
-    public async Task<IActionResult> TabuaMaresAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            var options = await _tideTables.GetPortsAsync(cancellationToken);
-            if (options is null)
-            {
-                return StatusCode(StatusCodes.Status503ServiceUnavailable);
-            }
-
-            return Ok(options);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to retrieve tide table options.");
-            return StatusCode(StatusCodes.Status503ServiceUnavailable);
-        }
-    }
-
     [HttpGet("mares")]
-    public async Task<IActionResult> MaresAsync(CancellationToken cancellationToken)
+    public IActionResult Mares()
     {
-        int? maxYear = null;
-        try
-        {
-            maxYear = await _tideTables.GetLatestYearAsync(cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to resolve tide table latest year.");
-        }
-
-        if (maxYear.HasValue)
-        {
-            ViewData["maxAnoTabuas"] = maxYear;
-        }
-
         return WebGl("mares");
-    }
-
-    [HttpGet("tabua-mares/{tabuaMares}")]
-    public async Task<IActionResult> TabuaMaresAsync(string tabuaMares, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var tideTable = await _tideTables.GetTideTableAsync(tabuaMares, cancellationToken);
-            if (tideTable is null)
-            {
-                return StatusCode(StatusCodes.Status503ServiceUnavailable);
-            }
-
-            return Ok(tideTable);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to retrieve tide table {Tabua}.", tabuaMares);
-            return StatusCode(StatusCodes.Status503ServiceUnavailable);
-        }
     }
 
     [HttpGet("orbitas")]

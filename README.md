@@ -1,8 +1,8 @@
 # ASTRO
 
 Interactive astronomy visualizations and tools served by a modern ASP.NET Core application.  
-This repository now focuses exclusively on the .NET 10 implementation while preserving the
-previous Spring Boot codebase under `external-dependencies/prior-java-version/` for reference.
+This repository focuses exclusively on the .NET 10 implementation. The previous Spring Boot codebase
+and the retired DHN tide-table integration are preserved on the `historico` branch.
 
 ## Repository layout
 
@@ -13,7 +13,7 @@ previous Spring Boot codebase under `external-dependencies/prior-java-version/` 
 | `dotnet/Astro.Web/LegacyTemplates` | Former Thymeleaf templates consumed directly by `SiteController`. |
 | `scripts/` | Utility scripts (e.g., `build_jovian_ephemeris.py` to regenerate satellite ephemerides). |
 | `docs/` | Markdown documentation plus the project wiki submodule. |
-| `external-dependencies/prior-java-version/` | Full Maven project tree, images, and auxiliary resources from the legacy Java app. |
+| `external-dependencies/declinacao-magnetica/` | DISLIN package and Fortran source used to generate the magnetic charts. |
 
 ## Requirements
 
@@ -83,6 +83,6 @@ and rewrites `dotnet/Astro.Web/Data/galilean_ephemeris.bin`. Rebuild the solutio
 
 ## Legacy Java application
 
-The historic Spring Boot implementation (source, `pom.xml`, `gfx/`, `imgs/`, `orbitas/`, etc.) now lives entirely under
-`external-dependencies/prior-java-version/`. Nothing in the .NET solution references those files at build or runtime.
-To inspect or rebuild the legacy app you can work inside that directory with Maven without affecting the modern stack.
+The historic Spring Boot implementation (source, `pom.xml`, `gfx/`, `imgs/`, `orbitas/`, etc.) was removed from `main`.
+It lives under `external-dependencies/prior-java-version/` on the `historico` branch, together with the DHN tide-table
+integration (`/tabua-mares`), retired after the Marinha site started blocking automated access.

@@ -23,13 +23,9 @@ ASTRO relies on several binaries, datasets, and third-party services. This docum
   - For Telnet, use `System.Net.Sockets.TcpClient` or a Telnet library to automate the interactive prompts. Treat it as optional fallback and feature-flag it if NASA eventually disables Telnet.
 - Ensure all outbound requests set a descriptive `User-Agent` and respect NASA’s usage policies (rate limiting).
 
-## Tide Tables (`HTMLHandling`)
+## Tide Tables (retired)
 
-- Pages scrape `http://www.mar.mil.br/dhn/chm/box-previsao-mare/tabuas/index.htm`. The .NET port must:
-  - Fetch the same URL via `HttpClient` with a short timeout and fallback to cached data if unavailable.
-  - Parse HTML using `AngleSharp`/`HtmlAgilityPack`, replicating the selection logic implemented with Jsoup.
-  - Preserve the caching/sorting of `PortoData` and `TabuaMare`, including ordering by Portuguese names and year ranges.
-- Consider adding local caching (memory or disk) to avoid re-scraping the site on every request.
+- The DHN tide-table scraper (`/tabua-mares`) was removed: the Marinha site now sits behind a Cloudflare challenge that blocks automated access. The last implementation is preserved on the `historico` branch.
 
 ## Orbit Generator Utility
 
@@ -52,7 +48,7 @@ ASTRO relies on several binaries, datasets, and third-party services. This docum
 
 ## Configuration Management
 
-- Legacy `application.properties` / `log4j2.xml` now live under `external-dependencies/prior-java-version/src/main/resources` for archival purposes. All active configuration uses `appsettings.json` and environment variables. Provide a migration table for every property when porting settings from legacy files.
+- Legacy `application.properties` / `log4j2.xml` are preserved under `external-dependencies/prior-java-version/src/main/resources` on the `historico` branch. All active configuration uses `appsettings.json` and environment variables. Provide a migration table for every property when porting settings from legacy files.
 - Sensitive configuration such as API tokens should be injected through `IConfiguration` or secret stores.
 
 ## Container & Environment Setup

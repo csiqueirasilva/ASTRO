@@ -32,8 +32,6 @@ This reference maps every HTTP endpoint in the current Spring Boot application t
 | `/holo-grafico-globo-2` | `SiteController#holoPiramide2` | View `webgl/holo-piramide/grafico-globo-2` |  |
 | `/orbitas` | `SiteController#orbitas` (redirect) | HTTP 302 → `/orbitas-{name}` | Implement redirect logic in .NET to match first available JSON file. |
 | `/orbitas-{orbita}` | `SiteController#orbitas` (overload) | `templatewebgl` | Sets `arquivoDados` attribute for the selected orbit JSON. |
-| `/tabua-mares` | `SiteController#tabuaMares` | JSON (`TreeSet<PortoData>`) | Return `IActionResult` with JSON; ensure ordering preserved. |
-| `/tabua-mares/{tabuaMares}` | `SiteController#tabuaMares(String)` | JSON (`TabuaMare`) |  |
 | `/pdf/dados-magneticos.pdf` | `SiteController#dadosMagneticos` | PDF stream | Reuse DISLIN generator; set identical headers. |
 
 All remaining mappings from `SiteController` follow the same pattern—each route returns the WebGL template pointing to `templates/webgl/<slug>/conteudo.html`. Use this inventory when creating Blazor components:

@@ -39,3 +39,8 @@
 
 ## 2025-11-04 — Solution Cleanup
 - Removed the placeholder `Astro.Tools` console project from `ASTRO.Net.sln` after build failures revealed it never contained an entry point. The repository now builds (`dotnet build`) without extra steps. When we have concrete CLI utilities to ship, reintroduce them as a properly configured project with a `Main` method.
+
+## 2026-10-28 — Legacy Cleanup
+- Branch `historico` created from `main` to preserve the legacy Spring Boot tree (`external-dependencies/prior-java-version/`) and the DHN tide-table integration.
+- Removed the legacy Java tree from `main`, along with the JDK/Maven layers of the dev container.
+- Retired the tide-table integration (`/tabua-mares`, `HtmlTideTableService`, `PortoData`/`TabuaMare` models, AngleSharp dependency, and the tide-table modal of `/mares`): the Marinha site blocks automated access behind a Cloudflare challenge. The `/mares` WebGL visualization is unchanged.

@@ -10,13 +10,6 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl gnupg2 unzip wget && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Liberica JDK 8 (for legacy app) and Maven
-RUN wget -qO- https://download.bell-sw.com/pki/GPG-KEY-bellsoft | gpg --dearmor --output /usr/share/keyrings/bellsoft.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/bellsoft.gpg] https://apt.bell-sw.com/ stable main" > /etc/apt/sources.list.d/bellsoft.list && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends bellsoft-java8-full maven && \
-    rm -rf /var/lib/apt/lists/*
-
 # Install DISLIN 11.5 (vendored .deb)
 COPY external-dependencies/declinacao-magnetica/dislin-11.5.linux.i586_64.deb /tmp/dislin.deb
 RUN apt-get update && \
@@ -29,9 +22,6 @@ RUN apt-get update && \
 
 # Symlink project path for declinacao-magnetica
 RUN mkdir -p /opt && ln -s /app/external-dependencies/declinacao-magnetica /opt/declinacao-magnetica
-
-ENV JAVA_HOME=/usr/lib/jvm/bellsoft-java8-full-amd64
-ENV PATH=$JAVA_HOME/bin:$PATH
 
 WORKDIR /app
 CMD ["sleep", "infinity"]
