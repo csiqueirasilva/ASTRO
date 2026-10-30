@@ -55,6 +55,12 @@ persists ASP.NET Data Protection keys between runs so cookies remain valid acros
 `docker compose down`. If you need an ad‑hoc shell while keeping the published port, prefer
 `docker compose run --service-ports astro-web`.
 
+`GET /health` returns `200` with a JSON list of checks (`magnetic-generator`, `dislin-library`, `jovian-ephemeris`,
+`templates`) when everything is in place, or `503` naming the failing check. The checks only probe files, so the
+endpoint is cheap enough to poll. The image declares a Docker `HEALTHCHECK` against it (every 30 s, unhealthy after
+3 failures), visible in `docker ps` / `docker inspect astro-web`. For a deeper post-incident check, request a chart
+(`/pdf/dados-magneticos.pdf?ano=2020&tipo=1`), which actually runs the DISLIN generator.
+
 > **Note:** the Docker build expects `dotnet/Astro.Web/Data/galilean_ephemeris.bin` to exist (generate it with
 > `python3 scripts/build_jovian_ephemeris.py` when necessary). The Dockerfile checks for this artifact and fails fast
 > if it is absent, preventing containers from starting without the Jovian dataset.

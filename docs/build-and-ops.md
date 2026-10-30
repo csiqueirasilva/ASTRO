@@ -74,7 +74,7 @@ ASTRO.Net.sln
 ## Observability
 
 - Replace any existing logging with `ILogger` and route logs to the platform’s preferred sink (Console, Journald, Application Insights, etc.).
-- Add health checks (`app.MapHealthChecks("/health")`) to allow Kubernetes or other orchestrators to monitor the service.
+- `GET /health` (built-in ASP.NET Core health checks, `Services/DependencyHealthChecks.cs`) returns `200`/`503` with per-check JSON: the DISLIN generator binary exists and is executable, `libdislin.so.11` is present, the Galilean ephemeris loads, and the templates are on disk. It never generates a PDF; hit `/pdf/dados-magneticos.pdf?ano=2020&tipo=1` for that deeper check. `devops/Dockerfile` declares a `HEALTHCHECK` that calls it through bash's `/dev/tcp` (the runtime image has no curl/wget).
 - Instrument key endpoints (Horizons API, PDF generator) with metrics (e.g., Prometheus counters) if the platform supports it.
 
 ## Backward Compatibility Checklist

@@ -18,8 +18,8 @@ public sealed class CliMagneticPdfService : IMagneticPdfService
     private static readonly HashSet<string> AllowedTypes = new(StringComparer.Ordinal) { "1", "2", "3" };
     private const double MinYear = 1900.0;
     private const double MaxYear = 2030.0;
-    private const string ExecutablePath = "/opt/declinacao-magnetica/gerar";
-    private const string LibraryPath = "/usr/local/dislin";
+    internal const string ExecutablePath = "/opt/declinacao-magnetica/gerar";
+    internal const string LibraryPath = "/usr/local/dislin";
     private const string OutputFileName = "dislin.pdf";
 
     private readonly ILogger<CliMagneticPdfService> _logger;

@@ -52,4 +52,8 @@ COPY --from=build /app/publish .
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 
+# No curl/wget in the runtime image: bash's /dev/tcp issues the request; healthy only on HTTP 200 from /health.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD ["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /health HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && head -n1 <&3 | grep -q ' 200 '"]
+
 ENTRYPOINT ["dotnet", "Astro.Web.dll"]
