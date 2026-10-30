@@ -50,6 +50,7 @@ COPY --from=magnetism-build /mag /opt/declinacao-magnetica
 COPY --from=build /app/publish .
 
 ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
 EXPOSE 8080
 
 # No curl/wget in the runtime image: bash's /dev/tcp issues the request; healthy only on HTTP 200 from /health.

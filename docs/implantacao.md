@@ -22,9 +22,11 @@ Guia para a equipe que opera o ASTRO em produção. A aplicação roda em **um c
 
 ## Variáveis de ambiente
 
+A imagem já vem configurada para produção; nenhuma variável precisa ser informada.
+
 | Variável | Valor | Observação |
 | --- | --- | --- |
-| `ASPNETCORE_ENVIRONMENT` | `Production` | Obrigatória. Desliga páginas de erro detalhadas e liga HSTS. |
+| `ASPNETCORE_ENVIRONMENT` | `Production` | Já definida na imagem. Desliga páginas de erro detalhadas e liga HSTS. |
 | `ASPNETCORE_URLS` | `http://+:8080` | Padrão da imagem; não precisa ser alterada. |
 | `Logging__LogLevel__Default` | `Information` | Opcional (`Warning` reduz o volume de log). |
 
