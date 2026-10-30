@@ -44,6 +44,8 @@ are picked up without restarting while the app runs in `dotnet watch run`.
 
 ## Running with Docker
 
+Production deployment guide (in Portuguese, for the infrastructure team): [`docs/implantacao.md`](docs/implantacao.md).
+
 ```bash
 cd devops
 docker compose up --build
